@@ -1,0 +1,24 @@
+matrix:
+  NODE_VERSION:
+  - 8
+  - latest
+pipeline:
+  generate-tags:
+    image: quay.io/natlibfi/drone-gen-tags
+  test:
+    image: node:${NODE_VERSION}
+    commands:
+    - npm install
+    - npm test
+  #docker:
+  #  image: plugins/docker
+  #  registry: quay.io
+  #  repo: quay.io/tike/melinda-oai-pmh-server
+  #  secrets:
+  #  - docker_username
+  #  - docker_password
+  #  when:
+  #    event: [push, tag]
+  #    branch: [master, test]
+  #    matrix:
+  #      NODE_VERSION: 8

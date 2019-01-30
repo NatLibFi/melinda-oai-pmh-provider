@@ -27,18 +27,18 @@ export async function getResults({connection, query, cb, args = {}}) {
 	return pump();
 
 	async function pump(results = []) {
-		const row = resultSet.getRow();
+		const row = await resultSet.getRow();
 
 		if (row) {
 			const formatted = cb(row);
 
 			if (formatted) {
-				return pump(results.concat(row));
+				return pump(results.concat(formatted));
 			}
 		}
 
 		await resultSet.close();
-		return results;
+		return {payload: results};
 	}
 }
 
@@ -50,7 +50,7 @@ export function parseRecord(data) {
 	function iterate(offset = 0, lines = []) {
 		if (offset + 4 > buffer.length) {
 			const str = lines.join('\n');
-			return AlephSequential.from(str);
+			return transformRecord(str);
 		}
 
 		const length = Number(buffer.toString('utf8', offset, offset + 4));
@@ -62,6 +62,10 @@ export function parseRecord(data) {
 			const start = l.substr(0, 5);
 			const end = l.substr(5);
 			return `000000000 ${start} ${end}`;
+		}
+
+		function transformRecord(str) {
+			return AlephSequential.from(str);
 		}
 	}
 }

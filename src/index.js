@@ -18,24 +18,25 @@ import startApp from './app';
 import {bibOpendata, bibPrivileged} from './providers/bib';
 import {PROVIDER_RESOURCE, PROVIDER_OPEN_DATA} from './config';
 
-switch (PROVIDER_RESOURCE) {
-	case 'bib':
-		start(bibOpendata, bibPrivileged);
-		break;
-		/*	Case 'aut_names':
-	start(autNamesOpendata, autNamesPrivileged);
-	break;
-	case 'aut_subjects':
-	start(autSubjectsOpendata, autSubjectsPrivileged);
-	break; */
-	default:
-		break;
+const [opendata, privileged] = getProviders();
+
+if (PROVIDER_OPEN_DATA) {
+	startApp(opendata);
+} else {
+	startApp(privileged);
 }
 
-function start(opendata, privileged) {
-	if (PROVIDER_OPEN_DATA) {
-		startApp(opendata());
-	} else {
-		startApp(privileged());
+function getProviders() {
+	switch (PROVIDER_RESOURCE) {
+		case 'bib':
+			return [bibOpendata, bibPrivileged];
+		/*	Case 'aut_names':
+		start(autNamesOpendata, autNamesPrivileged);
+		break;
+		case 'aut_subjects':
+		start(autSubjectsOpendata, autSubjectsPrivileged);
+		break; */
+		default:
+			break;
 	}
 }

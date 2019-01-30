@@ -18,30 +18,36 @@ import express from 'express';
 import moment from 'moment';
 import oracledb from 'oracledb';
 import HttpStatus from 'http-status';
+import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
-import {XMLSerializer, DOMParser} from 'xmldom';
-import {ERRORS, XML_DOCUMENT} from './constants';
+import {ERRORS} from './constants';
+import {generateErrorResponse, generateListRecordsResponse} from './response';
 
-// Const {createLogger, createExpressLogger, encryptString, decryptString} = Utils;
-const {createLogger, createExpressLogger, decryptString} = Utils;
+const {createLogger, createExpressLogger, encryptString, decryptString} = Utils;
+
+MarcRecord.setValidationOptions({subfieldValues: false});
 
 import {
 	HTTP_PORT, ENABLE_PROXY, SECRET_ENCRYPTION_KEY,
 	ORACLE_USERNAME, ORACLE_PASSWORD, ORACLE_CONNECT_STRING
 } from './config';
 
-export default async function ({listRecords}) {
-	oracledb.outFormat = oracledb.OBJECT;
-
+export default async function (createProvider) {
 	let server;
+
+	const {listRecords} = await createProvider();
 	const pool = await oracledb.createPool({
 		user: ORACLE_USERNAME, password: ORACLE_PASSWORD,
 		connectString: ORACLE_CONNECT_STRING
-
 	});
+
+	oracledb.outFormat = oracledb.OBJECT;
 
 	process.on('SIGTERM', handleSignal);
 	process.on('SIGINT', handleSignal);
+	// Nodemon
+	process.on('SIGUSR2', handleSignal);
+
 	process.on('unhandledRejection', async err => {
 		handleTermination({code: -1, message: err.stack});
 	});
@@ -82,6 +88,7 @@ export default async function ({listRecords}) {
 
 		switch (req.query.verb) {
 			case 'ListRecords':
+				Logger.log('debug', 'Calling listRecords');
 				sendResponse(Object.assign({verb: 'ListRecords'}, await callMethod(listRecords)));
 				break;
 			default:
@@ -91,7 +98,7 @@ export default async function ({listRecords}) {
 
 		async function callMethod(cb, useDb = true) {
 			if (useDb) {
-				const params = await getParams();
+				const params = getParams();
 
 				//  Error in parameters;
 				if (res.headersSent) {
@@ -101,13 +108,16 @@ export default async function ({listRecords}) {
 				params.connection = await pool.getConnection();
 
 				try {
-					return await cb(params);
-				} finally {
+					const results = await cb(params);
 					await params.connection.close();
+					return results;
+				} catch (err) {
+					await params.connection.close();
+					throw err;
 				}
 			}
 
-			const params = await getParams();
+			const params = getParams();
 
 			//  Error in parameters;
 			if (res.headersSent) {
@@ -116,26 +126,26 @@ export default async function ({listRecords}) {
 
 			return cb(params);
 
-			async function getParams() {
+			function getParams() {
 				const {verb} = req.query;
-				const params = {};
+				const obj = {};
 
 				Object.keys(req.query).forEach(key => {
 					switch (key) {
 						case 'verb':
 							break;
 						case 'from':
-							params.from = parseDatestamp(req.query.from);
+							obj.from = parseDatestamp(req.query.from);
 							break;
 						case 'until':
-							params.until = parseDatestamp(req.query.until);
+							obj.until = parseDatestamp(req.query.until);
 							break;
 						case 'set':
-							params.set = req.query.set;
+							obj.set = req.query.set;
 							break;
 						case 'resumptionToken':
 							try {
-								params.offset = parseResumptionToken(req.query.resumptionToken);
+								obj.offset = parseResumptionToken(req.query.resumptionToken);
 							} catch (err) {
 								sendResponse({error: ERRORS.BAD_RESUMPTION_TOKEN, verb});
 							}
@@ -154,7 +164,7 @@ export default async function ({listRecords}) {
 					sendResponse({error: ERRORS.CANNOT_DISSEMINATE_FORMAT, verb});
 				}
 
-				return params;
+				return obj;
 
 				function parseDatestamp(stamp) {
 					const m = moment(stamp);
@@ -170,38 +180,31 @@ export default async function ({listRecords}) {
 					const str = decryptString({key: SECRET_ENCRYPTION_KEY, value: token, algorithm: 'aes128'});
 					return Number(str);
 				}
-
-				/* Function generateResumptionToken(offset) {
-					return encryptString({key: SECRET_ENCRYPTION_KEY, value: String(offset), algorithm: 'aes128'});
-				} */
 			}
 		}
 
-		function sendResponse({error, verb}) {
+		function sendResponse({error, verb, payload, nextOffset}) {
 			if (res.headersSent) {
 				return;
 			}
 
-			const document = new DOMParser().parseFromString(XML_DOCUMENT);
-			const root = document.documentElement;
-
 			if (error) {
-				const responseElement = document.createElement('response');
-				const errorElement = document.createElement('error');
+				res.send(generateErrorResponse({error, verb}));
+			} else {
+				const resumptionToken = Number.isNaN(nextOffset) ? generateResumptionToken(nextOffset) : undefined;
 
-				responseElement.textContent = moment().toISOString(true);
-				errorElement.setAttribute('code', error);
-
-				root.appendChild(responseElement);
-				root.appendChild(errorElement);
-
-				if (verb) {
-					const requestElement = document.getElementsByTagName('request').item(0);
-					requestElement.setAttribute('verb', verb);
+				switch (verb) {
+					case 'ListRecords':
+						res.send(generateListRecordsResponse({verb, records: payload, resumptionToken}));
+						break;
+					default:
+						break;
 				}
 			}
 
-			res.send(new XMLSerializer().serializeToString(document));
+			function generateResumptionToken(offset) {
+				return encryptString({key: SECRET_ENCRYPTION_KEY, value: String(offset), algorithm: 'aes128'});
+			}
 		}
 	}
 

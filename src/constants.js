@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-import {INSTANCE_URL} from './config';
+import {PROVIDER_RESOURCE} from './config';
 
 export const ROW_LIMIT = 100;
 
@@ -29,10 +29,6 @@ export const ERRORS = {
 	NO_SET_HIERARCHY: 'noSetHierarchy'
 };
 
-export const XML_DOCUMENT = `<?xml version="1.0" encoding="UTF-8"?> 
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
-		 http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-		 <request>${INSTANCE_URL}</request>
-</OAI-PMH>`;
+export const DB_TIME_FORMAT = 'YYYYMMDDHHmmss';
+
+export const OAI_IDENTIFIER_PREFIX = `oai:melinda.kansalliskirjasto.fi:${PROVIDER_RESOURCE}/`;

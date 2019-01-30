@@ -14,54 +14,75 @@
 * limitations under the License.
 */
 
+import moment from 'moment';
+import {Utils} from '@natlibfi/melinda-commons';
+import {ERRORS, DB_TIME_FORMAT} from '../../../constants';
 import {getResults, parseRecord} from '../../utils';
 import {createLowFilter, createSidFilter, create960Filter} from './filter';
 import {recordsQuery, recordsTimeframe, recordsStartTime, recordsEndTime} from './query';
 
+const {createLogger} = Utils;
+
 export async function bibPrivileged() {
+	const Logger = createLogger();
+
 	return {listRecords};
 
 	async function listRecords({connection, from, until, set, offset = 0}) {
-		const filter = getFilter();
+		try {
+			const filter = getFilter();
+			return doQuery(filter);
+		} catch (err) {
+			if (err.code) {
+				return {error: err.code};
+			}
 
-		return doQuery();
+			throw err;
+		}
 
-		function doQuery() {
+		function doQuery(filter) {
 			const parameters = {connection, cb: rowCallback};
 
 			if (from && until) {
 				Object.assign(parameters, recordsTimeframe({offset, from, until}));
 			} else if (from) {
-				Object.assign(recordsStartTime({offset, from}));
+				Object.assign(parameters, recordsStartTime({offset, from}));
 			} else if (until) {
-				Object.assign(recordsEndTime({offset, until}));
+				Object.assign(parameters, recordsEndTime({offset, until}));
 			} else {
-				Object.assign(recordsQuery({offset}));
+				Object.assign(parameters, recordsQuery({offset}));
 			}
 
+			Logger.log('debug', 'Executing ListRecords query');
+
+			// Handle incomplete sets
 			return getResults(parameters);
 
 			function rowCallback(row) {
-				const record = parseRecord(row.RECORD);
+				const record = parseRecord(row.DATA);
 
 				if (filter(record)) {
-					return {record, id: row.ID};
+					return {data: record, id: row.ID, time: moment(row.TIME, DB_TIME_FORMAT)};
 				}
 			}
 		}
 
 		function getFilter() {
-			switch (set) {
-				case 'collection:fennica':
-					return createLowFilter('FENNI');
-				case 'collection:viola':
-					return createLowFilter('VIOLA');
-				case 'collection:arto':
-					return create960Filter('ARTO');
-				case 'collection:helmet':
-					return createSidFilter('helme');
-				default:
-					break;
+			return set ? getSetFilter() : () => true;
+
+			function getSetFilter() {
+				switch (set) {
+					case 'collection:fennica':
+						return createLowFilter('FENNI');
+					case 'collection:viola':
+						return createLowFilter('VIOLA');
+					case 'collection:arto':
+						return create960Filter('ARTO');
+					case 'collection:helmet':
+						return createSidFilter('helme');
+					default:
+						throw Object.assign(new Error(), {code: ERRORS.BAD_ARGUMENT});
+				}
 			}
 		}
 	}

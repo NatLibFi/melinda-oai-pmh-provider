@@ -97,7 +97,7 @@ export const recordsQuery = ({offset}) => {
 	const endId = String(offset + ROW_LIMIT).padStart(9, '0');
 
 	return {
-		query: `SELECT id, time, z00_data record FROM (
+		query: `SELECT id, time, z00_data data FROM (
                     SELECT id, max(time) time FROM (
                         WITH records AS (
                             SELECT z00_doc_number id, z00_data data FROM ${Z106_LIBRARY}.z00 WHERE z00_doc_number >= :startId AND z00_doc_number <= :endId

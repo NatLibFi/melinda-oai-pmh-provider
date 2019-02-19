@@ -15,34 +15,35 @@
 */
 
 import moment from 'moment';
-import {INSTANCE_URL} from './config';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
-import {OAI_IDENTIFIER_PREFIX} from './constants';
 
-export const generateErrorResponse = ({verb, error}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateErrorResponse = ({instanceUrl, verb, error}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
 		http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-                <request verb="${verb}">${INSTANCE_URL}</request>
+                <request${verb ? `verb="${verb}"` : ''}>${instanceUrl}</request>
 				<responseDate>${moment().toISOString(true)}</responseDate>
 				<error code="${error}"/>
 </OAI-PMH>`;
 
-export const generateListRecordsResponse = ({verb, records}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateListRecordsResponse = ({instanceUrl, verb, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
 		http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-                <request verb="${verb}" metadataPrefix="marc">${INSTANCE_URL}</request>
-				<responseDate>${moment().toISOString(true)}</responseDate>
-				${records.map(r => `<record>
-                <header>
-                  <identifier>${OAI_IDENTIFIER_PREFIX}${r.id}</identifier>
-                  <datestamp>${r.time.toISOString(true)}</datestamp>
-                </header>
-                <metadata>
-                  ${MARCXML.to(r.data, {declaration: false})}
-                </metadata>
-              </record>`)}
+                <request verb="${verb}" metadataPrefix="marc">${instanceUrl}</request>
+                <responseDate>${moment().toISOString(true)}</responseDate>
+                <ListRecords>
+				          ${results.map(r => `<record>
+                    <header>
+                      <identifier>${identifierPrefix}/${r.id}</identifier>
+                      <datestamp>${r.time.toISOString(true)}</datestamp>
+                    </header>
+                    <metadata>
+                      ${MARCXML.to(r.data, {omitDeclaration: true})}
+                    </metadata>
+                  </record>`)}${token === undefined ? '' :
+	`<resumptionToken expirationDate="${tokenExpirationTime}">${token}</resumptionToken>`}
+                </ListRecords>
 </OAI-PMH>`;

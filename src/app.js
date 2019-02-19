@@ -16,34 +16,36 @@
 
 import express from 'express';
 import moment from 'moment';
-import oracledb from 'oracledb';
 import HttpStatus from 'http-status';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
 import {ERRORS} from './constants';
+import ApiError from './error';
 import {generateErrorResponse, generateListRecordsResponse} from './response';
 
-const {createLogger, createExpressLogger, encryptString, decryptString} = Utils;
+/* Import {
+	httpPort, enableProxy, secretEncryptionKey, resumptionTokenTimeout,
+	oracleUsername, oraclePassword, oracleConnectString
+} from './config'; */
 
-MarcRecord.setValidationOptions({subfieldValues: false});
-
-import {
-	HTTP_PORT, ENABLE_PROXY, SECRET_ENCRYPTION_KEY,
-	ORACLE_USERNAME, ORACLE_PASSWORD, ORACLE_CONNECT_STRING
-} from './config';
-
-export default async function (createProvider) {
+export default async function ({
+	oracledb,
+	listRecords, identifierPrefix, httpPort, enableProxy, secretEncryptionKey, resumptionTokenTimeout,
+	oracleUsername, oraclePassword, oracleConnectString, instanceUrl
+}) {
 	let server;
 
-	const {listRecords} = await createProvider();
-	const pool = await oracledb.createPool({
-		user: ORACLE_USERNAME, password: ORACLE_PASSWORD,
-		connectString: ORACLE_CONNECT_STRING
-	});
-
+	MarcRecord.setValidationOptions({subfieldValues: false});
 	oracledb.outFormat = oracledb.OBJECT;
 
-	process.on('SIGTERM', handleSignal);
+	const {createLogger, createExpressLogger, encryptString, decryptString} = Utils;
+
+	const pool = await oracledb.createPool({
+		user: oracleUsername, password: oraclePassword,
+		connectString: oracleConnectString
+	});
+
+	/*	Process.on('SIGTERM', handleSignal);
 	process.on('SIGINT', handleSignal);
 	// Nodemon
 	process.on('SIGUSR2', handleSignal);
@@ -51,11 +53,11 @@ export default async function (createProvider) {
 	process.on('unhandledRejection', async err => {
 		handleTermination({code: -1, message: err.stack});
 	});
-
+*/
 	const Logger = createLogger();
 	const app = express();
 
-	if (ENABLE_PROXY) {
+	if (enableProxy) {
 		app.enable('trust proxy', true);
 	}
 
@@ -63,72 +65,55 @@ export default async function (createProvider) {
 	app.get('/', handleRequest);
 	app.use(handleError);
 
-	server = app.listen(HTTP_PORT, () => Logger.log('info', 'Started Melinda OAI-PMH provider'));
+	server = app.listen(httpPort, () => Logger.log('info', 'Started Melinda OAI-PMH provider'));
 
-	async function handleTermination({code = 0, message}) {
-		await pool.close();
+	return server;
 
-		if (server) {
-			await server.close();
-		}
-
-		if (message) {
-			console.log(message);
-		}
-
-		process.exit(code);
-	}
-
-	async function handleSignal(signal) {
-		handleTermination({code: 1, message: `Received ${signal}`});
-	}
-
-	async function handleRequest(req, res) {
+	async function handleRequest(req, res, next) {
 		res.type('application/xml');
 
-		switch (req.query.verb) {
-			case 'ListRecords':
-				Logger.log('debug', 'Calling listRecords');
-				sendResponse(Object.assign({verb: 'ListRecords'}, await callMethod(listRecords)));
-				break;
-			default:
-				sendResponse({error: ERRORS.BAD_VERB});
-				break;
+		try {
+			switch (req.query.verb) {
+				case 'ListRecords':
+					Logger.log('debug', 'Calling ListRecords');
+					await callMethod(listRecords);
+					break;
+				default:
+					throw new ApiError(ERRORS.BAD_VERB);
+			}
+		} catch (err) {
+			if (err instanceof ApiError) {
+				err.verb = req.query.verb;
+			}
+
+			next(err);
 		}
 
-		async function callMethod(cb, useDb = true) {
-			if (useDb) {
-				const params = getParams();
+		async function callMethod(method) {
+			const params = await getParams();
+			const {results, cursor} = await method(params);
 
-				//  Error in parameters;
-				if (res.headersSent) {
-					return;
-				}
-
-				params.connection = await pool.getConnection();
-
-				try {
-					const results = await cb(params);
-					await params.connection.close();
-					return results;
-				} catch (err) {
-					await params.connection.close();
-					throw err;
-				}
+			if (params.connection) {
+				await params.connection.close();
+				Logger.log('debug', 'Connection closed');
 			}
 
-			const params = getParams();
-
-			//  Error in parameters;
-			if (res.headersSent) {
-				return;
+			if (results.length === 0) {
+				const err = new ApiError(ERRORS.NO_RECORDS_MATCH);
+				err.verb = req.query.verb;
+				throw err;
 			}
 
-			return cb(params);
+			sendResponse({results, cursor, res, verb: req.query.verb});
 
-			function getParams() {
-				const {verb} = req.query;
+			async function getParams(useDb = true) {
 				const obj = {};
+
+				if (useDb) {
+					Logger.log('debug', 'Requesting a new connection from the pool...');
+					obj.connection = await pool.getConnection();
+					Logger.log('debug', 'Connection acquired!');
+				}
 
 				Object.keys(req.query).forEach(key => {
 					switch (key) {
@@ -144,24 +129,21 @@ export default async function (createProvider) {
 							obj.set = req.query.set;
 							break;
 						case 'resumptionToken':
-							try {
-								obj.offset = parseResumptionToken(req.query.resumptionToken);
-							} catch (err) {
-								sendResponse({error: ERRORS.BAD_RESUMPTION_TOKEN, verb});
-							}
+							obj.cursor = parseResumptionToken(req.query.resumptionToken);
 							break;
 						case 'metadataPrefix':
 							if (req.query.metadataPrefix !== 'marc') {
-								sendResponse({error: ERRORS.CANNOT_DISSEMINATE_FORMAT, verb});
+								throw new ApiError(ERRORS.CANNOT_DISSEMINATE_FORMAT);
 							}
+
 							break;
 						default:
-							sendResponse({error: ERRORS.BAD_ARGUMENT, verb});
+							throw new ApiError(ERRORS.BAD_ARGUMENT);
 					}
 				});
 
 				if (!req.query.metadataPrefix && !req.query.resumptionToken) {
-					sendResponse({error: ERRORS.CANNOT_DISSEMINATE_FORMAT, verb});
+					throw new ApiError(ERRORS.CANNOT_DISSEMINATE_FORMAT);
 				}
 
 				return obj;
@@ -173,47 +155,85 @@ export default async function (createProvider) {
 						return m;
 					}
 
-					sendResponse({error: ERRORS.BAD_ARGUMENT});
+					throw new ApiError(ERRORS.BAD_ARGUMENT);
 				}
 
 				function parseResumptionToken(token) {
-					const str = decryptString({key: SECRET_ENCRYPTION_KEY, value: token, algorithm: 'aes128'});
-					return Number(str);
+					const str = decryptToken();
+					const [expirationTime, cursorString] = str.split(/;/);
+					const cursor = Number(cursorString);
+
+					if (moment(expirationTime).isBefore(moment()) || Number.isNaN(cursor)) {
+						throw new ApiError(ERRORS.BAD_RESUMPTION_TOKEN);
+					}
+
+					return cursor;
+
+					function decryptToken() {
+						try {
+							return decryptString({key: secretEncryptionKey, value: token, algorithm: 'aes128'});
+						} catch (err) {
+							throw new ApiError(ERRORS.BAD_RESUMPTION_TOKEN);
+						}
+					}
 				}
-			}
-		}
-
-		function sendResponse({error, verb, payload, nextOffset}) {
-			if (res.headersSent) {
-				return;
-			}
-
-			if (error) {
-				res.send(generateErrorResponse({error, verb}));
-			} else {
-				const resumptionToken = Number.isNaN(nextOffset) ? generateResumptionToken(nextOffset) : undefined;
-
-				switch (verb) {
-					case 'ListRecords':
-						res.send(generateListRecordsResponse({verb, records: payload, resumptionToken}));
-						break;
-					default:
-						break;
-				}
-			}
-
-			function generateResumptionToken(offset) {
-				return encryptString({key: SECRET_ENCRYPTION_KEY, value: String(offset), algorithm: 'aes128'});
 			}
 		}
 	}
 
-	async function handleError(err, req, res, next) {
-		if (res.headersSent) {
-			return next(err);
+	function sendResponse({res, error, verb, results, cursor}) {
+		if (error) {
+			res.send(generateErrorResponse({instanceUrl, error, verb}));
+		} else {
+			const {token, tokenExpirationTime} = cursor === undefined ? [] : generateResumptionToken(cursor);
+
+			switch (verb) {
+				case 'ListRecords':
+					res.send(generateListRecordsResponse({instanceUrl, verb, results, token, tokenExpirationTime, identifierPrefix}));
+					break;
+				default:
+					break;
+			}
 		}
 
-		res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-		handleTermination({code: -1, message: err.stack});
+		function generateResumptionToken(cursor) {
+			const tokenExpirationTime = generateResumptionExpirationTime();
+			const token = encryptString({key: secretEncryptionKey, value: `${tokenExpirationTime};${cursor}`, algorithm: 'aes128'});
+
+			return {token, tokenExpirationTime};
+
+			function generateResumptionExpirationTime() {
+				const expirationTime = moment().add(resumptionTokenTimeout, 'milliseconds');
+				return expirationTime.toISOString(true);
+			}
+		}
 	}
+
+	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
+		if (err instanceof ApiError) {
+			sendResponse({error: err.code, res});
+		} else {
+			res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+			// HandleTermination({code: -1, message: err.stack});
+			Logger.log('error', err.stack);
+		}
+	}
+
+	/* Async function handleTermination({code = 0, message}) {
+		await pool.close(2);
+
+		if (server) {
+			await server.close();
+		}
+
+		if (message) {
+			console.log(message);
+		}
+
+		process.exit(code);
+	}
+
+	async function handleSignal(signal) {
+		handleTermination({code: 1, message: `Received ${signal}`});
+	} */
 }

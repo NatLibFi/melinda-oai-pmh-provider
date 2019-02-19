@@ -4,8 +4,7 @@ coverage
 dist
 .nyc_output
 .env
-.poll-change-timestamp.json
-fetched.json
 tnsnames.ora
 sqlnet.ora
 wallet
+test.sh

@@ -14,10 +14,6 @@
 * limitations under the License.
 */
 
-import {PROVIDER_RESOURCE} from './config';
-
-export const ROW_LIMIT = 100;
-
 export const ERRORS = {
 	BAD_ARGUMENT: 'badArgument',
 	BAD_RESUMPTION_TOKEN: 'badResumptionToken',
@@ -30,5 +26,3 @@ export const ERRORS = {
 };
 
 export const DB_TIME_FORMAT = 'YYYYMMDDHHmmss';
-
-export const OAI_IDENTIFIER_PREFIX = `oai:melinda.kansalliskirjasto.fi:${PROVIDER_RESOURCE}/`;

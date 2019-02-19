@@ -14,76 +14,48 @@
 * limitations under the License.
 */
 
-import moment from 'moment';
-import {Utils} from '@natlibfi/melinda-commons';
-import {ERRORS, DB_TIME_FORMAT} from '../../../constants';
-import {getResults, parseRecord} from '../../utils';
+// import {OAI_IDENTIFIER_PREFIX} from '../../../config';
+import oracledb from 'oracledb';
+import {ERRORS} from '../../../constants';
+import ApiError from '../../../error';
+import startApp from '../../../app';
+import createService from '../../service';
+
 import {createLowFilter, createSidFilter, create960Filter} from './filter';
-import {recordsQuery, recordsTimeframe, recordsStartTime, recordsEndTime} from './query';
+import queryFactory from './query';
 
-const {createLogger} = Utils;
+export default async ({
+	httpPort, oaiIdentifierPrefixBase, maxResults,
+	instanceUrl, z106Library, z115Library,
+	oracleUsername, oraclePassword, oracleConnectString
+}) => {
+	const queries = queryFactory({z106Library, z115Library});
+	const identifierPrefix = `${oaiIdentifierPrefixBase}:bib`;
+	const Service = createService({
+		maxResults,
+		getFilter,
+		queries
+	});
 
-export async function bibPrivileged() {
-	const Logger = createLogger();
+	return startApp({
+		...Service,
+		oracledb,
+		httpPort, identifierPrefix, instanceUrl, z106Library,
+		oracleUsername, oraclePassword, oracleConnectString
+	});
 
-	return {listRecords};
-
-	async function listRecords({connection, from, until, set, offset = 0}) {
-		try {
-			const filter = getFilter();
-			return doQuery(filter);
-		} catch (err) {
-			if (err.code) {
-				return {error: err.code};
-			}
-
-			throw err;
-		}
-
-		function doQuery(filter) {
-			const parameters = {connection, cb: rowCallback};
-
-			if (from && until) {
-				Object.assign(parameters, recordsTimeframe({offset, from, until}));
-			} else if (from) {
-				Object.assign(parameters, recordsStartTime({offset, from}));
-			} else if (until) {
-				Object.assign(parameters, recordsEndTime({offset, until}));
-			} else {
-				Object.assign(parameters, recordsQuery({offset}));
-			}
-
-			Logger.log('debug', 'Executing ListRecords query');
-
-			// Handle incomplete sets
-			return getResults(parameters);
-
-			function rowCallback(row) {
-				const record = parseRecord(row.DATA);
-
-				if (filter(record)) {
-					return {data: record, id: row.ID, time: moment(row.TIME, DB_TIME_FORMAT)};
-				}
-			}
-		}
-
-		function getFilter() {
-			return set ? getSetFilter() : () => true;
-
-			function getSetFilter() {
-				switch (set) {
-					case 'collection:fennica':
-						return createLowFilter('FENNI');
-					case 'collection:viola':
-						return createLowFilter('VIOLA');
-					case 'collection:arto':
-						return create960Filter('ARTO');
-					case 'collection:helmet':
-						return createSidFilter('helme');
-					default:
-						throw Object.assign(new Error(), {code: ERRORS.BAD_ARGUMENT});
-				}
-			}
+	function getFilter(set) {
+		switch (set) {
+			case 'collection:fennica':
+				return createLowFilter('FENNI');
+			case 'collection:viola':
+				return createLowFilter('VIOLA');
+			case 'collection:arto':
+				return create960Filter('ARTO');
+			case 'collection:helmet':
+				return createSidFilter('helme');
+			default:
+				throw new ApiError(ERRORS.NO_SET_HIERARCHY);
 		}
 	}
-}
+};

@@ -27,11 +27,11 @@
 		"lint:dev": "eslint --fix src",
 		"test:base": "cross-env NODE_ENV=test mocha --require @babel/register",
 		"test": "npm run lint && npm run test:base -- src/**/*.spec.js",
-		"test:dev": "npm run lint:dev && npm run test:base -- src/providers/**/**/*.spec.js",
+		"test:dev": "npm run lint:dev && npm run test:base -- src/*.spec.js",
 		"build": "babel src --source-maps --delete-dir-on-start --out-dir=dist --minified",
 		"build:dev": "npm run build && npm run check-deps",
-		"watch:test": "cross-env DEBUG=0 NODE_ENV=test nodemon --watch src --exec 'npm run test:dev'",
-		"watch:dev": "cross-env DEBUG=1 nodemon --delay 5000ms --watch src --exec 'babel-node ./src/providers/$PROVIDER'"
+		"watch:test": "cross-env NODE_ENV=test nodemon --watch src --exec 'npm run test:dev'",
+		"watch:dev": "cross-env DEBUG=1 nodemon --delay 5000ms --watch src --exec 'babel-node ./src/index.js"
 	},
 	"dependencies": {
 		"@natlibfi/marc-record": "^4.0.4",

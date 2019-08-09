@@ -14,35 +14,21 @@
 * limitations under the License.
 */
 
-// import {OAI_IDENTIFIER_PREFIX} from '../../../config';
-import oracledb from 'oracledb';
-import {ERRORS} from '../../../constants';
-import ApiError from '../../../error';
-import startApp from '../../../app';
-import createService from '../../service';
-
-import {createLowFilter, createSidFilter, create960Filter} from './filter';
+import queryInterfaceFactory from '../query-interface';
+import {createLowFilter, createSidFilter, create960Filter} from '../utils';
 import queryFactory from './query';
+import requestFactory from '../request';
 
-export default async ({
-	httpPort, oaiIdentifierPrefixBase, maxResults,
-	instanceUrl, z106Library, z115Library,
-	oracleUsername, oraclePassword, oracleConnectString
-}) => {
+export default params => {
+	const {maxResults, z106Library, z115Library} = params;
 	const queries = queryFactory({z106Library, z115Library});
-	const identifierPrefix = `${oaiIdentifierPrefixBase}:bib`;
-	const Service = createService({
+	const queryInterface = queryInterfaceFactory({
 		maxResults,
 		getFilter,
 		queries
 	});
 
-	return startApp({
-		...Service,
-		oracledb,
-		httpPort, identifierPrefix, instanceUrl, z106Library,
-		oracleUsername, oraclePassword, oracleConnectString
-	});
+	return requestFactory({...queryInterface, ...params});
 
 	function getFilter(set) {
 		switch (set) {
@@ -55,7 +41,6 @@ export default async ({
 			case 'collection:helmet':
 				return createSidFilter('helme');
 			default:
-				throw new ApiError(ERRORS.NO_SET_HIERARCHY);
 		}
 	}
 };

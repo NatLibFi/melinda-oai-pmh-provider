@@ -15,7 +15,8 @@
 */
 
 import moment from 'moment';
-import {DB_TIME_FORMAT} from '../../constants';
+// Import {DB_TIME_FORMAT, ERRORS} from './constants';
+import {DB_TIME_FORMAT} from '../constants';
 import parseRecord from './parse-record';
 
 export default function ({maxResults, queries, getFilter = getDefaultFilter, formatRecord = defaultFormatRecord}) {
@@ -51,6 +52,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		return executeQuery(params);
 
 		function getParams() {
+			// Throw new ApiError(ERRORS.NO_SET_HIERARCHY);
 			const filter = set ? getFilter(set) : defaultFilter;
 
 			if (from && until) {

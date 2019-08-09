@@ -14,6 +14,18 @@
 * limitations under the License.
 */
 
+export function createLowFilter(value) {
+	return createSubfieldValueFilter({tag: /^LOW$/, code: /^a$/, value});
+}
+
+export function createSidFilter(value) {
+	return createSubfieldValueFilter({tag: /^SID$/, code: /^a$/, value});
+}
+
+export function create960Filter(value) {
+	return createSubfieldValueFilter({tag: /^960$/, code: /^a$/, value});
+}
+
 export function createSubfieldValueFilter({tag, code, value}) {
 	return record => record.get(tag.some(f => f.subfields.some(sf => {
 		return code.test(sf.code) && value.test(sf.value);

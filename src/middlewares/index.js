@@ -14,16 +14,8 @@
 * limitations under the License.
 */
 
-import {createSubfieldValueFilter} from '../../utils';
+import bibFactory from './bib';
+import autNamesFactory from './aut-names';
+import autSubjectsFactory from './aut-subjects';
 
-export function createLowFilter(value) {
-	return createSubfieldValueFilter({tag: /^LOW$/, code: /^a$/, value});
-}
-
-export function createSidFilter(value) {
-	return createSubfieldValueFilter({tag: /^SID$/, code: /^a$/, value});
-}
-
-export function create960Filter(value) {
-	return createSubfieldValueFilter({tag: /^960$/, code: /^a$/, value});
-}
+export {bibFactory, autNamesFactory, autSubjectsFactory};

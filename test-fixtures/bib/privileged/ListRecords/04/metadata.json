@@ -1,0 +1,5 @@
+{
+  "descr": "Should work with from and until parameters",
+  "requestUrl": "/bibprv?verb=ListRecords",
+  "skip": true
+}

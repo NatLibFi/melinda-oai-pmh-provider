@@ -16,8 +16,8 @@
 
 import moment from 'moment';
 // Import {DB_TIME_FORMAT, ERRORS} from './constants';
-import {DB_TIME_FORMAT} from '../constants';
-import parseRecord from './parse-record';
+import {DB_TIME_FORMAT} from './constants';
+import {parseRecord} from '../record';
 
 export default function ({maxResults, queries, getFilter = getDefaultFilter, formatRecord = defaultFormatRecord}) {
 	const {
@@ -65,7 +65,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 			if (from) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: (cursor, limit) => resourcesStartTime({cursor, limit, from})
+					genQuery: (cursor, limit) => resourcesStartTime({cursor, limit, start: from})
 				};
 			}
 
@@ -95,9 +95,9 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		}
 
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
-			return executeQuery({cursor});
+			return execute({cursor});
 
-			async function executeQuery({results = [], cursor, previousCursor = cursor}) {
+			async function execute({results = [], cursor, previousCursor = cursor}) {
 				const limit = maxResults - results.length;
 
 				if (limit <= 0) {
@@ -110,13 +110,13 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 				previousCursor = cursor;
 				await pump(resultSet);
 
-				console.log(`cursor:${cursor};previousCursor:${previousCursor};results:${results.length};limit:${limit}`);
+				// Console.log(`cursor:${cursor};previousCursor:${previousCursor};results:${results.length};limit:${limit}`);
 
 				if (cursor === previousCursor) {
 					return {results};
 				}
 
-				return executeQuery({results, cursor, previousCursor});
+				return execute({results, cursor, previousCursor});
 
 				async function pump(resultSet) {
 					const row = await resultSet.getRow();

@@ -1,0 +1,5 @@
+{
+  "descr": "Should work with multiple set parameters",
+  "requestUrl": "/bibprv?verb=ListRecords",
+  "skip": true
+}

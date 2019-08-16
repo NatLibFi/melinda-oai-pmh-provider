@@ -14,12 +14,14 @@
 * limitations under the License.
 */
 
+/* eslint-disable max-nested-callbacks */
+
 import HttpStatus from 'http-status';
-import fixtureFactory from '@natlibfi/fixura';
 import chai, {expect} from 'chai';
 import chaiHttp from 'chai-http';
 import oracledbMockFactory from './oracledb-mock';
 import startApp, {__RewireAPI__ as RewireAPI} from './app'; // eslint-disable-line import/named
+import testSuiteFactory from './test-utils';
 
 chai.use(chaiHttp);
 
@@ -27,11 +29,16 @@ describe('app', () => {
 	let requester;
 
 	const fixturesPath = [__dirname, '..', 'test-fixtures'];
-	const {getFixture} = fixtureFactory({root: fixturesPath});
+	const oracledbMock = oracledbMockFactory();
+
+	const generateTestSuite = testSuiteFactory({
+		oracledbMock, requester,
+		rootPath: fixturesPath
+	});
+
+	RewireAPI.__Rewire__('oracledb', oracledbMock);
 
 	beforeEach(async () => {
-		RewireAPI.__Rewire__('oracledb', oracledbMockFactory());
-
 		const httpPort = 1337;
 		const secretEncryptionKey = 'foo';
 
@@ -55,6 +62,10 @@ describe('app', () => {
 
 	afterEach(async () => {
 		await requester.close();
+		oracledbMock._clear();
+	});
+
+	after(() => {
 		RewireAPI.__ResetDependency__('oracledb');
 	});
 
@@ -64,58 +75,21 @@ describe('app', () => {
 	});
 
 	describe('bib', () => {
-		describe('unprivileged', () => {
+		/* Describe('unprivileged', () => {
 			describe.skip('GetRecord');
 			describe.skip('Identify');
 			describe.skip('ListIdentifiers');
 			describe.skip('ListMetadataFormats');
 			describe.skip('ListRecords');
 			describe.skip('ListSets');
-		});
+		}); */
 
 		describe('privileged', () => {
-			it('Shouldn\'t accept the expected payload content type', async () => {
-				const response = await requester.get('/bibprv').set('Accept', 'application/json');
-				expect(response).to.have.status(HttpStatus.NOT_ACCEPTABLE);
-			});
-
-			it('Should return an error because of a bad verb', async () => {
-				const expectedPayload = getFixture(['bib', 'privileged', 'badVerbResponse.xml']);
-				const response = await requester.get('/bibprv?verb=foo');
-
-				expect(response).to.have.status(HttpStatus.OK);
-				expect(response.body).to.equal(expectedPayload);
-			});
-
 			describe.skip('GetRecord');
 			describe.skip('Identify');
 			describe.skip('ListIdentifiers');
 			describe.skip('ListMetadataFormats');
-
-			describe('ListRecords', () => {
-				it.skip('TESTING', async (index = '0') => {
-					const expectedPayload = getFixture(['bib', 'privileged', 'ListRecords', index, 'expectedPayload.xml']);
-					const response = await requester.get('/?verb=ListRecords');
-
-					expect(response).to.have.status(HttpStatus.OK);
-					expect(response.body).to.equal(expectedPayload);
-				});
-
-				/* It('Should fail because the resource does not exist', async () => {
-					const response = await requester.get(`${requestPath}/foo`);
-					expect(response).to.have.status(HttpStatus.NOT_FOUND);
-				}); */
-
-				/* async function init(index, getFixtures = false) {
-					await mongoFixtures.populate(['read', index, 'dbContents.json']);
-					if (getFixtures) {
-						return {
-							expectedPayload: getFixture({components: ['read', index, 'expectedPayload.json'], reader: READERS.JSON})
-						};
-					}
-				} */
-			});
-
+			describe('ListRecords', generateTestSuite('bib', 'privileged', 'ListRecords'));
 			describe.skip('ListSets');
 		});
 	});

@@ -58,11 +58,11 @@ export default ({
 					await callMethod(listSets);
 					break;
 				default:
-					throw new ApiError(ERRORS.BAD_VERB);
+					throw new ApiError({code: ERRORS.BAD_VERB});
 			}
 		} catch (err) {
 			if (err instanceof ApiError) {
-				sendResponse({res, error: err.code, verb: err.verb});
+				sendResponse({res, req, error: err.code});
 			} else {
 				next(err);
 			}
@@ -78,12 +78,13 @@ export default ({
 			}
 
 			if (results.length === 0) {
-				const err = new ApiError(ERRORS.NO_RECORDS_MATCH);
-				err.verb = req.query.verb;
-				throw err;
+				throw new ApiError({
+					code: ERRORS.NO_RECORDS_MATCH,
+					verb: req.query.verb
+				});
 			}
 
-			sendResponse({results, cursor, res, verb: req.query.verb});
+			sendResponse({res, req, results, cursor});
 
 			async function getParams(useDb = true) {
 				const obj = {};
@@ -112,29 +113,41 @@ export default ({
 							break;
 						case 'metadataPrefix':
 							if (req.query.metadataPrefix !== 'marc') {
-								throw new ApiError(ERRORS.CANNOT_DISSEMINATE_FORMAT);
+								throw new ApiError({
+									code: ERRORS.CANNOT_DISSEMINATE_FORMAT,
+									verb: req.query.verb
+								});
 							}
 
 							break;
 						default:
-							throw new ApiError(ERRORS.BAD_ARGUMENT);
+							throw new ApiError({
+								code: ERRORS.BAD_ARGUMENT,
+								verb: req.query.verb
+							});
 					}
 				});
 
 				if (!req.query.metadataPrefix && !req.query.resumptionToken) {
-					throw new ApiError(ERRORS.CANNOT_DISSEMINATE_FORMAT);
+					throw new ApiError({
+						code: ERRORS.CANNOT_DISSEMINATE_FORMAT,
+						verb: req.query.verb
+					});
 				}
 
 				return obj;
 
 				function parseDatestamp(stamp) {
-					const m = moment(stamp);
+					const m = moment.utc(stamp);
 
 					if (m.isValid()) {
 						return m;
 					}
 
-					throw new ApiError(ERRORS.BAD_ARGUMENT);
+					throw new ApiError({
+						code: ERRORS.BAD_ARGUMENT,
+						verb: req.query.verb
+					});
 				}
 
 				function parseResumptionToken(token) {
@@ -143,7 +156,10 @@ export default ({
 					const cursor = Number(cursorString);
 
 					if (moment(expirationTime).isBefore(moment()) || Number.isNaN(cursor)) {
-						throw new ApiError(ERRORS.BAD_RESUMPTION_TOKEN);
+						throw new ApiError({
+							code: ERRORS.BAD_RESUMPTION_TOKEN,
+							verb: req.query.verb
+						});
 					}
 
 					return cursor;
@@ -152,22 +168,32 @@ export default ({
 						try {
 							return decryptString({key: secretEncryptionKey, value: token, algorithm: 'aes128'});
 						} catch (err) {
-							throw new ApiError(ERRORS.BAD_RESUMPTION_TOKEN);
+							throw new ApiError({
+								code: ERRORS.BAD_RESUMPTION_TOKEN,
+								verb: req.query.verb
+							});
 						}
 					}
 				}
 			}
 		}
 
-		function sendResponse({res, error, verb, results, cursor}) {
+		function sendResponse({res, req, error, results, cursor}) {
 			if (error) {
-				res.send(generateErrorResponse({instanceUrl, error, verb}));
+				if (error === ERRORS.BAD_VERB) {
+					delete req.query.verb;
+				}
+
+				res.send(generateErrorResponse({...req.query, instanceUrl, error}));
 			} else {
 				const {token, tokenExpirationTime} = cursor === undefined ? [] : generateResumptionToken(cursor);
 
-				switch (verb) {
+				switch (req.query.verb) {
 					case 'ListRecords':
-						res.send(generateListRecordsResponse({instanceUrl, verb, results, token, tokenExpirationTime, identifierPrefix}));
+						res.send(generateListRecordsResponse({
+							...req.query, instanceUrl, results,
+							token, tokenExpirationTime, identifierPrefix
+						}));
 						break;
 					default:
 						break;

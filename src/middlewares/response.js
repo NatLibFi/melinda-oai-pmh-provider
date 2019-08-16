@@ -17,33 +17,31 @@
 import moment from 'moment';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
 
-export const generateErrorResponse = ({instanceUrl, verb, error}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
-		http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-                <request${verb ? `verb="${verb}"` : ''}>${instanceUrl}</request>
-				<responseDate>${moment().toISOString(true)}</responseDate>
-				<error code="${error}"/>
+export const generateErrorResponse = ({verb, metadataPrefix, from, until, set, instanceUrl, error}) => `<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	${generateRequestElement({instanceUrl, verb, from, until, set, metadataPrefix})}	
+	<responseDate>${moment().toISOString(true)}</responseDate>
+	<error code="${error}"/>
 </OAI-PMH>`;
 
-export const generateListRecordsResponse = ({instanceUrl, verb, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
-		http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-                <request verb="${verb}" metadataPrefix="marc">${instanceUrl}</request>
-                <responseDate>${moment().toISOString(true)}</responseDate>
-                <ListRecords>
-				          ${results.map(r => `<record>
-                    <header>
-                      <identifier>${identifierPrefix}/${r.id}</identifier>
-                      <datestamp>${r.time.toISOString(true)}</datestamp>
-                    </header>
-                    <metadata>
-                      ${MARCXML.to(r.data, {omitDeclaration: true})}
-                    </metadata>
-                  </record>`)}${token === undefined ? '' :
-	`<resumptionToken expirationDate="${tokenExpirationTime}">${token}</resumptionToken>`}
-                </ListRecords>
+export const generateListRecordsResponse = ({instanceUrl, verb, metadataPrefix, from, until, set, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	${generateRequestElement({instanceUrl, verb, from, until, set, metadataPrefix})}
+	<responseDate>${moment().toISOString(true)}</responseDate>
+	<ListRecords>
+		${results.reduce((acc, r) => `${acc}<record>
+			<header>
+				<identifier>${identifierPrefix}/${r.id}</identifier>
+				<datestamp>${r.time.toISOString(true)}</datestamp>
+			</header>
+			<metadata>
+				${MARCXML.to(r.data, {omitDeclaration: true})}
+			</metadata>
+		</record>\n`, '')}
+		${token === undefined ? '' : `<resumptionToken expirationDate="${tokenExpirationTime}">${token}</resumptionToken>`}
+	</ListRecords>
 </OAI-PMH>`;
+
+function generateRequestElement({verb, metadataPrefix, from, until, set, instanceUrl}) {
+	return `<request${verb ? ` verb="${verb}"` : ''}${metadataPrefix ? ` metadataPrefix="${metadataPrefix}"` : ''}${from ? ` from="${from}"` : ''}${until ? ` until="${until}"` : ''}${set ? ` set="${set}"` : ''}>${instanceUrl}</request>`;
+}

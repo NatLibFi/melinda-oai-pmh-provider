@@ -16,7 +16,7 @@
 
 import {AlephSequential} from '@natlibfi/marc-record-serializers';
 
-export default function (data) {
+export function parseRecord(data) {
 	const buffer = Buffer.from(data);
 	return iterate();
 
@@ -33,8 +33,8 @@ export default function (data) {
 
 		function format(l) {
 			const start = l.substr(0, 5);
-			const end = l.substr(5);
-			return `000000000 ${start} ${end}`;
+			const end = l.substr(6);
+			return `000000000 ${start} L ${end}`;
 		}
 
 		function transformRecord(str) {
@@ -44,4 +44,21 @@ export default function (data) {
 			return record;
 		}
 	}
+}
+
+export function formatRecord(record) {
+	const seq = AlephSequential.to(record);
+	const buffers = seq.split('\n').slice(0, -1).map(str => {
+		const data = str.slice(10);
+		const start = data.slice(0, 5);
+		// Offset is after is first 5 chars  + `L `
+		const end = data.slice(8);
+		// We need a buffer so that the total number of bytes can calculated
+		const dataBuffer = Buffer.from(`${start}L${end}`);
+		const lengthPrefix = String(dataBuffer.length).padStart(4, '0');
+
+		return Buffer.concat([Buffer.from(lengthPrefix), dataBuffer]);
+	});
+
+	return Buffer.concat(buffers);
 }

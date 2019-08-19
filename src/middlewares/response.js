@@ -17,16 +17,16 @@
 import moment from 'moment';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
 
-export const generateErrorResponse = ({verb, metadataPrefix, from, until, set, instanceUrl, error}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateErrorResponse = ({verb, metadataPrefix, from, until, set, resumptionToken, instanceUrl, error}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement({instanceUrl, verb, from, until, set, metadataPrefix})}	
+	${generateRequestElement({instanceUrl, verb, from, until, set, metadataPrefix, resumptionToken})}	
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<error code="${error}"/>
 </OAI-PMH>`;
 
-export const generateListRecordsResponse = ({instanceUrl, verb, metadataPrefix, from, until, set, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateListRecordsResponse = ({instanceUrl, verb, metadataPrefix, from, until, set, resumptionToken, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement({instanceUrl, verb, from, until, set, metadataPrefix})}
+	${generateRequestElement({instanceUrl, verb, from, until, set, metadataPrefix, resumptionToken})}
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<ListRecords>
 		${results.reduce((acc, r) => `${acc}<record>
@@ -42,6 +42,6 @@ export const generateListRecordsResponse = ({instanceUrl, verb, metadataPrefix, 
 	</ListRecords>
 </OAI-PMH>`;
 
-function generateRequestElement({verb, metadataPrefix, from, until, set, instanceUrl}) {
-	return `<request${verb ? ` verb="${verb}"` : ''}${metadataPrefix ? ` metadataPrefix="${metadataPrefix}"` : ''}${from ? ` from="${from}"` : ''}${until ? ` until="${until}"` : ''}${set ? ` set="${set}"` : ''}>${instanceUrl}</request>`;
+function generateRequestElement({verb, metadataPrefix, from, until, set, resumptionToken, instanceUrl}) {
+	return `<request${verb ? ` verb="${verb}"` : ''}${metadataPrefix ? ` metadataPrefix="${metadataPrefix}"` : ''}${from ? ` from="${from}"` : ''}${until ? ` until="${until}"` : ''}${set ? ` set="${set}"` : ''}${resumptionToken ? ` resumptionToken="${resumptionToken}"` : ''}>${instanceUrl}</request>`;
 }

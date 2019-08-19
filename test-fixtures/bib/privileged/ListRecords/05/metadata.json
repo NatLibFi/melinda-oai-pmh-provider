@@ -1,5 +1,4 @@
 {
   "descr": "Should work with set parameter",
-  "requestUrl": "/bibprv?verb=ListRecords",
-  "skip": true
+  "requestUrl": "/bibprv?verb=ListRecords&metadataPrefix=marc&set=fennica"  
 }

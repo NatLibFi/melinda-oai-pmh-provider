@@ -25,4 +25,15 @@ export const ERRORS = {
 	NO_SET_HIERARCHY: 'noSetHierarchy'
 };
 
+export const QUERY_PARAMETERS = [
+	'verb',
+	'set',
+	'metadataPrefix',
+	'from',
+	'until',
+	'resumptionToken'
+];
+
+export const METADATA_PREFIXES = ['marc', 'marc_melinda_v1'];
+export const TOKEN_EXPIRATION_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 export const DB_TIME_FORMAT = 'YYYYMMDDHHmmss';

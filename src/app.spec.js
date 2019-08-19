@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-/* eslint-disable max-nested-callbacks */
+/* eslint-enable max-nested-callbacks */
 
 import HttpStatus from 'http-status';
 import chai, {expect} from 'chai';
@@ -27,26 +27,22 @@ chai.use(chaiHttp);
 
 describe('app', () => {
 	let requester;
-
-	const fixturesPath = [__dirname, '..', 'test-fixtures'];
 	const oracledbMock = oracledbMockFactory();
-
 	const generateTestSuite = testSuiteFactory({
-		oracledbMock, requester,
-		rootPath: fixturesPath
+		rootPath: [__dirname, '..', 'test-fixtures'],
+		getInterfaces: () => ({requester, oracledbMock})
 	});
 
 	RewireAPI.__Rewire__('oracledb', oracledbMock);
 
 	beforeEach(async () => {
 		const httpPort = 1337;
-		const secretEncryptionKey = 'foo';
+		const secretEncryptionKey = 'yuKf7ly1xml33H5+fThvzhdY4XlFMJwQ';
 
 		const instanceUrl = `http://localhost:${httpPort}`;
 		const identifierPrefix = 'oai:foo.bar';
-		const maxResults = 10;
-		const resumptionTokenTimeout = 500;
-
+		const maxResults = 5;
+		const resumptionTokenTimeout = 31536000000000;
 		const oracleUsername = 'foo';
 		const oraclePassword = 'bar';
 		const oracleConnectString = 'BAR';

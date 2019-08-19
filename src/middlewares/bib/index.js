@@ -32,14 +32,14 @@ export default params => {
 
 	function getFilter(set) {
 		switch (set) {
-			case 'collection:fennica':
-				return createLowFilter('FENNI');
-			case 'collection:viola':
-				return createLowFilter('VIOLA');
-			case 'collection:arto':
-				return create960Filter('ARTO');
-			case 'collection:helmet':
-				return createSidFilter('helme');
+			case 'fennica':
+				return createLowFilter(/^FENNI$/);
+			case 'viola':
+				return createLowFilter(/^VIOLA$/);
+			case 'arto':
+				return create960Filter(/^ARTO$/);
+			case 'helmet':
+				return createSidFilter(/^helme$/);
 			default:
 		}
 	}

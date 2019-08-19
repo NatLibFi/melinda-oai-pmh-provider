@@ -1,5 +1,5 @@
 {
-  "descr": "Should respond with an error because of an invalid resumption token",
-  "requestUrl": "/bibprv?verb=ListRecords",
+  "descr": "Should respond with an error because of an expired resumption token",
+  "requestUrl": "/bibprv?verb=ListRecords&resumptionToken=moMzARibyZcXQixlldQN1g==",
   "skip": true
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="ListRecords" metadataPrefix="marc" until="2010-01-01T00:00:00">http://localhost:1337</request>
+	<responseDate>2000-01-01T00:00:00Z</responseDate>
+	<ListRecords>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/1234567</identifier>
+				<datestamp>2000-01-02T05:00:00.000+02:00</datestamp>
+			</header>
+			<metadata>
+				<record>
+					<leader>03106cam^a2200721^i^4500</leader>
+					<controlfield tag="001">1234567</controlfield>
+					<datafield tag="245" ind1=" " ind2=" ">
+						<subfield code="a">Foo Bar</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/89101112</identifier>
+				<datestamp>2009-07-01T00:10:00.000+03:00</datestamp>
+			</header>
+			<metadata>
+				<record>
+					<leader>03106cam^a2200721^i^4500</leader>
+					<controlfield tag="001">89101112</controlfield>
+					<datafield tag="245" ind1=" " ind2=" ">
+						<subfield code="a">Bar Foo</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+	</ListRecords>
+</OAI-PMH>

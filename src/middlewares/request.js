@@ -15,12 +15,11 @@
 */
 
 import HttpStatus from 'http-status';
-import {ERRORS} from './constants';
+import {ERRORS, QUERY_PARAMETERS, METADATA_PREFIXES, TOKEN_EXPIRATION_FORMAT} from './constants';
 import moment from 'moment';
 import ApiError from './error';
 import {generateErrorResponse, generateListRecordsResponse} from './response';
 import {Utils} from '@natlibfi/melinda-commons';
-// Const {createLogger, createExpressLogger, encryptString, decryptString} = Utils;
 
 export default ({
 	pool, secretEncryptionKey, instanceUrl, identifierPrefix, resumptionTokenTimeout,
@@ -95,79 +94,82 @@ export default ({
 					logger.log('debug', 'Connection acquired!');
 				}
 
-				Object.keys(req.query).forEach(key => {
-					switch (key) {
-						case 'verb':
-							break;
-						case 'from':
-							obj.from = parseDatestamp(req.query.from);
-							break;
-						case 'until':
-							obj.until = parseDatestamp(req.query.until);
-							break;
-						case 'set':
-							obj.set = req.query.set;
-							break;
-						case 'resumptionToken':
-							obj.cursor = parseResumptionToken(req.query.resumptionToken);
-							break;
-						case 'metadataPrefix':
-							if (req.query.metadataPrefix !== 'marc') {
-								throw new ApiError({
-									code: ERRORS.CANNOT_DISSEMINATE_FORMAT,
-									verb: req.query.verb
-								});
-							}
+				if (Object.keys(req.query).every(k => QUERY_PARAMETERS.includes(k))) {
+					if ('resumptionToken' in req.query) {
+						const params = parseResumptionToken(req.query.resumptionToken);
 
-							break;
-						default:
-							throw new ApiError({
-								code: ERRORS.BAD_ARGUMENT,
-								verb: req.query.verb
-							});
+						return {
+							...obj,
+							...parse({
+								...params,
+								metadataPrefix: req.query.metadataPrefix
+							})
+						};
 					}
+
+					return {...obj, ...parse({...req.query})};
+				}
+
+				throw new ApiError({
+					code: ERRORS.BAD_ARGUMENT,
+					verb: req.query.verb
 				});
 
-				if (!req.query.metadataPrefix && !req.query.resumptionToken) {
+				function parse(obj) {
+					if ('metadataPrefix' in obj && METADATA_PREFIXES.includes(obj.metadataPrefix)) {
+						if ('from' in obj) {
+							obj.from = parseDatestamp(obj.from);
+						}
+
+						if ('until' in obj) {
+							obj.until = parseDatestamp(obj.until);
+						}
+
+						return obj;
+					}
+
 					throw new ApiError({
 						code: ERRORS.CANNOT_DISSEMINATE_FORMAT,
 						verb: req.query.verb
 					});
-				}
 
-				return obj;
+					function parseDatestamp(stamp) {
+						const m = moment.utc(stamp);
 
-				function parseDatestamp(stamp) {
-					const m = moment.utc(stamp);
+						if (m.isValid()) {
+							return m;
+						}
 
-					if (m.isValid()) {
-						return m;
+						throw new ApiError({
+							code: ERRORS.BAD_ARGUMENT,
+							verb: req.query.verb
+						});
 					}
-
-					throw new ApiError({
-						code: ERRORS.BAD_ARGUMENT,
-						verb: req.query.verb
-					});
 				}
 
 				function parseResumptionToken(token) {
 					const str = decryptToken();
-					const [expirationTime, cursorString] = str.split(/;/);
+					const [expirationTime, cursorString, set, from, until] = str.split(/;/g);
+					const expires = moment(expirationTime, TOKEN_EXPIRATION_FORMAT, true);
 					const cursor = Number(cursorString);
 
-					if (moment(expirationTime).isBefore(moment()) || Number.isNaN(cursor)) {
-						throw new ApiError({
-							code: ERRORS.BAD_RESUMPTION_TOKEN,
-							verb: req.query.verb
-						});
+					if (expires.isValid() && moment().isAfter(expires) && Number.isNaN(cursor) === false) {
+						return {cursor, set, from, until};
 					}
 
-					return cursor;
+					throw new ApiError({
+						code: ERRORS.BAD_RESUMPTION_TOKEN,
+						verb: req.query.verb
+					});
 
 					function decryptToken() {
 						try {
-							return decryptString({key: secretEncryptionKey, value: token, algorithm: 'aes128'});
+							const decoded = decodeURIComponent(token);
+							// Console.log(encodeURIComponent(encryptString({key: secretEncryptionKey, value: '2000-01-01T00:00:00.000+00:00;12345;fennica;2009-01-01T00:00:00;2010-01-01T00:10:00', algorithm: 'aes-256-cbc'})));
+							// console.log(encryptString({key: secretEncryptionKey, value: '2000-01-01T00:00:00.000+00:00;12345;fennica;2009-01-01T00:00:00;2010-01-01T00:10:00', algorithm: 'aes-256-cbc'}));
+							return decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
 						} catch (err) {
+							console.log(err);
 							throw new ApiError({
 								code: ERRORS.BAD_RESUMPTION_TOKEN,
 								verb: req.query.verb
@@ -202,7 +204,7 @@ export default ({
 
 			function generateResumptionToken(cursor) {
 				const tokenExpirationTime = generateResumptionExpirationTime();
-				const token = encryptString({key: secretEncryptionKey, value: `${tokenExpirationTime};${cursor}`, algorithm: 'aes128'});
+				const token = encryptString({key: secretEncryptionKey, value: `${tokenExpirationTime};${cursor}`, algorithm: 'aes-256-cbc'});
 
 				return {token, tokenExpirationTime};
 

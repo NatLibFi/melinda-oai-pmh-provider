@@ -1,5 +1,4 @@
 {
-  "descr": "Should work with from, untils and multiple set parameters",
-  "requestUrl": "/bibprv?verb=ListRecords",
-  "skip": true
+  "descr": "Should respond with an imcomplete list with a resumption token",
+  "requestUrl": "/bibprv?verb=ListRecords&metadataPrefix=marc"
 }

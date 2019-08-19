@@ -27,7 +27,7 @@ export function create960Filter(value) {
 }
 
 export function createSubfieldValueFilter({tag, code, value}) {
-	return record => record.get(tag.some(f => f.subfields.some(sf => {
+	return record => record.get(tag).some(f => f.subfields.some(sf => {
 		return code.test(sf.code) && value.test(sf.value);
-	})));
+	}));
 }

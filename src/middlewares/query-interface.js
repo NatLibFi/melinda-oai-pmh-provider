@@ -53,26 +53,28 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 
 		function getParams() {
 			// Throw new ApiError(ERRORS.NO_SET_HIERARCHY);
+			const start = from;
+			const end = until;
 			const filter = set ? getFilter(set) : defaultFilter;
 
-			if (from && until) {
+			if (start && end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: (cursor, limit) => resourcesTimeframe({cursor, limit, from, until})
+					genQuery: (cursor, limit) => resourcesTimeframe({cursor, limit, start, end})
 				};
 			}
 
-			if (from) {
+			if (start) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: (cursor, limit) => resourcesStartTime({cursor, limit, start: from})
+					genQuery: (cursor, limit) => resourcesStartTime({cursor, limit, start})
 				};
 			}
 
-			if (until) {
+			if (end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: (cursor, limit) => resourcesEndTime({cursor, limit, until})
+					genQuery: (cursor, limit) => resourcesEndTime({cursor, limit, end})
 				};
 			}
 

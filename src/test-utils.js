@@ -24,11 +24,12 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import moment from 'moment';
 import {formatRecord} from './record';
 
-export default ({rootPath, oracledbMock, requester}) => {
+export default ({rootPath, getInterfaces}) => {
 	return (...args) => {
 		const dir = rootPath.concat(args);
 		const {getFixture} = fixtureFactory({root: dir});
 		const subDirs = readdirSync(joinPath.apply(undefined, dir));
+
 		return iterate();
 
 		async function iterate() {
@@ -41,6 +42,8 @@ export default ({rootPath, oracledbMock, requester}) => {
 					it.skip(descr);
 				} else {
 					it(descr, async () => {
+						const {requester, oracledbMock} = getInterfaces();
+
 						if (dbResults) {
 							oracledbMock._execute([{
 								results: dbResults

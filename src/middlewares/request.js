@@ -117,12 +117,16 @@ export default ({
 
 				function parse(obj) {
 					if ('metadataPrefix' in obj && METADATA_PREFIXES.includes(obj.metadataPrefix)) {
-						if ('from' in obj) {
+						if (obj.from) {
 							obj.from = parseDatestamp(obj.from);
+						} else {
+							delete obj.from;
 						}
 
-						if ('until' in obj) {
+						if (obj.until) {
 							obj.until = parseDatestamp(obj.until);
+						} else {
+							delete obj.until;
 						}
 
 						return obj;
@@ -165,11 +169,8 @@ export default ({
 					function decryptToken() {
 						try {
 							const decoded = decodeURIComponent(token);
-							// Console.log(encodeURIComponent(encryptString({key: secretEncryptionKey, value: '2000-01-01T00:00:00.000+00:00;12345;fennica;2009-01-01T00:00:00;2010-01-01T00:10:00', algorithm: 'aes-256-cbc'})));
-							// console.log(encryptString({key: secretEncryptionKey, value: '2000-01-01T00:00:00.000+00:00;12345;fennica;2009-01-01T00:00:00;2010-01-01T00:10:00', algorithm: 'aes-256-cbc'}));
 							return decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
 						} catch (err) {
-							console.log(err);
 							throw new ApiError({
 								code: ERRORS.BAD_RESUMPTION_TOKEN,
 								verb: req.query.verb

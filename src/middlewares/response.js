@@ -37,7 +37,7 @@ export const generateListRecordsResponse = ({instanceUrl, verb, metadataPrefix, 
 			<metadata>
 				${MARCXML.to(r.data, {omitDeclaration: true})}
 			</metadata>
-		</record>\n`, '')}
+		</record>\n\t\t`, '')}
 		${token === undefined ? '' : `<resumptionToken expirationDate="${tokenExpirationTime}">${token}</resumptionToken>`}
 	</ListRecords>
 </OAI-PMH>`;

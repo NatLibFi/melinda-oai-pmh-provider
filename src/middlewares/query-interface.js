@@ -60,27 +60,31 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 			if (start && end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: (cursor, limit) => resourcesTimeframe({cursor, limit, start, end})
+					genQuery: cursor => resourcesTimeframe({cursor, start, end})
+					// GenQuery: (cursor, limit) => resourcesTimeframe({cursor, limit, start, end})
 				};
 			}
 
 			if (start) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: (cursor, limit) => resourcesStartTime({cursor, limit, start})
+					genQuery: cursor => resourcesStartTime({cursor, start})
+					// GenQuery: (cursor, limit) => resourcesStartTime({cursor, limit, start})
 				};
 			}
 
 			if (end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: (cursor, limit) => resourcesEndTime({cursor, limit, end})
+					genQuery: cursor => resourcesEndTime({cursor, end})
+					// GenQuery: (cursor, limit) => resourcesEndTime({cursor, limit, end})
 				};
 			}
 
 			return {
 				rowCallback, connection, cursor,
-				genQuery: (cursor, limit) => resourcesAll({cursor, limit})
+				genQuery: cursor => resourcesAll({cursor})
+				// GenQuery: (cursor, limit) => resourcesAll({cursor, limit})
 			};
 
 			function rowCallback(row) {
@@ -100,22 +104,27 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 			return execute({cursor});
 
 			async function execute({results = [], cursor, previousCursor = cursor}) {
-				const limit = maxResults - results.length;
+				/* Const limit = maxResults - results.length;
+
+				console.log(`${cursor}:${previousCursor}:${limit}:${results.length}`);
 
 				if (limit <= 0) {
 					return {results, cursor};
 				}
 
-				const {query, args} = genQuery(cursor, limit);
+				const {query, args} = genQuery(cursor, limit); */
+				const {query, args} = genQuery(cursor);
 				const {resultSet} = await connection.execute(query, args, {resultSet: true});
 
 				previousCursor = cursor;
 				await pump(resultSet);
 
-				// Console.log(`cursor:${cursor};previousCursor:${previousCursor};results:${results.length};limit:${limit}`);
-
 				if (cursor === previousCursor) {
 					return {results};
+				}
+
+				if (results.length === maxResults) {
+					return {results, cursor};
 				}
 
 				return execute({results, cursor, previousCursor});
@@ -129,6 +138,12 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 
 						if (result) {
 							results.push(result);
+
+							if (results.length === maxResults) {
+								await resultSet.close();
+								return;
+							}
+
 							return pump(resultSet);
 						}
 					}

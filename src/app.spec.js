@@ -42,6 +42,7 @@ describe('app', () => {
 		const instanceUrl = `http://localhost:${httpPort}`;
 		const identifierPrefix = 'oai:foo.bar';
 		const maxResults = 5;
+		// Tests will break in the 4th millennium
 		const resumptionTokenTimeout = 31536000000000;
 		const oracleUsername = 'foo';
 		const oraclePassword = 'bar';

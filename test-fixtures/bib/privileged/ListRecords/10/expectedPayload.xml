@@ -48,5 +48,36 @@
 				</record>
 			</metadata>
 		</record>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/17181920</identifier>
+				<datestamp>2010-01-01T00:01:10.000+02:00</datestamp>
+			</header>
+			<metadata>
+				<record>
+					<leader>03106cam^a2200721^i^4500</leader>
+					<controlfield tag="001">17181920</controlfield>
+					<datafield tag="245" ind1=" " ind2=" ">
+						<subfield code="a">Fubar1</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/21222324</identifier>
+				<datestamp>2010-01-02T00:11:00.000+02:00</datestamp>
+			</header>
+			<metadata>
+				<record>
+					<leader>03106cam^a2200721^i^4500</leader>
+					<controlfield tag="001">21222324</controlfield>
+					<datafield tag="245" ind1=" " ind2=" ">
+						<subfield code="a">Fubar2</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+		<resumptionToken expirationDate="2000-01-01T00:00:00Z">foo</resumptionToken>
 	</ListRecords>
 </OAI-PMH>

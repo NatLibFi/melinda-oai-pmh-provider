@@ -39,9 +39,9 @@ export default ({rootPath, getInterfaces}) => {
 				const {descr, skip, expectedPayload, requestUrl, dbResults} = getData(sub);
 
 				if (skip) {
-					it.skip(descr);
+					it.skip(`${sub} ${descr}`);
 				} else {
-					it(descr, async () => {
+					it(`${sub} ${descr}`, async () => {
 						const {requester, oracledbMock} = getInterfaces();
 
 						if (dbResults) {
@@ -51,11 +51,9 @@ export default ({rootPath, getInterfaces}) => {
 						}
 
 						const response = await requester.get(requestUrl).buffer(true);
-
 						expect(response).to.have.status(HttpStatus.OK);
 
 						const formattedResponse = await formatResponse(response.text);
-
 						expect(formattedResponse).to.equal(expectedPayload);
 					});
 				}
@@ -107,6 +105,11 @@ export default ({rootPath, getInterfaces}) => {
 			});
 
 			obj['OAI-PMH'].responseDate[0] = moment.utc('2000-01-01T00:00:00').format();
+
+			if ('ListRecords' in obj['OAI-PMH'] && 'resumptionToken' in obj['OAI-PMH'].ListRecords[0]) {
+				obj['OAI-PMH'].ListRecords[0].resumptionToken[0].$.expirationDate = moment.utc('2000-01-01T00:00:00').format();
+				obj['OAI-PMH'].ListRecords[0].resumptionToken[0]._ = 'foo';
+			}
 
 			return new XMLBuilder({
 				xmldec: {

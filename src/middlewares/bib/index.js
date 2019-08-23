@@ -21,7 +21,7 @@ import requestFactory from '../request';
 
 export default params => {
 	const {maxResults, z106Library, z115Library} = params;
-	const queries = queryFactory({z106Library, z115Library});
+	const queries = queryFactory({z106Library, z115Library, limit: maxResults});
 	const queryInterface = queryInterfaceFactory({
 		maxResults,
 		getFilter,

@@ -1,5 +1,4 @@
 {
   "descr": "Should respond with an error because of an expired resumption token",
-  "requestUrl": "/bibprv?verb=ListRecords&resumptionToken=moMzARibyZcXQixlldQN1g==",
-  "skip": true
+  "requestUrl": "/bibprv?verb=ListRecords&metadataPrefix=marc&resumptionToken=xDCc%2Baa0wXitcDFme9cdlssW3ZLb4Fd69nLV%2BPT6c6I%3D"  
 }

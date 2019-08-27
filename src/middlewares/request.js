@@ -20,8 +20,9 @@ import {Utils} from '@natlibfi/melinda-commons';
 import {ERRORS, QUERY_PARAMETERS, METADATA_FORMATS, TOKEN_EXPIRATION_FORMAT} from './constants';
 import ApiError from './error';
 import {
-	generateErrorResponse, generateListRecordsResponse, generateIdentifyResponse,
-	generateListMetadataFormatsResponse, generateListSetsResponse
+	generateErrorResponse, generateIdentifyResponse,
+	generateListMetadataFormatsResponse, generateListSetsResponse,
+	generateGetRecordResponse, generateListRecordsResponse, generateListIdentifiersResponse
 } from './response';
 
 export default ({
@@ -32,7 +33,7 @@ export default ({
 }) => {
 	const {createLogger, encryptString, decryptString} = Utils;
 	const logger = createLogger();
-	
+
 	return async (req, res, next) => {
 		if (!req.accepts('application/xml')) {
 			res.sendStatus(HttpStatus.NOT_ACCEPTABLE);
@@ -44,22 +45,29 @@ export default ({
 		try {
 			switch (req.query.verb) {
 				case 'GetRecord':
-					await callMethod(getRecord);
+					await callMethod({
+						method: getRecord,
+						allowedParams: ['verb', 'identifier', 'metadataPrefix'],
+						requiredParams: ['verb', 'identifier', 'metadataPrefix']
+					});
 					break;
 				case 'Identify':
 					await callMethod({
-						method: retrieveEarliestTimestamp,						
+						method: retrieveEarliestTimestamp,
 						allowedParams: ['verb']
 					});
 					break;
 				case 'ListIdentifiers':
-					await callMethod(listIdentifiers);
+					await callMethod({
+						method: listIdentifiers,
+						requiredParams: ['verb']
+					});
 					break;
 				case 'ListMetadataFormats':
 					await callMethod({
 						method: listMetadataFormats,
 						useDb: false,
-						allowedParams: ['verb', 'identifier']						
+						allowedParams: ['verb', 'identifier']
 					});
 					break;
 				case 'ListRecords':
@@ -72,7 +80,7 @@ export default ({
 					await callMethod({
 						method: listSets,
 						useDb: false,
-						allowedParams: ['verb', 'resumptionToken']	
+						allowedParams: ['verb', 'resumptionToken']
 					});
 					break;
 				default:
@@ -95,7 +103,7 @@ export default ({
 
 			return {
 				results: METADATA_FORMATS.slice()
-			}
+			};
 		}
 
 		async function callMethod({method, useDb, allowedParams = QUERY_PARAMETERS, requiredParams = ['verb']}) {
@@ -108,11 +116,11 @@ export default ({
 					await params.connection.close();
 					logger.log('debug', 'Connection closed');
 				}
-	
+
 				sendResponse({res, req, results, cursor});
 			} else {
 				sendResponse({res, req});
-			}						
+			}
 
 			async function getParams(useDb = true) {
 				const obj = {};
@@ -123,7 +131,7 @@ export default ({
 					logger.log('debug', 'Connection acquired!');
 				}
 
-				if (checkArguments()) {					
+				if (checkArguments()) {
 					if (allowedParams.includes('resumptionToken') && 'resumptionToken' in req.query) {
 						const params = parseResumptionToken(req.query.resumptionToken);
 
@@ -139,7 +147,6 @@ export default ({
 					return {...obj, ...parse({...req.query})};
 				}
 
-
 				throw new ApiError({
 					code: ERRORS.BAD_ARGUMENT,
 					verb: req.query.verb
@@ -151,19 +158,20 @@ export default ({
 					return hasOnlyAllowed && hasAllRequired;
 				}
 
-				function parse(obj) {					
+				function parse(obj) {
 					if (allowedParams.includes('metadataPrefix')) {
 						if (METADATA_FORMATS.some(({prefix}) => prefix === obj.metadataPrefix)) {
 							if (obj.from) {
 								obj.from = parseDatestamp(obj.from);
-							} else {
-								delete obj.from;
 							}
 
 							if (obj.until) {
 								obj.until = parseDatestamp(obj.until);
-							} else {
-								delete obj.until;
+							}
+
+							if (obj.identifier) {
+								// Strip prefix (Slice takes offset and the length of the prefix doesn't include the separator)
+								obj.identifier = obj.identifier.slice(identifierPrefix.length + 1);
 							}
 
 							return obj;
@@ -181,7 +189,7 @@ export default ({
 						}
 
 						return {...acc, [key]: value};
-					}, {});					
+					}, {});
 
 					function parseDatestamp(stamp) {
 						const m = moment.utc(stamp);
@@ -238,23 +246,34 @@ export default ({
 				const {token, tokenExpirationTime} = cursor === undefined ? {} : generateResumptionToken(cursor);
 
 				switch (req.query.verb) {
+					case 'GetRecord':
+						if (results) {
+							res.send(generateGetRecordResponse({
+								instanceUrl, results, identifierPrefix,
+								query: req.query
+							}));
+						} else {
+							res.send(generateErrorResponse({query: req.query, instanceUrl, error: ERRORS.ID_DOES_NOT_EXIST}));
+						}
+
+						break;
 					case 'ListMetadataFormats':
 						if (results.length === 0) {
 							res.send(generateErrorResponse({query: req.query, instanceUrl, error: ERRORS.ID_DOES_NOT_EXIST}));
 						} else {
 							res.send(generateListMetadataFormatsResponse({
 								instanceUrl, results,
-								query: req.query,								
+								query: req.query
 							}));
 						}
-						
+
 						break;
 					case 'ListSets':
 						res.send(generateListSetsResponse({
 							instanceUrl, results,
-							query: req.query,					
-						}));								
-						break;						
+							query: req.query
+						}));
+						break;
 					case 'Identify':
 						res.send(generateIdentifyResponse({
 							instanceUrl, name, supportEmail,
@@ -269,8 +288,22 @@ export default ({
 								verb: req.query.verb
 							});
 						}
-									
+
 						res.send(generateListRecordsResponse({
+							query: req.query, instanceUrl, results,
+							token, tokenExpirationTime, identifierPrefix
+						}));
+
+						break;
+					case 'ListIdentifiers':
+						if (results.length === 0) {
+							throw new ApiError({
+								code: ERRORS.NO_RECORDS_MATCH,
+								verb: req.query.verb
+							});
+						}
+
+						res.send(generateListIdentifiersResponse({
 							query: req.query, instanceUrl, results,
 							token, tokenExpirationTime, identifierPrefix
 						}));

@@ -1,5 +1,4 @@
 {
     "descr": "Should respond with an error because of an invalid metadata format specifier",
-    "requestUrl": "/bibprv?verb=GetRecord&metadataPrefix=foo",
-    "skip": true
+    "requestUrl": "/bibprv?verb=GetRecord&metadataPrefix=foo&identifier=oai:foo.bar/12345"
 }

@@ -42,8 +42,8 @@ export function createSubfieldValueFilter(conditions) {
 					return sf.code === code && sf.value === value;
 				});
 			});
-		});		
-	}
+		});
+	};
 
 	function getPattern() {
 		const str = conditions.map(({tag}) => tag).join('|');

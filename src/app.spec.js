@@ -82,9 +82,9 @@ describe('app', () => {
 			describe('Identify', generateTestSuite('bib', 'privileged', 'Identify'));
 			describe('ListMetadataFormats', generateTestSuite('bib', 'privileged', 'ListMetadataFormats'));
 			describe('ListSets', generateTestSuite('bib', 'privileged', 'ListSets'));
-			describe('GetRecord', generateTestSuite('bib', 'privileged', 'GetRecord'));			
-			describe.skip('ListIdentifiers');			
-			describe('ListRecords', generateTestSuite('bib', 'privileged', 'ListRecords'));			
+			describe('GetRecord', generateTestSuite('bib', 'privileged', 'GetRecord'));
+			describe('ListIdentifiers', generateTestSuite('bib', 'privileged', 'ListIdentifiers'));
+			describe('ListRecords', generateTestSuite('bib', 'privileged', 'ListRecords'));
 		});
 	});
 

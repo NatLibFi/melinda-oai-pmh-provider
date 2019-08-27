@@ -53,11 +53,10 @@ export default ({rootPath, getInterfaces}) => {
 
 							const response = await requester.get(requestUrl).buffer(true);
 							expect(response).to.have.status(HttpStatus.OK);
-							
 
 							const formattedResponse = await formatResponse(response.text);
-							//console.log(formattedResponse);
-							//console.log(expectedPayload);
+							// Console.log(formattedResponse);
+							// console.log(expectedPayload);
 							expect(formattedResponse).to.equal(expectedPayload);
 						});
 					}
@@ -138,7 +137,7 @@ export default ({rootPath, getInterfaces}) => {
 						if ('DATA' in row) {
 							return {...row, DATA: formatRecord(new MarcRecord(row.DATA))};
 						}
-						
+
 						return row;
 					});
 				});

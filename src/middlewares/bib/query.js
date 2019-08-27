@@ -16,7 +16,10 @@
 
 export default ({z106Library, z115Library, limit}) => {
 	return {
-		record: `SELECT z00_doc_number id, z00_data record FROM ${z106Library}.z00_data`,
+		singleRecord: ({identifier}) => ({
+			query: `SELECT z00_doc_number id, z00_data record FROM ${z106Library}.z00_data WHERE z00_doc_number = :identifier`,
+			args: {identifier}
+		}),
 		earliestTimestamp: `SELECT RPAD(CONCAT(z106_update_date, z106_time), 14, '0') time from ${z106Library}.z106 orig,
 			(SELECT MIN(z106_update_date) as value FROM ${z106Library}.z106) min
 			WHERE orig.z106_update_date = min.value
@@ -24,8 +27,8 @@ export default ({z106Library, z115Library, limit}) => {
 		SELECT CONCAT(z115_today_date, SUBSTR(z115_today_time,0,6)) time from ${z115Library}.z115 orig,
 			(SELECT MIN(z115_today_date) as value FROM ${z115Library}.z115) min
 			WHERE orig.z115_today_date = min.value
-		ORDER by time ASC FETCH FIRST ROW ONLY`,		
-		identifiers: ({cursor = 0}) => {
+		ORDER by time ASC FETCH FIRST ROW ONLY`,
+		identifiersAll: ({cursor = 0}) => {
 			const startId = String(cursor).padStart(9, '0');
 			const endId = String(cursor + limit).padStart(9, '0');
 
@@ -42,7 +45,7 @@ export default ({z106Library, z115Library, limit}) => {
                 ) GROUP BY id ORDER BY id`,
 				args: {startId, endId}
 			};
-		},		
+		},
 		identifiersTimeframe: ({cursor = 0, start, end}) => {
 			const startDate = start.format('YYYYMMDD');
 			const endDate = end.format('YYYYMMDD');
@@ -135,7 +138,7 @@ export default ({z106Library, z115Library, limit}) => {
                             (z106_update_date = :startDate AND z106_time >= :z106StartTime) or
                             (z106_update_date = :endDate AND z106_time <= :z106EndTime) or
                             (z106_update_date > :startDate AND z106_update_date < '20190117')
-                        UNION
+                        UNION ALL
                         SELECT z115_tab id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115 WHERE
                             (z115_today_date = :startDate AND z115_today_time >= :z115StartTime) or
                             (z115_today_date = :endDate AND z115_today_time <= :z115EndTime) or

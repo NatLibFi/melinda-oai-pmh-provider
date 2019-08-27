@@ -39,7 +39,6 @@ export const QUERY_PARAMETERS = [
 	'resumptionToken'
 ];
 
-
 export const METADATA_FORMATS = [
 	{
 		prefix: 'marc',
@@ -51,4 +50,4 @@ export const METADATA_FORMATS = [
 		schema: 'https://schemas.melinda.kansalliskirjasto.fi/marc-melinda-v1.xsd',
 		namespace: 'https://melinda.kansalliskirjasto.fi/marc-melinda/v1'
 	}
-];	
+];

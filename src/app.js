@@ -89,7 +89,7 @@ export default async function ({
 		};
 	}
 
-	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars		
+	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
 		res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		logger.log('error', err.stack);
 	}

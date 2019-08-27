@@ -27,30 +27,30 @@ export default params => {
 		getFilter,
 		queries
 	});
-	
+
 	return requestFactory({...params, ...queryInterface, listSets});
-	
+
 	function getFilter(set) {
 		switch (set) {
 			case 'fennica':
-			return createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finb'}]);
+				return createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finb'}]);
 			case 'viola':
-			return createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finbd'}]);				
+				return createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finbd'}]);
 			case 'arto':
-			return create960Filter(/^ARTO$/);
+				return create960Filter(/^ARTO$/);
 			case 'helmet':
-			return createSidFilter(/^helme$/);
+				return createSidFilter(/^helme$/);
 			default:
 		}
 	}
-	
+
 	function listSets() {
 		return {
 			results: [
-				{ spec: 'fennica', name: 'Fennica'},
-				{ spec: 'viola', name: 'Viola'},
-				{ spec: 'arto', name: 'Arto'},
-				{ spec: 'helmet', name: 'Helmet'},
+				{spec: 'fennica', name: 'Fennica'},
+				{spec: 'viola', name: 'Viola'},
+				{spec: 'arto', name: 'Arto'},
+				{spec: 'helmet', name: 'Helmet'}
 			]
 		};
 	}

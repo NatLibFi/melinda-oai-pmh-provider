@@ -16,6 +16,14 @@
 
 import {AlephSequential} from '@natlibfi/marc-record-serializers';
 
+export function toAlephId(id) {
+	return id.padStart(9, '0');
+}
+
+export function fromAlephId(id) {
+	return id.replace(/^0+/, '');
+}
+
 export function parseRecord(data) {
 	const buffer = Buffer.from(data);
 	return iterate();

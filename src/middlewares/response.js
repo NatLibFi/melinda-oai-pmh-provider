@@ -83,6 +83,38 @@ export const generateListRecordsResponse = ({instanceUrl, query, results, identi
 	</ListRecords>
 </OAI-PMH>`;
 
+export const generateListIdentifiersResponse = ({instanceUrl, query, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	${generateRequestElement(instanceUrl, query)}
+	<responseDate>${moment().toISOString(true)}</responseDate>
+	<ListIdentifiers>
+		${results.reduce((acc, r) => `${acc}<record>
+			<header>
+				<identifier>${identifierPrefix}/${r.id}</identifier>
+				<datestamp>${r.time.toISOString(true)}</datestamp>
+			</header>
+		</record>\n\t\t`, '')}
+		${token === undefined ? '' : `<resumptionToken expirationDate="${tokenExpirationTime}">${token}</resumptionToken>`}
+	</ListIdentifiers>
+</OAI-PMH>`;
+
+export const generateGetRecordResponse = ({instanceUrl, query, results, identifierPrefix}) => `<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	${generateRequestElement(instanceUrl, query)}
+	<responseDate>${moment().toISOString(true)}</responseDate>
+	<GetRecord>
+		<record>
+			<header>
+				<identifier>${identifierPrefix}/${results.id}</identifier>
+				<datestamp>${results.time.toISOString(true)}</datestamp>
+			</header>
+			<metadata>
+				${MARCXML.to(results.data, {omitDeclaration: true})}
+			</metadata>
+		</record>
+	</GetRecord>
+</OAI-PMH>`;
+
 function generateRequestElement(instanceUrl, query = {}) {
 	return `<request${generateAttr()}>${instanceUrl}</request>`;
 

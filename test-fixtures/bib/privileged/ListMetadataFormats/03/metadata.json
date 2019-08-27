@@ -1,0 +1,4 @@
+{
+    "descr": "Should respond with an error because the metadata format does not exist",
+    "requestUrl": "/bibprv?verb=ListMetadataFormats&identifier=foo"
+}

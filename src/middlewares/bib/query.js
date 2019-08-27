@@ -17,7 +17,14 @@
 export default ({z106Library, z115Library, limit}) => {
 	return {
 		record: `SELECT z00_doc_number id, z00_data record FROM ${z106Library}.z00_data`,
-		// Identifiers: ({limit, cursor = 0}) => {
+		earliestTimestamp: `SELECT RPAD(CONCAT(z106_update_date, z106_time), 14, '0') time from ${z106Library}.z106 orig,
+			(SELECT MIN(z106_update_date) as value FROM ${z106Library}.z106) min
+			WHERE orig.z106_update_date = min.value
+		UNION
+		SELECT CONCAT(z115_today_date, SUBSTR(z115_today_time,0,6)) time from ${z115Library}.z115 orig,
+			(SELECT MIN(z115_today_date) as value FROM ${z115Library}.z115) min
+			WHERE orig.z115_today_date = min.value
+		ORDER by time ASC FETCH FIRST ROW ONLY`,		
 		identifiers: ({cursor = 0}) => {
 			const startId = String(cursor).padStart(9, '0');
 			const endId = String(cursor + limit).padStart(9, '0');
@@ -35,8 +42,7 @@ export default ({z106Library, z115Library, limit}) => {
                 ) GROUP BY id ORDER BY id`,
 				args: {startId, endId}
 			};
-		},
-		// IdentifiersTimeframe: ({limit, cursor = 0, start, end}) => {
+		},		
 		identifiersTimeframe: ({cursor = 0, start, end}) => {
 			const startDate = start.format('YYYYMMDD');
 			const endDate = end.format('YYYYMMDD');
@@ -59,7 +65,6 @@ export default ({z106Library, z115Library, limit}) => {
 				args: {startDate, endDate, z106StartTime, z106EndTime, z115StartTime, z115EndTime}
 			};
 		},
-		// IdentifiersStartTime: ({limit, cursor = 0, start}) => {
 		identifiersStartTime: ({cursor = 0, start}) => {
 			const startDate = start.format('YYYYMMDD');
 			const z106StartTime = start.format('HHmm');
@@ -77,7 +82,6 @@ export default ({z106Library, z115Library, limit}) => {
 				args: {startDate, z106StartTime, z115StartTime}
 			};
 		},
-		// IdentifiersEndTime: ({limit, cursor = 0, end}) => {
 		identifiersEndTime: ({cursor = 0, end}) => {
 			const endDate = end.format('YYYYMMDD');
 			const z106EndTime = end.format('HHmm');
@@ -96,7 +100,6 @@ export default ({z106Library, z115Library, limit}) => {
 				args: {endDate, z106EndTime, z115EndTime}
 			};
 		},
-		// RecordsAll: ({limit, cursor}) => {
 		recordsAll: ({cursor}) => {
 			const startId = String(cursor).padStart(9, '0');
 			const endId = String(cursor + limit).padStart(9, '0');
@@ -117,7 +120,6 @@ export default ({z106Library, z115Library, limit}) => {
 				args: {startId, endId}
 			};
 		},
-		// RecordsTimeframe: ({limit, cursor = 0, start, end}) => {
 		recordsTimeframe: ({cursor = 0, start, end}) => {
 			const startDate = start.format('YYYYMMDD');
 			const endDate = end.format('YYYYMMDD');
@@ -143,7 +145,6 @@ export default ({z106Library, z115Library, limit}) => {
 				args: {startDate, endDate, z106StartTime, z106EndTime, z115StartTime, z115EndTime}
 			};
 		},
-		// RecordsStartTime: ({limit, cursor = 0, start}) => {
 		recordsStartTime: ({cursor = 0, start}) => {
 			const startDate = start.format('YYYYMMDD');
 			const z106StartTime = start.format('HHmm');
@@ -164,7 +165,6 @@ export default ({z106Library, z115Library, limit}) => {
 				args: {startDate, z106StartTime, z115StartTime}
 			};
 		},
-		// RecordsEndTime: ({limit, cursor = 0, end}) => {
 		recordsEndTime: ({cursor = 0, end}) => {
 			const endDate = end.format('YYYYMMDD');
 			const z106EndTime = end.format('HHmm');

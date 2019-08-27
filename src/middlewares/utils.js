@@ -15,19 +15,38 @@
 */
 
 export function createLowFilter(value) {
-	return createSubfieldValueFilter({tag: /^LOW$/, code: /^a$/, value});
+	return createSubfieldValueFilter({tag: 'LOW', code: /^a$/, value});
+}
+
+export function createLow020Filter(value) {
+	return createSubfieldValueFilter({tag: 'LOW', code: /^a$/, value});
 }
 
 export function createSidFilter(value) {
-	return createSubfieldValueFilter({tag: /^SID$/, code: /^a$/, value});
+	return createSubfieldValueFilter({tag: 'SID', code: /^a$/, value});
 }
 
 export function create960Filter(value) {
-	return createSubfieldValueFilter({tag: /^960$/, code: /^a$/, value});
+	return createSubfieldValueFilter([{tag: '960', code: /^a$/, value}]);
 }
 
-export function createSubfieldValueFilter({tag, code, value}) {
-	return record => record.get(tag).some(f => f.subfields.some(sf => {
-		return code.test(sf.code) && value.test(sf.value);
-	}));
+export function createSubfieldValueFilter(conditions) {
+	const pattern = getPattern();
+
+	return record => {
+		const fields = record.get(pattern);
+
+		return conditions.every(({tag, code, value}) => {
+			return fields.some(f => {
+				return f.tag === tag && f.subfields.some(sf => {
+					return sf.code === code && sf.value === value;
+				});
+			});
+		});		
+	}
+
+	function getPattern() {
+		const str = conditions.map(({tag}) => tag).join('|');
+		return new RegExp(`^(${str})$`);
+	}
 }

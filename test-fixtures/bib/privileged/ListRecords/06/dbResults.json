@@ -11,6 +11,13 @@
                         "value": "89101112"
                     },
                     {
+                        "tag": "042",
+                        "subfields": [{
+                            "code": "a",
+                            "value": "finb"
+                        }]
+                    },
+                    {
                         "tag": "245",
                         "subfields": [{
                             "code": "a",
@@ -21,7 +28,7 @@
                         "tag": "LOW",
                         "subfields": [{
                             "code": "a",
-                            "value": "FENNI"
+                            "value": "FIKKA"
                         }]
                     }    
                 ]

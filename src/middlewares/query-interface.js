@@ -21,12 +21,24 @@ import {parseRecord} from '../record';
 
 export default function ({maxResults, queries, getFilter = getDefaultFilter, formatRecord = defaultFormatRecord}) {
 	const {
-		recordsAll, recordsTimeframe, recordsStartTime, recordsEndTime,
+		recordsAll, earliestTimestamp, recordsTimeframe, recordsStartTime, recordsEndTime,
 		identifiersAll, identifiersTimeframe, identifiersStartTime, identifiersEndTime
 	} = queries;
+	
+	return {listRecords, listIdentifiers, retrieveEarliestTimestamp};
+	
+	async function retrieveEarliestTimestamp({connection}) {
+		const {resultSet} = await connection.execute(earliestTimestamp, [], {resultSet: true});
+		const row = await resultSet.getRow();
 
-	return {listRecords, listIdentifiers};
-
+		await resultSet.close();
+		return {results: format()};
+s
+		function format() {
+			return moment(row.TIME, 'YYYYMMDDHHmmss').format();
+		}		
+	}
+	
 	async function listRecords(params) {
 		return listResources({...params, queries: {
 			resourcesTimeframe: recordsTimeframe,
@@ -35,7 +47,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 			resourcesAll: recordsAll
 		}});
 	}
-
+	
 	async function listIdentifiers(params) {
 		return listResources({...params, queries: {
 			resourcesTimeframe: identifiersTimeframe,
@@ -44,19 +56,19 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 			resourcesAll: identifiersAll
 		}});
 	}
-
+	
 	async function listResources({connection, from, until, set, cursor = 0, queries}) {
 		const {resourcesAll, resourcesTimeframe, resourcesStartTime, resourcesEndTime} = queries;
 		const params = getParams();
-
+		
 		return executeQuery(params);
-
+		
 		function getParams() {
 			// Throw new ApiError(ERRORS.NO_SET_HIERARCHY);
 			const start = from;
 			const end = until;
 			const filter = set ? getFilter(set) : defaultFilter;
-
+			
 			if (start && end) {
 				return {
 					rowCallback, connection, cursor,
@@ -64,7 +76,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 					// GenQuery: (cursor, limit) => resourcesTimeframe({cursor, limit, start, end})
 				};
 			}
-
+			
 			if (start) {
 				return {
 					rowCallback, connection, cursor,
@@ -72,7 +84,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 					// GenQuery: (cursor, limit) => resourcesStartTime({cursor, limit, start})
 				};
 			}
-
+			
 			if (end) {
 				return {
 					rowCallback, connection, cursor,
@@ -80,17 +92,17 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 					// GenQuery: (cursor, limit) => resourcesEndTime({cursor, limit, end})
 				};
 			}
-
+			
 			return {
 				rowCallback, connection, cursor,
 				genQuery: cursor => resourcesAll({cursor})
 				// GenQuery: (cursor, limit) => resourcesAll({cursor, limit})
 			};
-
+			
 			function rowCallback(row) {
 				if (row.DATA) {
 					const record = parseRecord(row.DATA);
-
+					
 					if (filter(record)) {
 						return {data: formatRecord(record), id: row.ID, time: moment(row.TIME, DB_TIME_FORMAT)};
 					}
@@ -99,55 +111,46 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 				}
 			}
 		}
-
+		
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
 			return execute({cursor});
-
+			
 			async function execute({results = [], cursor, previousCursor = cursor}) {
-				/* Const limit = maxResults - results.length;
-
-				console.log(`${cursor}:${previousCursor}:${limit}:${results.length}`);
-
-				if (limit <= 0) {
-					return {results, cursor};
-				}
-
-				const {query, args} = genQuery(cursor, limit); */
 				const {query, args} = genQuery(cursor);
 				const {resultSet} = await connection.execute(query, args, {resultSet: true});
-
+				
 				previousCursor = cursor;
 				await pump(resultSet);
-
+				
 				if (cursor === previousCursor) {
 					return {results};
 				}
-
+				
 				if (results.length === maxResults) {
 					return {results, cursor};
 				}
-
+				
 				return execute({results, cursor, previousCursor});
-
+				
 				async function pump(resultSet) {
 					const row = await resultSet.getRow();
-
+					
 					if (row) {
 						cursor++;
 						const result = rowCallback(row);
-
+						
 						if (result) {
 							results.push(result);
-
+							
 							if (results.length === maxResults) {
 								await resultSet.close();
 								return;
 							}
-
+							
 							return pump(resultSet);
 						}
 					}
-
+					
 					await resultSet.close();
 				}
 			}

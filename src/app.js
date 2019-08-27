@@ -22,7 +22,7 @@ import {Utils} from '@natlibfi/melinda-commons';
 import {bibFactory, autNamesFactory, autSubjectsFactory} from './middlewares';
 
 export default async function ({
-	identifierPrefix, httpPort, enableProxy,
+	identifierPrefix, httpPort, enableProxy, name, supportEmail,
 	secretEncryptionKey, resumptionTokenTimeout, maxResults,
 	oracleUsername, oraclePassword, oracleConnectString, instanceUrl,
 	z106Library, z115Library
@@ -72,7 +72,7 @@ export default async function ({
 
 	function getMiddlewares(pool) {
 		const params = {
-			pool, httpPort, enableProxy,
+			pool, httpPort, enableProxy, name, supportEmail,
 			secretEncryptionKey, resumptionTokenTimeout, identifierPrefix,
 			instanceUrl, maxResults,
 			oracleUsername, oraclePassword, oracleConnectString,
@@ -89,7 +89,7 @@ export default async function ({
 		};
 	}
 
-	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
+	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars		
 		res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		logger.log('error', err.stack);
 	}

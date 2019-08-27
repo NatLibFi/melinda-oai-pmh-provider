@@ -16,8 +16,7 @@
 
 /* eslint-enable max-nested-callbacks */
 
-import HttpStatus from 'http-status';
-import chai, {expect} from 'chai';
+import chai from 'chai';
 import chaiHttp from 'chai-http';
 import oracledbMockFactory from './oracledb-mock';
 import startApp, {__RewireAPI__ as RewireAPI} from './app'; // eslint-disable-line import/named
@@ -39,6 +38,8 @@ describe('app', () => {
 		const httpPort = 1337;
 		const secretEncryptionKey = 'yuKf7ly1xml33H5+fThvzhdY4XlFMJwQ';
 
+		const name = 'Foo Bar';
+		const supportEmail = 'foo@fu.bar';
 		const instanceUrl = `http://localhost:${httpPort}`;
 		const identifierPrefix = 'oai:foo.bar';
 		const maxResults = 5;
@@ -50,7 +51,8 @@ describe('app', () => {
 
 		const app = await startApp({
 			httpPort, secretEncryptionKey, instanceUrl,
-			identifierPrefix, maxResults, resumptionTokenTimeout,
+			name, supportEmail, identifierPrefix,
+			maxResults, resumptionTokenTimeout,
 			oracleUsername, oraclePassword, oracleConnectString
 		});
 
@@ -66,11 +68,6 @@ describe('app', () => {
 		RewireAPI.__ResetDependency__('oracledb');
 	});
 
-	it('Shouldn\'t find the resource', async () => {
-		const response = await requester.get('/foo');
-		expect(response).to.have.status(HttpStatus.NOT_FOUND);
-	});
-
 	describe('bib', () => {
 		/* Describe('unprivileged', () => {
 			describe.skip('GetRecord');
@@ -82,12 +79,12 @@ describe('app', () => {
 		}); */
 
 		describe('privileged', () => {
-			describe.skip('GetRecord');
-			describe.skip('Identify');
-			describe.skip('ListIdentifiers');
-			describe.skip('ListMetadataFormats');
-			describe('ListRecords', generateTestSuite('bib', 'privileged', 'ListRecords'));
-			describe.skip('ListSets');
+			describe('Identify', generateTestSuite('bib', 'privileged', 'Identify'));
+			describe('ListMetadataFormats', generateTestSuite('bib', 'privileged', 'ListMetadataFormats'));
+			describe('ListSets', generateTestSuite('bib', 'privileged', 'ListSets'));
+			describe('GetRecord', generateTestSuite('bib', 'privileged', 'GetRecord'));			
+			describe.skip('ListIdentifiers');			
+			describe('ListRecords', generateTestSuite('bib', 'privileged', 'ListRecords'));			
 		});
 	});
 

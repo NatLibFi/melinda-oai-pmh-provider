@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="ListSets">http://localhost:1337</request>
+	<responseDate>2000-01-01T00:00:00Z</responseDate>
+	<ListSets>
+		<set>
+			<setSpec>fennica</setSpec>
+			<setName>Fennica</setName>
+		</set>
+		<set>
+			<setSpec>viola</setSpec>
+			<setName>Viola</setName>
+		</set>
+		<set>
+			<setSpec>arto</setSpec>
+			<setName>Arto</setName>
+		</set>
+		<set>
+			<setSpec>helmet</setSpec>
+			<setName>Helmet</setName>
+		</set>
+	</ListSets>
+</OAI-PMH>

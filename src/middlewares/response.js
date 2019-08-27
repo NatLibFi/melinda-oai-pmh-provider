@@ -16,17 +16,58 @@
 
 import moment from 'moment';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
+import {PROTOCOL_VERSION} from './constants';
 
-export const generateErrorResponse = ({verb, metadataPrefix, from, until, set, resumptionToken, instanceUrl, error}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateErrorResponse = ({query, instanceUrl, error}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement({instanceUrl, verb, from, until, set, metadataPrefix, resumptionToken})}	
+	${generateRequestElement(instanceUrl, query)}	
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<error code="${error}"/>
 </OAI-PMH>`;
 
-export const generateListRecordsResponse = ({instanceUrl, verb, metadataPrefix, from, until, set, resumptionToken, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateListMetadataFormatsResponse = ({query, results, instanceUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement({instanceUrl, verb, from, until, set, metadataPrefix, resumptionToken})}
+	${generateRequestElement(instanceUrl, query)}	
+	<responseDate>${moment().toISOString(true)}</responseDate>
+	<ListMetadataFormats>	
+		${results.reduce((acc, {prefix, schema, namespace}) => `${acc}<metadataFormat>
+			<metadataPrefix>${prefix}</metadataPrefix>
+			<schema>${schema}</schema>
+		  <metadataNamespace>${namespace}</metadataNamespace>
+		</metadataFormat>\n\t\t`, '')}	
+	</ListMetadataFormats>
+</OAI-PMH>`;
+
+export const generateListSetsResponse = ({query, results, instanceUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	${generateRequestElement(instanceUrl, query)}	
+	<responseDate>${moment().toISOString(true)}</responseDate>
+	<ListSets>	
+		${results.reduce((acc, {spec, name}) => `${acc}<set>
+			<setSpec>${spec}</setSpec>
+			<setName>${name}</setName>
+		</set>\n\t\t`, '')}	
+	</ListSets>
+</OAI-PMH>`;
+
+export const generateIdentifyResponse = ({name, supportEmail, earliestTimestamp, instanceUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	${generateRequestElement(instanceUrl)}	
+	<responseDate>${moment().toISOString(true)}</responseDate>
+	<Identify>
+		<repositoryName>${name}</repositoryName>
+		<baseURL>${instanceUrl}</baseURL>
+		<protocolVersion>${PROTOCOL_VERSION}</protocolVersion>
+		<earliestTimestamp>${earliestTimestamp}</earliestTimestamp>
+		<deletedRecord>persistent</deletedRecord>
+		<granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
+		<adminEmail>${supportEmail}</adminEmail>
+	</Identify>
+</OAI-PMH>`;
+
+export const generateListRecordsResponse = ({instanceUrl, query, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	${generateRequestElement(instanceUrl, query)}
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<ListRecords>
 		${results.reduce((acc, r) => `${acc}<record>
@@ -42,6 +83,21 @@ export const generateListRecordsResponse = ({instanceUrl, verb, metadataPrefix, 
 	</ListRecords>
 </OAI-PMH>`;
 
-function generateRequestElement({verb, metadataPrefix, from, until, set, resumptionToken, instanceUrl}) {
-	return `<request${verb ? ` verb="${verb}"` : ''}${metadataPrefix ? ` metadataPrefix="${metadataPrefix}"` : ''}${from ? ` from="${from}"` : ''}${until ? ` until="${until}"` : ''}${set ? ` set="${set}"` : ''}${resumptionToken ? ` resumptionToken="${resumptionToken}"` : ''}>${instanceUrl}</request>`;
+function generateRequestElement(instanceUrl, query = {}) {
+	return `<request${generateAttr()}>${instanceUrl}</request>`;
+
+	function generateAttr() {
+		return Object.entries(query)
+			.sort((a, b) => {
+				const {key: aKey} = a;
+				const {key: bKey} = b;
+
+				if (aKey === 'verb' || bKey === 'verb') {
+					return -1;
+				}
+
+				return 0;
+			})
+			.reduce((acc, [key, value]) => `${acc} ${key}="${value}"`, '');
+	}
 }

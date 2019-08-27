@@ -1,0 +1,5 @@
+{
+    "descr": "Should respond with an error because of an illegal argument",
+    "requestUrl": "/bibprv?verb=GetRecord&foo=bar",
+    "skip": true
+}

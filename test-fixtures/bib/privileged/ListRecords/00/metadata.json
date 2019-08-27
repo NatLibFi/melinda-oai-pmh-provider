@@ -1,4 +1,4 @@
 {
-    "descr": "Should return an error because of a missing metadata format specifier",
-    "requestUrl": "/bibprv?verb=ListRecords"
+    "descr": "Should return an error because of an invalid metadata format specifier",
+    "requestUrl": "/bibprv?verb=ListRecords&metadataPrefix=foo"
 }

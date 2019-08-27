@@ -1,0 +1,5 @@
+{
+    "descr": "Should respond with an error because the record cannot be found",
+    "requestUrl": "/bibprv?verb=GetRecord&metadataPrefix=marc&identifier=12345",
+    "skip": true
+}

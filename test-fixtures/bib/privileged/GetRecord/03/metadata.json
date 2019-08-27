@@ -1,0 +1,5 @@
+{
+    "descr": "Should respond with a record",
+    "requestUrl": "/bibprv?verb=GetRecord&metadataPrefix=marc&dentifier=12345",
+    "skip": true
+}

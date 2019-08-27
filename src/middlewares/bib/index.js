@@ -15,7 +15,7 @@
 */
 
 import queryInterfaceFactory from '../query-interface';
-import {createLowFilter, createSidFilter, create960Filter} from '../utils';
+import {createSubfieldValueFilter, createSidFilter, create960Filter} from '../utils';
 import queryFactory from './query';
 import requestFactory from '../request';
 
@@ -27,20 +27,31 @@ export default params => {
 		getFilter,
 		queries
 	});
-
-	return requestFactory({...queryInterface, ...params});
-
+	
+	return requestFactory({...params, ...queryInterface, listSets});
+	
 	function getFilter(set) {
 		switch (set) {
 			case 'fennica':
-				return createLowFilter(/^FENNI$/);
+			return createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finb'}]);
 			case 'viola':
-				return createLowFilter(/^VIOLA$/);
+			return createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finbd'}]);				
 			case 'arto':
-				return create960Filter(/^ARTO$/);
+			return create960Filter(/^ARTO$/);
 			case 'helmet':
-				return createSidFilter(/^helme$/);
+			return createSidFilter(/^helme$/);
 			default:
 		}
+	}
+	
+	function listSets() {
+		return {
+			results: [
+				{ spec: 'fennica', name: 'Fennica'},
+				{ spec: 'viola', name: 'Viola'},
+				{ spec: 'arto', name: 'Arto'},
+				{ spec: 'helmet', name: 'Helmet'},
+			]
+		};
 	}
 };

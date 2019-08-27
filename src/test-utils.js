@@ -26,110 +26,123 @@ import {formatRecord} from './record';
 
 export default ({rootPath, getInterfaces}) => {
 	return (...args) => {
-		const dir = rootPath.concat(args);
-		const {getFixture} = fixtureFactory({root: dir});
-		const subDirs = readdirSync(joinPath.apply(undefined, dir));
+		return async () => {
+			const dir = rootPath.concat(args);
+			const {getFixture} = fixtureFactory({root: dir});
+			const subDirs = readdirSync(joinPath.apply(undefined, dir));
 
-		return iterate();
+			return iterate();
 
-		async function iterate() {
-			const sub = subDirs.shift();
+			async function iterate() {
+				const sub = subDirs.shift();
 
-			if (sub) {
-				const {descr, skip, expectedPayload, requestUrl, dbResults} = getData(sub);
+				if (sub) {
+					const {descr, skip, expectedPayload, requestUrl, dbResults} = getData(sub);
 
-				if (skip) {
-					it.skip(`${sub} ${descr}`);
-				} else {
-					it(`${sub} ${descr}`, async () => {
-						const {requester, oracledbMock} = getInterfaces();
+					if (skip) {
+						it.skip(`${sub} ${descr}`);
+					} else {
+						it(`${sub} ${descr}`, async () => {
+							const {requester, oracledbMock} = getInterfaces();
 
-						if (dbResults) {
-							oracledbMock._execute([{
-								results: dbResults
-							}]);
-						}
+							if (dbResults) {
+								oracledbMock._execute([{
+									results: dbResults
+								}]);
+							}
 
-						const response = await requester.get(requestUrl).buffer(true);
-						expect(response).to.have.status(HttpStatus.OK);
+							const response = await requester.get(requestUrl).buffer(true);
+							expect(response).to.have.status(HttpStatus.OK);
+							
 
-						const formattedResponse = await formatResponse(response.text);
-						expect(formattedResponse).to.equal(expectedPayload);
-					});
+							const formattedResponse = await formatResponse(response.text);
+							//console.log(formattedResponse);
+							//console.log(expectedPayload);
+							expect(formattedResponse).to.equal(expectedPayload);
+						});
+					}
+
+					iterate();
 				}
 
-				iterate();
-			}
-
-			function getData(subDir) {
-				const {descr, requestUrl, skip} = getFixture({
-					components: [subDir, 'metadata.json'],
-					reader: READERS.JSON
-				});
-
-				if (skip) {
-					return {descr, skip};
-				}
-
-				const expectedPayload = getFixture([subDir, 'expectedPayload.xml']);
-
-				try {
-					const dbResults = getFixture({
-						components: [subDir, 'dbResults.json'],
+				function getData(subDir) {
+					const {descr, requestUrl, skip} = getFixture({
+						components: [subDir, 'metadata.json'],
 						reader: READERS.JSON
 					});
 
-					return {
-						expectedPayload, descr, requestUrl,
-						dbResults: formatDbResults(dbResults)
-					};
-				} catch (err) {
-					if (err.code === 'ENOENT') {
-						return {expectedPayload, descr, requestUrl};
+					if (skip) {
+						return {descr, skip};
 					}
 
-					throw err;
-				}
-			}
-		}
+					const expectedPayload = getFixture([subDir, 'expectedPayload.xml']);
 
-		async function formatResponse(xml) {
-			const obj = await new Promise((resolve, reject) => {
-				new XMLParser().parseString(xml, (err, obj) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(obj);
+					try {
+						const dbResults = getFixture({
+							components: [subDir, 'dbResults.json'],
+							reader: READERS.JSON
+						});
+
+						return {
+							expectedPayload, descr, requestUrl,
+							dbResults: formatDbResults(dbResults)
+						};
+					} catch (err) {
+						if (err.code === 'ENOENT') {
+							return {expectedPayload, descr, requestUrl};
+						}
+
+						throw err;
 					}
-				});
-			});
-
-			obj['OAI-PMH'].responseDate[0] = moment.utc('2000-01-01T00:00:00').format();
-
-			if ('ListRecords' in obj['OAI-PMH'] && 'resumptionToken' in obj['OAI-PMH'].ListRecords[0]) {
-				obj['OAI-PMH'].ListRecords[0].resumptionToken[0].$.expirationDate = moment.utc('2000-01-01T00:00:00').format();
-				obj['OAI-PMH'].ListRecords[0].resumptionToken[0]._ = 'foo';
+				}
 			}
 
-			return new XMLBuilder({
-				xmldec: {
-					version: '1.0',
-					encoding: 'UTF-8',
-					standalone: false
-				},
-				renderOpts: {
-					pretty: true,
-					indent: '\t'
-				}
-			}).buildObject(obj);
-		}
-
-		function formatDbResults(results) {
-			return results.map(set => {
-				return set.map(row => {
-					return {...row, DATA: formatRecord(new MarcRecord(row.DATA))};
+			async function formatResponse(xml) {
+				const obj = await new Promise((resolve, reject) => {
+					new XMLParser().parseString(xml, (err, obj) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(obj);
+						}
+					});
 				});
-			});
-		}
+
+				obj['OAI-PMH'].responseDate[0] = moment.utc('2000-01-01T00:00:00').format();
+
+				if ('ListRecords' in obj['OAI-PMH'] && 'resumptionToken' in obj['OAI-PMH'].ListRecords[0]) {
+					obj['OAI-PMH'].ListRecords[0].resumptionToken[0].$.expirationDate = moment.utc('2000-01-01T00:00:00').format();
+					obj['OAI-PMH'].ListRecords[0].resumptionToken[0]._ = 'foo';
+				}
+
+				if ('Identify' in obj['OAI-PMH']) {
+					obj['OAI-PMH'].Identify[0].earliestTimestamp[0] = moment.utc('2000-01-01T00:00:00').format();
+				}
+
+				return new XMLBuilder({
+					xmldec: {
+						version: '1.0',
+						encoding: 'UTF-8',
+						standalone: false
+					},
+					renderOpts: {
+						pretty: true,
+						indent: '\t'
+					}
+				}).buildObject(obj);
+			}
+
+			function formatDbResults(results) {
+				return results.map(set => {
+					return set.map(row => {
+						if ('DATA' in row) {
+							return {...row, DATA: formatRecord(new MarcRecord(row.DATA))};
+						}
+						
+						return row;
+					});
+				});
+			}
+		};
 	};
 };

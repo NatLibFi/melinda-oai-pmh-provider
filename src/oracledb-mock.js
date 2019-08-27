@@ -9,7 +9,7 @@ export default () => {
 
 	const connection = {
 		close: async () => {},
-		execute: async (query, args) => {
+		execute: async (query, args) => {			
 			const rows = getRows();
 
 			return {

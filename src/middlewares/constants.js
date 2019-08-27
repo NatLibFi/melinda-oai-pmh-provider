@@ -14,6 +14,11 @@
 * limitations under the License.
 */
 
+export const PROTOCOL_VERSION = '2.0';
+
+export const TOKEN_EXPIRATION_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+export const DB_TIME_FORMAT = 'YYYYMMDDHHmmss';
+
 export const ERRORS = {
 	BAD_ARGUMENT: 'badArgument',
 	BAD_RESUMPTION_TOKEN: 'badResumptionToken',
@@ -34,6 +39,16 @@ export const QUERY_PARAMETERS = [
 	'resumptionToken'
 ];
 
-export const METADATA_PREFIXES = ['marc', 'marc_melinda_v1'];
-export const TOKEN_EXPIRATION_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
-export const DB_TIME_FORMAT = 'YYYYMMDDHHmmss';
+
+export const METADATA_FORMATS = [
+	{
+		prefix: 'marc',
+		schema: 'https://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd',
+		namespace: 'http://www.loc.gov/MARC21/slim'
+	},
+	{
+		prefix: 'marc_melinda_v1',
+		schema: 'https://schemas.melinda.kansalliskirjasto.fi/marc-melinda-v1.xsd',
+		namespace: 'https://melinda.kansalliskirjasto.fi/marc-melinda/v1'
+	}
+];	

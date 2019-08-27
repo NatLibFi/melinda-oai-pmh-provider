@@ -12,11 +12,14 @@
 				<record>
 					<leader>03106cam^a2200721^i^4500</leader>
 					<controlfield tag="001">89101112</controlfield>
+					<datafield tag="042" ind1=" " ind2=" ">
+						<subfield code="a">finb</subfield>
+					</datafield>
 					<datafield tag="245" ind1=" " ind2=" ">
 						<subfield code="a">Bar Foo</subfield>
 					</datafield>
 					<datafield tag="LOW" ind1=" " ind2=" ">
-						<subfield code="a">FENNI</subfield>
+						<subfield code="a">FIKKA</subfield>
 					</datafield>
 				</record>
 			</metadata>

@@ -17,7 +17,7 @@
 export default ({z106Library, z115Library, limit}) => {
 	return {
 		singleRecord: ({identifier}) => ({
-			query: `SELECT z00_doc_number id, z00_data record FROM ${z106Library}.z00_data WHERE z00_doc_number = :identifier`,
+			query: `SELECT z00_doc_number id, z00_data record FROM ${z106Library}.z00 WHERE z00_doc_number = :identifier`,
 			args: {identifier}
 		}),
 		earliestTimestamp: `SELECT RPAD(CONCAT(z106_update_date, z106_time), 14, '0') time from ${z106Library}.z106 orig,

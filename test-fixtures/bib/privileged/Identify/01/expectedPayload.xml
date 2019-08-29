@@ -3,7 +3,7 @@
 	<request>http://localhost:1337</request>
 	<responseDate>2000-01-01T00:00:00Z</responseDate>
 	<Identify>
-		<repositoryName>Foo Bar</repositoryName>
+		<repositoryName>Melinda OAI-PMH provider for bibliographic records (Privileged)</repositoryName>
 		<baseURL>http://localhost:1337</baseURL>
 		<protocolVersion>2.0</protocolVersion>
 		<earliestTimestamp>2000-01-01T00:00:00Z</earliestTimestamp>

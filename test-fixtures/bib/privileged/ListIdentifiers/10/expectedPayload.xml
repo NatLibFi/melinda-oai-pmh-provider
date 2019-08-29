@@ -26,6 +26,7 @@
 				<identifier>oai:foo.bar/17181920</identifier>
 				<datestamp>2010-01-01T00:01:10.000+02:00</datestamp>
 			</header>
+		</record>
 		<record>
 			<header>
 				<identifier>oai:foo.bar/21222324</identifier>

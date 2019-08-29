@@ -17,8 +17,13 @@
 import HttpStatus from 'http-status';
 import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
-import {ERRORS, QUERY_PARAMETERS, METADATA_FORMATS, TOKEN_EXPIRATION_FORMAT} from './constants';
 import ApiError from './error';
+
+import {
+	ERRORS, QUERY_PARAMETERS, METADATA_FORMATS,
+	TOKEN_EXPIRATION_FORMAT, REPOSITORY_NAMES
+} from './constants';
+
 import {
 	generateErrorResponse, generateIdentifyResponse,
 	generateListMetadataFormatsResponse, generateListSetsResponse,
@@ -26,7 +31,7 @@ import {
 } from './response';
 
 export default ({
-	pool, secretEncryptionKey, name, supportEmail,
+	pool, secretEncryptionKey, supportEmail,
 	instanceUrl, identifierPrefix, resumptionTokenTimeout,
 	retrieveEarliestTimestamp, getRecord, listIdentifiers,
 	listRecords, listSets
@@ -236,12 +241,14 @@ export default ({
 		}
 
 		function sendResponse({res, req, error, results, cursor}) {
+			const baseUrl = `${instanceUrl}/${req.path}`;
+
 			if (error) {
 				if (error === ERRORS.BAD_VERB) {
 					delete req.query.verb;
 				}
 
-				res.send(generateErrorResponse({query: req.query, instanceUrl, error}));
+				res.send(generateErrorResponse({query: req.query, baseUrl, error}));
 			} else {
 				const {token, tokenExpirationTime} = cursor === undefined ? {} : generateResumptionToken(cursor);
 
@@ -249,20 +256,20 @@ export default ({
 					case 'GetRecord':
 						if (results) {
 							res.send(generateGetRecordResponse({
-								instanceUrl, results, identifierPrefix,
+								baseUrl, results, identifierPrefix,
 								query: req.query
 							}));
 						} else {
-							res.send(generateErrorResponse({query: req.query, instanceUrl, error: ERRORS.ID_DOES_NOT_EXIST}));
+							res.send(generateErrorResponse({query: req.query, baseUrl, error: ERRORS.ID_DOES_NOT_EXIST}));
 						}
 
 						break;
 					case 'ListMetadataFormats':
 						if (results.length === 0) {
-							res.send(generateErrorResponse({query: req.query, instanceUrl, error: ERRORS.ID_DOES_NOT_EXIST}));
+							res.send(generateErrorResponse({query: req.query, baseUrl, error: ERRORS.ID_DOES_NOT_EXIST}));
 						} else {
 							res.send(generateListMetadataFormatsResponse({
-								instanceUrl, results,
+								baseUrl, results,
 								query: req.query
 							}));
 						}
@@ -270,13 +277,14 @@ export default ({
 						break;
 					case 'ListSets':
 						res.send(generateListSetsResponse({
-							instanceUrl, results,
+							baseUrl, results,
 							query: req.query
 						}));
 						break;
 					case 'Identify':
 						res.send(generateIdentifyResponse({
-							instanceUrl, name, supportEmail,
+							baseUrl, supportEmail,
+							name: getRepositoryDescription(),
 							query: res.query,
 							earliestTimestamp: results
 						}));
@@ -290,7 +298,7 @@ export default ({
 						}
 
 						res.send(generateListRecordsResponse({
-							query: req.query, instanceUrl, results,
+							query: req.query, baseUrl, results,
 							token, tokenExpirationTime, identifierPrefix
 						}));
 
@@ -304,13 +312,18 @@ export default ({
 						}
 
 						res.send(generateListIdentifiersResponse({
-							query: req.query, instanceUrl, results,
+							query: req.query, baseUrl, results,
 							token, tokenExpirationTime, identifierPrefix
 						}));
 						break;
 					default:
 						break;
 				}
+			}
+
+			function getRepositoryDescription() {
+				// Remove the preceding slash
+				return REPOSITORY_NAMES[req.path.slice(1)];
 			}
 
 			function generateResumptionToken(cursor) {

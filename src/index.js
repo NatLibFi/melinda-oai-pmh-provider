@@ -19,12 +19,15 @@ import {
 	HTTP_PORT as httpPort,
 	ENABLE_PROXY as enableProxy,
 	INSTANCE_URL as instanceUrl,
+	SUPPORT_EMAIL as supportEmail,
 	SECRET_ENCRYPTION_KEY as secretEncryptionKey,
 	RESUMPTION_TOKEN_TIMEOUT as resumptionTokenTimeout,
 	OAI_IDENTIFIER_PREFIX as identifierPrefix,
 	ORACLE_USERNAME as oracleUsername,
 	ORACLE_PASSWORD as oraclePassword,
-	ORACLE_CONNECT_STRING as oracleConnectString
+	ORACLE_CONNECT_STRING as oracleConnectString,
+	Z106_LIBRARY as z106Library,
+	Z115_LIBRARY as z115Library
 } from './config';
 
 run();
@@ -33,28 +36,35 @@ async function run() {
 	process.on('SIGTERM', handleSignal);
 	process.on('SIGINT', handleSignal);
 
+	process.on('uncaughtException', async err => {
+		handleTermination({code: 1, message: err.stack});
+	});
+
 	process.on('unhandledRejection', async err => {
-		handleTermination({code: -1, message: err.stack});
+		handleTermination({code: 1, message: err.stack});
 	});
 
 	const server = await startApp({
-		identifierPrefix, httpPort, enableProxy, secretEncryptionKey, resumptionTokenTimeout,
-		oracleUsername, oraclePassword, oracleConnectString, instanceUrl
+		enableProxy, supportEmail,
+		httpPort, secretEncryptionKey, instanceUrl,
+		identifierPrefix, resumptionTokenTimeout,
+		oracleUsername, oraclePassword, oracleConnectString,
+		z106Library, z115Library
 	});
 
-	async function handleTermination({code = 0, message}) {
+	function handleTermination({code = 0, message}) {
 		if (server) {
 			server.close();
 		}
 
 		if (message) {
-			console.log(message);
+			console.error(message);
 		}
 
 		process.exit(code);
 	}
 
-	async function handleSignal(signal) {
+	function handleSignal(signal) {
 		handleTermination({code: 1, message: `Received ${signal}`});
 	}
 }

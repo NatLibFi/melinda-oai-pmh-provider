@@ -15,11 +15,13 @@
 */
 
 import moment from 'moment';
-// Import {DB_TIME_FORMAT, ERRORS} from './constants';
+import {Utils} from '@natlibfi/melinda-commons';
 import {DB_TIME_FORMAT} from './constants';
 import {parseRecord, toAlephId, fromAlephId} from '../record';
 
 export default function ({maxResults, queries, getFilter = getDefaultFilter, formatRecord = defaultFormatRecord}) {
+	const {createLogger} = Utils;
+	const logger = createLogger();
 	const {
 		recordsAll, earliestTimestamp, recordsTimeframe,
 		recordsStartTime, recordsEndTime, identifiersAll,
@@ -30,6 +32,8 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 	return {listRecords, listIdentifiers, getRecord, retrieveEarliestTimestamp};
 
 	async function retrieveEarliestTimestamp({connection}) {
+		debugQuery(earliestTimestamp);
+
 		const {resultSet} = await connection.execute(earliestTimestamp, [], {resultSet: true});
 		const row = await resultSet.getRow();
 
@@ -43,6 +47,9 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 
 	async function getRecord({connection, identifier}) {
 		const {query, args} = singleRecord({identifier: toAlephId(identifier)});
+
+		debugQuery(query, args);
+
 		const {resultSet} = await connection.execute(query, args, {resultSet: true});
 		const row = await resultSet.getRow();
 
@@ -128,6 +135,9 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 
 			async function execute({results = [], cursor, previousCursor = cursor}) {
 				const {query, args} = genQuery(cursor);
+
+				debugQuery(query, args);
+
 				const {resultSet} = await connection.execute(query, args, {resultSet: true});
 
 				previousCursor = cursor;
@@ -174,6 +184,10 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		if (filter === undefined || filter(record)) {
 			return {data: formatRecord(record), id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
 		}
+	}
+
+	function debugQuery(query, args) {
+		logger.log('debug', `Executing query '${query}' with args: ${JSON.stringify(args)}`);
 	}
 }
 

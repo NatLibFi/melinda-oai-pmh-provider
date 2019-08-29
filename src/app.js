@@ -28,16 +28,22 @@ export default async function ({
 	z106Library, z115Library
 }) {
 	MarcRecord.setValidationOptions({subfieldValues: false});
+
 	oracledb.outFormat = oracledb.OBJECT;
+	oracledb.queueTimeout = 10000;
 
 	const {createLogger, createExpressLogger} = Utils;
 	const logger = createLogger();
 	const app = express();
 
+	logger.log('debug', 'Establishing connection to database...');
+
 	const pool = await oracledb.createPool({
 		user: oracleUsername, password: oraclePassword,
 		connectString: oracleConnectString
 	});
+
+	logger.log('debug', 'Connected to database!');
 
 	const {
 		bib,
@@ -46,7 +52,7 @@ export default async function ({
 		autPrivilegedNames,
 		autSubjects,
 		autPrivilegedSubjects
-	} = getMiddlewares(pool);
+	} = getMiddlewares();
 
 	if (enableProxy) {
 		app.enable('trust proxy', true);
@@ -70,18 +76,17 @@ export default async function ({
 
 	return server;
 
-	function getMiddlewares(pool) {
+	function getMiddlewares() {
 		const params = {
 			pool, httpPort, enableProxy, name, supportEmail,
 			secretEncryptionKey, resumptionTokenTimeout, identifierPrefix,
 			instanceUrl, maxResults,
-			oracleUsername, oraclePassword, oracleConnectString,
-			z106Library
+			oracleUsername, oraclePassword, oracleConnectString
 		};
 
 		return {
-			bib: bibFactory({...params, z115Library}),
-			bibPrivileged: bibFactory({...params, z115Library, privileged: true}),
+			bib: bibFactory({...params, z106Library, z115Library}),
+			bibPrivileged: bibFactory({...params, z106Library, z115Library, privileged: true}),
 			autNames: autNamesFactory(params),
 			autPrivilegedNames: autNamesFactory({...params, privileged: true}),
 			autSubjects: autSubjectsFactory(params),

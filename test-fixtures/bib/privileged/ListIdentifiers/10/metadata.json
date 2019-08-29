@@ -1,4 +1,4 @@
 {
-  "descr": "Should respond with an imcomplete list with a resumption token",
+  "descr": "Should respond with an incomplete list with a resumption token",
   "requestUrl": "/bibprv?verb=ListIdentifiers&metadataPrefix=marc"
 }

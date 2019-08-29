@@ -109,9 +109,19 @@ export default ({rootPath, getInterfaces}) => {
 
 				obj['OAI-PMH'].responseDate[0] = moment.utc('2000-01-01T00:00:00').format();
 
-				if ('ListRecords' in obj['OAI-PMH'] && 'resumptionToken' in obj['OAI-PMH'].ListRecords[0]) {
-					obj['OAI-PMH'].ListRecords[0].resumptionToken[0].$.expirationDate = moment.utc('2000-01-01T00:00:00').format();
-					obj['OAI-PMH'].ListRecords[0].resumptionToken[0]._ = 'foo';
+				const resumptionTokenElem = getResumptionTokenElem();
+
+				function getResumptionTokenElem() {
+					const elem = Object.values(obj['OAI-PMH']).find(o => {
+						return typeof o[0] === 'object' && 'resumptionToken' in o[0];
+					});
+
+					return elem ? elem[0].resumptionToken : undefined;
+				}
+
+				if (resumptionTokenElem) {
+					resumptionTokenElem[0].$.expirationDate = moment.utc('2000-01-01T00:00:00').format();
+					resumptionTokenElem[0]._ = 'foo';
 				}
 
 				if ('Identify' in obj['OAI-PMH']) {

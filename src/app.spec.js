@@ -38,7 +38,6 @@ describe('app', () => {
 		const httpPort = 1337;
 		const secretEncryptionKey = 'yuKf7ly1xml33H5+fThvzhdY4XlFMJwQ';
 
-		const name = 'Foo Bar';
 		const supportEmail = 'foo@fu.bar';
 		const instanceUrl = `http://localhost:${httpPort}`;
 		const identifierPrefix = 'oai:foo.bar';
@@ -51,7 +50,7 @@ describe('app', () => {
 
 		const app = await startApp({
 			httpPort, secretEncryptionKey, instanceUrl,
-			name, supportEmail, identifierPrefix,
+			supportEmail, identifierPrefix,
 			maxResults, resumptionTokenTimeout,
 			oracleUsername, oraclePassword, oracleConnectString
 		});

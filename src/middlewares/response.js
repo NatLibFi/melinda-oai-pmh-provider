@@ -18,16 +18,16 @@ import moment from 'moment';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
 import {PROTOCOL_VERSION} from './constants';
 
-export const generateErrorResponse = ({query, instanceUrl, error}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateErrorResponse = ({query, baseUrl, error}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(instanceUrl, query)}	
+	${generateRequestElement(baseUrl, query)}	
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<error code="${error}"/>
 </OAI-PMH>`;
 
-export const generateListMetadataFormatsResponse = ({query, results, instanceUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateListMetadataFormatsResponse = ({query, results, baseUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(instanceUrl, query)}	
+	${generateRequestElement(baseUrl, query)}	
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<ListMetadataFormats>	
 		${results.reduce((acc, {prefix, schema, namespace}) => `${acc}<metadataFormat>
@@ -38,9 +38,9 @@ export const generateListMetadataFormatsResponse = ({query, results, instanceUrl
 	</ListMetadataFormats>
 </OAI-PMH>`;
 
-export const generateListSetsResponse = ({query, results, instanceUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateListSetsResponse = ({query, results, baseUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(instanceUrl, query)}	
+	${generateRequestElement(baseUrl, query)}	
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<ListSets>	
 		${results.reduce((acc, {spec, name}) => `${acc}<set>
@@ -50,13 +50,13 @@ export const generateListSetsResponse = ({query, results, instanceUrl}) => `<?xm
 	</ListSets>
 </OAI-PMH>`;
 
-export const generateIdentifyResponse = ({name, supportEmail, earliestTimestamp, instanceUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateIdentifyResponse = ({name, supportEmail, earliestTimestamp, baseUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(instanceUrl)}	
+	${generateRequestElement(baseUrl)}	
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<Identify>
 		<repositoryName>${name}</repositoryName>
-		<baseURL>${instanceUrl}</baseURL>
+		<baseURL>${baseUrl}</baseURL>
 		<protocolVersion>${PROTOCOL_VERSION}</protocolVersion>
 		<earliestTimestamp>${earliestTimestamp}</earliestTimestamp>
 		<deletedRecord>persistent</deletedRecord>
@@ -65,9 +65,9 @@ export const generateIdentifyResponse = ({name, supportEmail, earliestTimestamp,
 	</Identify>
 </OAI-PMH>`;
 
-export const generateListRecordsResponse = ({instanceUrl, query, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateListRecordsResponse = ({query, results, identifierPrefix, token, baseUrl, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(instanceUrl, query)}
+	${generateRequestElement(baseUrl, query)}
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<ListRecords>
 		${results.reduce((acc, r) => `${acc}<record>
@@ -83,9 +83,9 @@ export const generateListRecordsResponse = ({instanceUrl, query, results, identi
 	</ListRecords>
 </OAI-PMH>`;
 
-export const generateListIdentifiersResponse = ({instanceUrl, query, results, identifierPrefix, token, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateListIdentifiersResponse = ({query, results, identifierPrefix, token, baseUrl, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(instanceUrl, query)}
+	${generateRequestElement(baseUrl, query)}
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<ListIdentifiers>
 		${results.reduce((acc, r) => `${acc}<record>
@@ -98,9 +98,9 @@ export const generateListIdentifiersResponse = ({instanceUrl, query, results, id
 	</ListIdentifiers>
 </OAI-PMH>`;
 
-export const generateGetRecordResponse = ({instanceUrl, query, results, identifierPrefix}) => `<?xml version="1.0" encoding="UTF-8"?>
+export const generateGetRecordResponse = ({query, results, baseUrl, identifierPrefix}) => `<?xml version="1.0" encoding="UTF-8"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(instanceUrl, query)}
+	${generateRequestElement(baseUrl, query)}
 	<responseDate>${moment().toISOString(true)}</responseDate>
 	<GetRecord>
 		<record>
@@ -115,8 +115,8 @@ export const generateGetRecordResponse = ({instanceUrl, query, results, identifi
 	</GetRecord>
 </OAI-PMH>`;
 
-function generateRequestElement(instanceUrl, query = {}) {
-	return `<request${generateAttr()}>${instanceUrl}</request>`;
+function generateRequestElement(baseUrl, query = {}) {
+	return `<request${generateAttr()}>${baseUrl}</request>`;
 
 	function generateAttr() {
 		return Object.entries(query)

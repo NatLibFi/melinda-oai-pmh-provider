@@ -122,7 +122,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 			};
 
 			function rowCallback(row) {
-				if (row.DATA) {
+				if (row.RECORD) {
 					return recordRowCallback(row, filter);
 				}
 
@@ -179,10 +179,11 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 	}
 
 	function recordRowCallback(row, filter) {
-		const record = parseRecord(row.DATA);
+		const record = parseRecord(row.RECORD);
 
 		if (filter === undefined || filter(record)) {
-			return {data: formatRecord(record), id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
+			// Return {data: formatRecord(record), id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
+			return {record: formatRecord(record), id: fromAlephId(row.ID), time: moment()};
 		}
 	}
 

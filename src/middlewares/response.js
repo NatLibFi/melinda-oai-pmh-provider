@@ -16,120 +16,188 @@
 
 import moment from 'moment';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
-import {PROTOCOL_VERSION} from './constants';
+import {ERRORS, PROTOCOL_VERSION} from './constants';
+import {Parser, Builder} from 'xml2js';
 
-export const generateErrorResponse = ({query, baseUrl, error}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(baseUrl, query)}	
-	<responseDate>${moment().toISOString(true)}</responseDate>
-	<error code="${error}"/>
-</OAI-PMH>`;
+export default ({identifierPrefix, supportEmail}) => {
+	return {
+		generateErrorResponse, generateListMetadataFormatsResponse, generateListSetsResponse,
+		generateIdentifyResponse, generateListRecordsResponse, generateListIdentifiersResponse,
+		generateGetRecordResponse
+	};
 
-export const generateListMetadataFormatsResponse = ({query, results, baseUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(baseUrl, query)}	
-	<responseDate>${moment().toISOString(true)}</responseDate>
-	<ListMetadataFormats>	
-		${results.reduce((acc, {prefix, schema, namespace}) => `${acc}<metadataFormat>
-			<metadataPrefix>${prefix}</metadataPrefix>
-			<schema>${schema}</schema>
-		  <metadataNamespace>${namespace}</metadataNamespace>
-		</metadataFormat>\n\t\t`, '')}	
-	</ListMetadataFormats>
-</OAI-PMH>`;
+	async function generateErrorResponse({requestURL, query, error}) {
+		if (error === ERRORS.BAD_VERB) {
+			delete query.verb;
+		}
 
-export const generateListSetsResponse = ({query, results, baseUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(baseUrl, query)}	
-	<responseDate>${moment().toISOString(true)}</responseDate>
-	<ListSets>	
-		${results.reduce((acc, {spec, name}) => `${acc}<set>
-			<setSpec>${spec}</setSpec>
-			<setName>${name}</setName>
-		</set>\n\t\t`, '')}	
-	</ListSets>
-</OAI-PMH>`;
-
-export const generateIdentifyResponse = ({name, supportEmail, earliestTimestamp, baseUrl}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(baseUrl)}	
-	<responseDate>${moment().toISOString(true)}</responseDate>
-	<Identify>
-		<repositoryName>${name}</repositoryName>
-		<baseURL>${baseUrl}</baseURL>
-		<protocolVersion>${PROTOCOL_VERSION}</protocolVersion>
-		<earliestTimestamp>${earliestTimestamp}</earliestTimestamp>
-		<deletedRecord>persistent</deletedRecord>
-		<granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
-		<adminEmail>${supportEmail}</adminEmail>
-	</Identify>
-</OAI-PMH>`;
-
-export const generateListRecordsResponse = ({query, results, identifierPrefix, token, baseUrl, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(baseUrl, query)}
-	<responseDate>${moment().toISOString(true)}</responseDate>
-	<ListRecords>
-		${results.reduce((acc, r) => `${acc}<record>
-			<header>
-				<identifier>${identifierPrefix}/${r.id}</identifier>
-				<datestamp>${r.time.toISOString(true)}</datestamp>
-			</header>
-			<metadata>
-				${MARCXML.to(r.data, {omitDeclaration: true})}
-			</metadata>
-		</record>\n\t\t`, '')}
-		${token === undefined ? '' : `<resumptionToken expirationDate="${tokenExpirationTime}">${token}</resumptionToken>`}
-	</ListRecords>
-</OAI-PMH>`;
-
-export const generateListIdentifiersResponse = ({query, results, identifierPrefix, token, baseUrl, tokenExpirationTime}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(baseUrl, query)}
-	<responseDate>${moment().toISOString(true)}</responseDate>
-	<ListIdentifiers>
-		${results.reduce((acc, r) => `${acc}<record>
-			<header>
-				<identifier>${identifierPrefix}/${r.id}</identifier>
-				<datestamp>${r.time.toISOString(true)}</datestamp>
-			</header>
-		</record>\n\t\t`, '')}
-		${token === undefined ? '' : `<resumptionToken expirationDate="${tokenExpirationTime}">${token}</resumptionToken>`}
-	</ListIdentifiers>
-</OAI-PMH>`;
-
-export const generateGetRecordResponse = ({query, results, baseUrl, identifierPrefix}) => `<?xml version="1.0" encoding="UTF-8"?>
-<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	${generateRequestElement(baseUrl, query)}
-	<responseDate>${moment().toISOString(true)}</responseDate>
-	<GetRecord>
-		<record>
-			<header>
-				<identifier>${identifierPrefix}/${results.id}</identifier>
-				<datestamp>${results.time.toISOString(true)}</datestamp>
-			</header>
-			<metadata>
-				${MARCXML.to(results.data, {omitDeclaration: true})}
-			</metadata>
-		</record>
-	</GetRecord>
-</OAI-PMH>`;
-
-function generateRequestElement(baseUrl, query = {}) {
-	return `<request${generateAttr()}>${baseUrl}</request>`;
-
-	function generateAttr() {
-		return Object.entries(query)
-			.sort((a, b) => {
-				const {key: aKey} = a;
-				const {key: bKey} = b;
-
-				if (aKey === 'verb' || bKey === 'verb') {
-					return -1;
-				}
-
-				return 0;
-			})
-			.reduce((acc, [key, value]) => `${acc} ${key}="${value}"`, '');
+		return generate({requestURL, query, payload: {
+			error: {
+				$: {code: error}
+			}
+		}});
 	}
-}
+
+	async function generateGetRecordResponse({requestURL, query, id, time, record}) {
+		return generate({requestURL, query, payload: {
+			GetRecord: [
+				await generateRecordObject({id, time, record})
+			]
+		}});
+	}
+
+	async function generateIdentifyResponse({requestURL, query, descr, earliestTimestamp}) {
+		return generate({requestURL, query, payload: {
+			Identify: {
+				repositoryName: [descr],
+				baseURL: [requestURL.split('?').shift()],
+				procotolVersion: [PROTOCOL_VERSION],
+				earliestTimestamp: [earliestTimestamp.toISOString(true)],
+				deletedRecord: ['persistent'],
+				granularity: ['YYYY-MM-DDthh:mm:ssZ'],
+				adminEmail: [supportEmail]
+			}
+		}});
+	}
+
+	async function generateListMetadataFormatsResponse({requestURL, query, results}) {
+		return generate({requestURL, query, payload: {
+			ListMetadataFormats: {
+				metadataFormat: results.map(({prefix, schema, namespace}) => ({
+					metadataPrefix: [prefix],
+					schema: [schema],
+					metadataNamespace: [namespace]
+				}))
+			}
+		}});
+	}
+
+	async function generateListSetsResponse({requestURL, query, sets}) {
+		return generate({requestURL, query, payload: {
+			ListSets: {
+				set: sets.map(({spec, name}) => ({
+					setSpec: [spec],
+					setName: [name]
+				}))
+			}
+		}});
+	}
+
+	async function generateListRecordsResponse({requestURL, query, token, tokenExpirationTime, results}) {
+		return generate({requestURL, query, payload: {
+			ListRecords: await generateListResourcesResponse({results, token, tokenExpirationTime})
+		}});
+	}
+
+	async function generateListIdentifiersResponse({requestURL, query, token, tokenExpirationTime, results}) {
+		return generate({requestURL, query, payload: {
+			ListIdentifiers: await generateListResourcesResponse({results, token, tokenExpirationTime})
+		}});
+	}
+
+	async function generate(requestURL, query, payload) {
+		const obj =	{
+			'OAI-PMH': {
+				$: {
+					xmlns: 'http://www.openarchives.org/OAI/2.0/',
+					'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+					'xsi:schemaLocation': 'http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd'
+				},
+				request: [generateRequestObject()],
+				responseDate: [moment().toISOString(true)],
+				...payload
+			}
+		};
+
+		return format();
+
+		function generateRequestObject() {
+			return {
+				_: requestURL,
+				$: getAttr()
+			};
+
+			function getAttr() {
+				return Object.entries(query)
+					.sort((a, b) => {
+						const {key: aKey} = a;
+						const {key: bKey} = b;
+
+						if (aKey === 'verb' || bKey === 'verb') {
+							return -1;
+						}
+
+						return 0;
+					})
+					.reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
+			}
+		}
+
+		function format() {
+			return new Builder({
+				xmldec: {
+					version: '1.0',
+					encoding: 'UTF-8',
+					standalone: false
+				},
+				renderOpts: {
+					pretty: true,
+					indent: '\t'
+				}
+			}).buildObject(obj);
+		}
+	}
+
+	async function generateListResourcesResponse({results, token, tokenExpirationTime}) {
+		const obj = {
+			record: await Promise.all(results.map(generateRecordObject))
+		};
+
+		if (token) {
+			return {
+				...obj,
+				token: {
+					$: {
+						expirationDate: tokenExpirationTime.toISOString(true)
+					},
+					_: token
+				}
+			};
+		}
+
+		return obj;
+	}
+
+	async function generateRecordObject({time, id, record}) {
+		const obj = {
+			header: [{
+				identifier: [`${identifierPrefix}/${id}`],
+				datestamp: time.toISOString(true)
+			}]
+		};
+
+		if (record) {
+			return {
+				...obj,
+				metadata: [await convertRecord()]
+
+			};
+		}
+
+		return obj;
+
+		async function convertRecord() {
+			const str = MARCXML.to(record, {omitDeclaration: true});
+
+			return new Promise((resolve, reject) => {
+				new Parser().parseString(str, (err, obj) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve(obj);
+					}
+				});
+			});
+		}
+	}
+};

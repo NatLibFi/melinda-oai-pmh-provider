@@ -20,6 +20,7 @@ import queryFactory from './query';
 import requestFactory from '../request';
 
 export default params => {
+	const sets = generateSets();
 	const {maxResults, z106Library, z115Library} = params;
 	const queries = queryFactory({z106Library, z115Library, limit: maxResults});
 	const queryInterface = queryInterfaceFactory({
@@ -30,28 +31,33 @@ export default params => {
 
 	return requestFactory({...params, ...queryInterface, listSets});
 
-	function getFilter(set) {
-		switch (set) {
-			case 'fennica':
-				return createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finb'}]);
-			case 'viola':
-				return createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finbd'}]);
-			case 'arto':
-				return create960Filter(/^ARTO$/);
-			case 'helmet':
-				return createSidFilter(/^helme$/);
-			default:
-		}
+	function getFilter(id) {
+		const set = sets.find(({spec}) => spec === id);
+		return set ? set.filter : undefined;
 	}
 
 	function listSets() {
-		return {
-			results: [
-				{spec: 'fennica', name: 'Fennica'},
-				{spec: 'viola', name: 'Viola'},
-				{spec: 'arto', name: 'Arto'},
-				{spec: 'helmet', name: 'Helmet'}
-			]
-		};
+		return sets.map(({spec, name}) => ({spec, name}));
+	}
+
+	function generateSets() {
+		return [
+			{
+				spec: 'fennica', name: 'Fennica',
+				filter: createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finb'}])
+			},
+			{
+				spec: 'viola', name: 'Viola',
+				filter: createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finbd'}])
+			},
+			{
+				spec: 'arto', name: 'Arto',
+				filter: create960Filter(/^ARTO$/)
+			},
+			{
+				spec: 'helmet', name: 'Helmet',
+				filter: createSidFilter(/^helme$/)
+			}
+		];
 	}
 };

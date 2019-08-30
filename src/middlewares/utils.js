@@ -15,15 +15,15 @@
 */
 
 export function createLowFilter(value) {
-	return createSubfieldValueFilter({tag: 'LOW', code: /^a$/, value});
+	return createSubfieldValueFilter([{tag: 'LOW', code: /^a$/, value}]);
 }
 
 export function createLow020Filter(value) {
-	return createSubfieldValueFilter({tag: 'LOW', code: /^a$/, value});
+	return createSubfieldValueFilter([{tag: 'LOW', code: /^a$/, value}]);
 }
 
 export function createSidFilter(value) {
-	return createSubfieldValueFilter({tag: 'SID', code: /^a$/, value});
+	return createSubfieldValueFilter([{tag: 'SID', code: /^a$/, value}]);
 }
 
 export function create960Filter(value) {

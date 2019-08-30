@@ -38,11 +38,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		const row = await resultSet.getRow();
 
 		await resultSet.close();
-		return {results: format()};
-
-		function format() {
-			return moment(row.TIME, 'YYYYMMDDHHmmss').format();
-		}
+		return moment(row.TIME, 'YYYYMMDDHHmmss');
 	}
 
 	async function getRecord({connection, identifier}) {
@@ -56,10 +52,8 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		await resultSet.close();
 
 		if (row) {
-			return {results: recordRowCallback(row)};
+			return recordRowCallback(row);
 		}
-
-		return {};
 	}
 
 	async function listRecords(params) {
@@ -95,7 +89,6 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 				return {
 					rowCallback, connection, cursor,
 					genQuery: cursor => resourcesTimeframe({cursor, start, end})
-					// GenQuery: (cursor, limit) => resourcesTimeframe({cursor, limit, start, end})
 				};
 			}
 
@@ -103,7 +96,6 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 				return {
 					rowCallback, connection, cursor,
 					genQuery: cursor => resourcesStartTime({cursor, start})
-					// GenQuery: (cursor, limit) => resourcesStartTime({cursor, limit, start})
 				};
 			}
 
@@ -111,14 +103,12 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 				return {
 					rowCallback, connection, cursor,
 					genQuery: cursor => resourcesEndTime({cursor, end})
-					// GenQuery: (cursor, limit) => resourcesEndTime({cursor, limit, end})
 				};
 			}
 
 			return {
 				rowCallback, connection, cursor,
 				genQuery: cursor => resourcesAll({cursor})
-				// GenQuery: (cursor, limit) => resourcesAll({cursor, limit})
 			};
 
 			function rowCallback(row) {
@@ -133,7 +123,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
 			return execute({cursor});
 
-			async function execute({results = [], cursor, previousCursor = cursor}) {
+			async function execute({records = [], cursor, previousCursor = cursor}) {
 				const {query, args} = genQuery(cursor);
 
 				debugQuery(query, args);
@@ -144,14 +134,14 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 				await pump(resultSet);
 
 				if (cursor === previousCursor) {
-					return {results};
+					return {records};
 				}
 
-				if (results.length === maxResults) {
-					return {results, cursor};
+				if (records.length === maxResults) {
+					return {records, cursor};
 				}
 
-				return execute({results, cursor, previousCursor});
+				return execute({records, cursor, previousCursor});
 
 				async function pump(resultSet) {
 					const row = await resultSet.getRow();
@@ -161,9 +151,9 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 						const result = rowCallback(row);
 
 						if (result) {
-							results.push(result);
+							records.push(result);
 
-							if (results.length === maxResults) {
+							if (records.length === maxResults) {
 								await resultSet.close();
 								return;
 							}
@@ -182,8 +172,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		const record = parseRecord(row.RECORD);
 
 		if (filter === undefined || filter(record)) {
-			// Return {data: formatRecord(record), id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
-			return {record: formatRecord(record), id: fromAlephId(row.ID), time: moment()};
+			return {record: formatRecord(record), id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
 		}
 	}
 

@@ -63,7 +63,7 @@ export default ({
 			const handlers = getHandlers();
 
 			if (verb in handlers) {
-				await callMethod(handlers[verb]);
+				return callMethod(handlers[verb]);
 			}
 
 			throw new ApiError({code: ERRORS.BAD_VERB});
@@ -101,27 +101,23 @@ export default ({
 
 				function listMetadataFormats({identifier}) {
 					if (identifier) {
-						return {
-							results: METADATA_FORMATS.filter(({prefix}) => prefix === identifier)
-						};
+						return METADATA_FORMATS.filter(({prefix}) => prefix === identifier);
 					}
 
-					return {
-						results: METADATA_FORMATS.slice()
-					};
+					return METADATA_FORMATS;
 				}
 			}
 
 			async function callMethod({method, useDb, allowedParams = QUERY_PARAMETERS, requiredParams = ['verb']}) {
 				const params = await getParams(useDb);
-				const {results, cursor} = await method(params);
+				const result = await method(params);
 
 				if (params.connection) {
 					await params.connection.close();
 					logger.log('debug', 'Connection closed');
 				}
 
-				await sendResponse({results, cursor});
+				await sendResponse({result});
 
 				async function getParams(useDb = true) {
 					const obj = {};
@@ -222,68 +218,69 @@ export default ({
 			}
 		}
 
-		async function sendResponse({error, results, cursor}) {
+		async function sendResponse({error, result}) {
 			const query = clone(req.query);
-			const requestURL = `${instanceUrl}/${req.path}`;
+			const requestURL = `${instanceUrl}${req.path}`;
 
 			if (error) {
 				return res.send(await generateErrorResponse({query, requestURL, error}));
 			}
 
-			const {token, tokenExpirationTime} = cursor === undefined ? {} : generateResumptionToken(cursor);
 			return res.send(await generatePayload(verb));
-
-			function generateResumptionToken(cursor) {
-				const tokenExpirationTime = generateResumptionExpirationTime();
-				const token = encryptString({key: secretEncryptionKey, value: `${tokenExpirationTime};${cursor}`, algorithm: 'aes-256-cbc'});
-
-				return {token, tokenExpirationTime};
-
-				function generateResumptionExpirationTime() {
-					return moment().add(resumptionTokenTimeout, 'milliseconds');
-				}
-			}
 
 			async function generatePayload(method) {
 				const generators = {
-					ListSets: async () => generateListSetsResponse({requestURL, query, ...results}),
+					ListSets: async () => generateListSetsResponse({requestURL, query, sets: result}),
+					ListRecords: async () => listResources(generateListRecordsResponse),
+					ListIdentifiers: async () => listResources(generateListIdentifiersResponse),
 					GetRecord: async () => {
-						if (results) {
-							return generateGetRecordResponse({requestURL, query, ...results});
+						if (result) {
+							return generateGetRecordResponse({requestURL, query, ...result});
 						}
 
 						return generateErrorResponse({requestURL, query, error: ERRORS.ID_DOES_NOT_EXIST});
 					},
 					ListMetadataFormats: async () => {
-						if (results.length === 0) {
+						if (result.length === 0) {
 							return generateErrorResponse({query, requestURL, error: ERRORS.ID_DOES_NOT_EXIST});
 						}
 
-						return generateListMetadataFormatsResponse({requestURL, query, ...results});
-					},
-
-					ListRecords: async () => {
-						if (results.length === 0) {
-							return generateErrorResponse({query, requestURL, error: ERRORS.NO_RECORDS_MATCH});
-						}
-
-						return generateListRecordsResponse({requestURL, token, tokenExpirationTime, ...results});
-					},
-					ListIdentifiers: async () => {
-						if (results.length === 0) {
-							return generateErrorResponse({query, requestURL, error: ERRORS.NO_RECORDS_MATCH});
-						}
-
-						return generateListIdentifiersResponse({requestURL, token, tokenExpirationTime, ...results});
+						return generateListMetadataFormatsResponse({requestURL, query, formats: result});
 					},
 					Identify: async () => {
 						// Remove the preceding slash
 						const descr = REPOSITORY_NAMES[req.path.slice(1)];
-						return generateIdentifyResponse({requestURL, query, descr, ...results});
+						return generateIdentifyResponse({requestURL, query, descr, earliestTimestamp: result});
 					}
 				};
 
 				return generators[method]();
+
+				async function listResources(callback) {
+					const {records, cursor} = result;
+
+					if (records.length === 0) {
+						return generateErrorResponse({query, requestURL, error: ERRORS.NO_RECORDS_MATCH});
+					}
+
+					if (cursor) {
+						const {token, tokenExpirationTime} = generateResumptionToken(cursor);
+						return callback({requestURL, query, records, token, tokenExpirationTime});
+					}
+
+					return callback({requestURL, query, records});
+				}
+
+				function generateResumptionToken(cursor) {
+					const tokenExpirationTime = generateResumptionExpirationTime();
+					const token = encryptString({key: secretEncryptionKey, value: `${tokenExpirationTime};${cursor}`, algorithm: 'aes-256-cbc'});
+
+					return {token, tokenExpirationTime};
+
+					function generateResumptionExpirationTime() {
+						return moment().add(resumptionTokenTimeout, 'milliseconds');
+					}
+				}
 			}
 		}
 	};

@@ -16,14 +16,14 @@
 
 import moment from 'moment';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
-import {ERRORS, PROTOCOL_VERSION} from './constants';
+import {ERRORS, PROTOCOL_VERSION, RESPONSE_TIMESTAMP_FORMAT} from './constants';
 import {Parser, Builder} from 'xml2js';
 
 export default ({identifierPrefix, supportEmail}) => {
 	return {
 		generateErrorResponse, generateListMetadataFormatsResponse, generateListSetsResponse,
 		generateIdentifyResponse, generateListRecordsResponse, generateListIdentifiersResponse,
-		generateGetRecordResponse
+		generateGetRecordResponse, generateResponse, responseToXML
 	};
 
 	async function generateErrorResponse({requestURL, query, error}) {
@@ -40,9 +40,9 @@ export default ({identifierPrefix, supportEmail}) => {
 
 	async function generateGetRecordResponse({requestURL, query, id, time, record}) {
 		return generate({requestURL, query, payload: {
-			GetRecord: [
+			GetRecord: {record: [
 				await generateRecordObject({id, time, record})
-			]
+			]}
 		}});
 	}
 
@@ -52,7 +52,7 @@ export default ({identifierPrefix, supportEmail}) => {
 				repositoryName: [descr],
 				baseURL: [requestURL.split('?').shift()],
 				procotolVersion: [PROTOCOL_VERSION],
-				earliestTimestamp: [earliestTimestamp.toISOString(true)],
+				earliestTimestamp: [earliestTimestamp.format(RESPONSE_TIMESTAMP_FORMAT)],
 				deletedRecord: ['persistent'],
 				granularity: ['YYYY-MM-DDthh:mm:ssZ'],
 				adminEmail: [supportEmail]
@@ -60,10 +60,10 @@ export default ({identifierPrefix, supportEmail}) => {
 		}});
 	}
 
-	async function generateListMetadataFormatsResponse({requestURL, query, results}) {
+	async function generateListMetadataFormatsResponse({requestURL, query, formats}) {
 		return generate({requestURL, query, payload: {
 			ListMetadataFormats: {
-				metadataFormat: results.map(({prefix, schema, namespace}) => ({
+				metadataFormat: formats.map(({prefix, schema, namespace}) => ({
 					metadataPrefix: [prefix],
 					schema: [schema],
 					metadataNamespace: [namespace]
@@ -83,20 +83,20 @@ export default ({identifierPrefix, supportEmail}) => {
 		}});
 	}
 
-	async function generateListRecordsResponse({requestURL, query, token, tokenExpirationTime, results}) {
+	async function generateListRecordsResponse({requestURL, query, token, tokenExpirationTime, records}) {
 		return generate({requestURL, query, payload: {
-			ListRecords: await generateListResourcesResponse({results, token, tokenExpirationTime})
+			ListRecords: await generateListResourcesResponse({records, token, tokenExpirationTime})
 		}});
 	}
 
-	async function generateListIdentifiersResponse({requestURL, query, token, tokenExpirationTime, results}) {
+	async function generateListIdentifiersResponse({requestURL, query, token, tokenExpirationTime, records}) {
 		return generate({requestURL, query, payload: {
-			ListIdentifiers: await generateListResourcesResponse({results, token, tokenExpirationTime})
+			ListIdentifiers: await generateListResourcesResponse({records, token, tokenExpirationTime})
 		}});
 	}
 
-	async function generate(requestURL, query, payload) {
-		const obj =	{
+	function generateResponse({requestURL, query, payload}) {
+		return {
 			'OAI-PMH': {
 				$: {
 					xmlns: 'http://www.openarchives.org/OAI/2.0/',
@@ -104,12 +104,10 @@ export default ({identifierPrefix, supportEmail}) => {
 					'xsi:schemaLocation': 'http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd'
 				},
 				request: [generateRequestObject()],
-				responseDate: [moment().toISOString(true)],
+				responseDate: [moment().format(RESPONSE_TIMESTAMP_FORMAT)],
 				...payload
 			}
 		};
-
-		return format();
 
 		function generateRequestObject() {
 			return {
@@ -132,31 +130,35 @@ export default ({identifierPrefix, supportEmail}) => {
 					.reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
 			}
 		}
-
-		function format() {
-			return new Builder({
-				xmldec: {
-					version: '1.0',
-					encoding: 'UTF-8',
-					standalone: false
-				},
-				renderOpts: {
-					pretty: true,
-					indent: '\t'
-				}
-			}).buildObject(obj);
-		}
 	}
 
-	async function generateListResourcesResponse({results, token, tokenExpirationTime}) {
+	function responseToXML(obj) {
+		return new Builder({
+			xmldec: {
+				version: '1.0',
+				encoding: 'UTF-8',
+				standalone: false
+			},
+			renderOpts: {
+				pretty: true,
+				indent: '\t'
+			}
+		}).buildObject(obj);
+	}
+
+	function generate(params) {
+		return responseToXML(generateResponse(params));
+	}
+
+	async function generateListResourcesResponse({records, token, tokenExpirationTime}) {
 		const obj = {
-			record: await Promise.all(results.map(generateRecordObject))
+			record: await Promise.all(records.map(generateRecordObject))
 		};
 
 		if (token) {
 			return {
 				...obj,
-				token: {
+				resumptionToken: {
 					$: {
 						expirationDate: tokenExpirationTime.toISOString(true)
 					},
@@ -180,7 +182,6 @@ export default ({identifierPrefix, supportEmail}) => {
 			return {
 				...obj,
 				metadata: [await convertRecord()]
-
 			};
 		}
 

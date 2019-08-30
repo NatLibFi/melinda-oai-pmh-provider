@@ -59,6 +59,7 @@
 		"eslint": "^6.1.0",
 		"eslint-config-xo": ">=0.26.0 <1.0.0",
 		"eslint-plugin-import": "^2.13.0",
+		"jsonpath": "^1.0.2",
 		"mocha": "^6.0.0",
 		"nock": "^10.0.6",
 		"nodemon": "^1.18.10",

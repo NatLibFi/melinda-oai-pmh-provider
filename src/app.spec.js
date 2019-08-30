@@ -47,12 +47,15 @@ describe('app', () => {
 		const oracleUsername = 'foo';
 		const oraclePassword = 'bar';
 		const oracleConnectString = 'BAR';
+		const z106Library = 'foo1';
+		const z115Library = 'foo2';
 
 		const app = await startApp({
 			httpPort, secretEncryptionKey, instanceUrl,
 			supportEmail, identifierPrefix,
 			maxResults, resumptionTokenTimeout,
-			oracleUsername, oraclePassword, oracleConnectString
+			oracleUsername, oraclePassword, oracleConnectString,
+			z106Library, z115Library
 		});
 
 		requester = chai.request(app).keepOpen();

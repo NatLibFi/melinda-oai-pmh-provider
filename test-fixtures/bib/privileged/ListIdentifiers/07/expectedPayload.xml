@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	<request verb="ListIdentifiers" metadataPrefix="marc" until="2010-01-01T00:00:00" set="fennica">http://localhost:1337</request>
+	<request verb="ListIdentifiers" metadataPrefix="marc" until="2010-01-01T00:00:00" set="fennica">http://localhost:1337/bibprv</request>
 	<responseDate>2000-01-01T00:00:00Z</responseDate>
 	<ListIdentifiers>
 		<record>
 			<header>
 				<identifier>oai:foo.bar/89101112</identifier>
-				<datestamp>2009-07-01T00:10:00.000+03:00</datestamp>
+				<datestamp>2000-01-01T00:00:00Z</datestamp>
 			</header>
 		</record>
 	</ListIdentifiers>

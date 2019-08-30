@@ -15,13 +15,13 @@
 */
 
 import HttpStatus from 'http-status';
+import jsonpath from 'jsonpath';
 import {expect} from 'chai';
 import {readdirSync} from 'fs';
 import {join as joinPath} from 'path';
 import fixtureFactory, {READERS} from '@natlibfi/fixura';
 import {Parser as XMLParser, Builder as XMLBuilder} from 'xml2js';
 import {MarcRecord} from '@natlibfi/marc-record';
-import moment from 'moment';
 import {formatRecord} from './record';
 
 export default ({rootPath, getInterfaces}) => {
@@ -46,9 +46,7 @@ export default ({rootPath, getInterfaces}) => {
 							const {requester, oracledbMock} = getInterfaces();
 
 							if (dbResults) {
-								oracledbMock._execute([{
-									results: dbResults
-								}]);
+								oracledbMock._execute([{results: dbResults}]);
 							}
 
 							const response = await requester.get(requestUrl).buffer(true);
@@ -98,7 +96,7 @@ export default ({rootPath, getInterfaces}) => {
 
 			async function formatResponse(xml) {
 				const obj = await new Promise((resolve, reject) => {
-					new XMLParser().parseString(xml, (err, obj) => {
+					new XMLParser({attrkey: '_attr'}).parseString(xml, (err, obj) => {
 						if (err) {
 							reject(err);
 						} else {
@@ -107,28 +105,20 @@ export default ({rootPath, getInterfaces}) => {
 					});
 				});
 
-				obj['OAI-PMH'].responseDate[0] = moment.utc('2000-01-01T00:00:00').format();
+				const timestamp = '2000-01-01T00:00:00Z';
 
-				const resumptionTokenElem = getResumptionTokenElem();
+				jsonpath.apply(obj, '$..responseDate', () => timestamp);
+				jsonpath.apply(obj, '$..datestamp', () => timestamp);
+				jsonpath.apply(obj, '$..expirationDate', () => timestamp);
+				jsonpath.apply(obj, '$..earliestTimestamp', () => timestamp);
 
-				function getResumptionTokenElem() {
-					const elem = Object.values(obj['OAI-PMH']).find(o => {
-						return typeof o[0] === 'object' && 'resumptionToken' in o[0];
-					});
-
-					return elem ? elem[0].resumptionToken : undefined;
-				}
-
-				if (resumptionTokenElem) {
-					resumptionTokenElem[0].$.expirationDate = moment.utc('2000-01-01T00:00:00').format();
-					resumptionTokenElem[0]._ = 'foo';
-				}
-
-				if ('Identify' in obj['OAI-PMH']) {
-					obj['OAI-PMH'].Identify[0].earliestTimestamp[0] = moment.utc('2000-01-01T00:00:00').format();
-				}
+				jsonpath.apply(obj, '$..resumptionToken[:1]', ({_, _attr}) => ({
+					_: 'foo',
+					_attr: {expirationDate: timestamp}
+				}));
 
 				return new XMLBuilder({
+					attrkey: '_attr',
 					xmldec: {
 						version: '1.0',
 						encoding: 'UTF-8',
@@ -144,8 +134,8 @@ export default ({rootPath, getInterfaces}) => {
 			function formatDbResults(results) {
 				return results.map(set => {
 					return set.map(row => {
-						if ('DATA' in row) {
-							return {...row, DATA: formatRecord(new MarcRecord(row.DATA))};
+						if ('RECORD' in row) {
+							return {...row, RECORD: formatRecord(new MarcRecord(row.RECORD))};
 						}
 
 						return row;

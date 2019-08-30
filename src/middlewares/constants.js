@@ -16,6 +16,7 @@
 
 export const PROTOCOL_VERSION = '2.0';
 
+export const RESPONSE_TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss[Z]';
 export const TOKEN_EXPIRATION_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 export const DB_TIME_FORMAT = 'YYYYMMDDHHmmss';
 

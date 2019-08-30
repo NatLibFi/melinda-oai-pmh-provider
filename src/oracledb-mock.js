@@ -49,10 +49,12 @@ export default () => {
 			};
 		},
 		_clear: () => {
+			// Clear array
 			options.splice(0);
 			Object.keys(options).forEach(k => delete options[k]);
 		},
 		_execute: optList => {
+			// Clear array
 			options.splice(0);
 
 			optList.forEach(opts => {

@@ -1,0 +1,4 @@
+{
+  "descr": "Should work with set parameter",
+  "requestUrl": "/bib?verb=ListRecords&metadataPrefix=marc&set=fennica"  
+}

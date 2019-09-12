@@ -25,7 +25,7 @@ export default async function ({
 	identifierPrefix, httpPort, enableProxy, name, supportEmail,
 	secretEncryptionKey, resumptionTokenTimeout, maxResults,
 	oracleUsername, oraclePassword, oracleConnectString, instanceUrl,
-	z106Library, z115Library
+	alephLibrary
 }) {
 	MarcRecord.setValidationOptions({subfieldValues: false});
 
@@ -47,11 +47,8 @@ export default async function ({
 
 	const {
 		bib,
-		bibPrivileged,
 		autNames,
-		autPrivilegedNames,
-		autSubjects,
-		autPrivilegedSubjects
+		autSubjects
 	} = getMiddlewares();
 
 	if (enableProxy) {
@@ -61,13 +58,8 @@ export default async function ({
 	app.use(createExpressLogger());
 
 	app.get('/bib', bib);
-	app.get('/bibprv', bibPrivileged);
-
 	app.get('/aut-names', autNames);
-	app.get('/autprv-names', autPrivilegedNames);
-
 	app.get('/aut-subjects', autSubjects);
-	app.get('/autprv-subjects', autPrivilegedSubjects);
 
 	app.use(handleError);
 
@@ -85,12 +77,9 @@ export default async function ({
 		};
 
 		return {
-			bib: bibFactory({...params, z106Library, z115Library}),
-			bibPrivileged: bibFactory({...params, z106Library, z115Library, privileged: true}),
+			bib: bibFactory({...params, alephLibrary}),
 			autNames: autNamesFactory(params),
-			autPrivilegedNames: autNamesFactory({...params, privileged: true}),
-			autSubjects: autSubjectsFactory(params),
-			autPrivilegedSubjects: autSubjectsFactory({...params, privileged: true})
+			autSubjects: autSubjectsFactory(params)
 		};
 	}
 

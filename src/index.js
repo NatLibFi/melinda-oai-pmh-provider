@@ -26,8 +26,7 @@ import {
 	ORACLE_USERNAME as oracleUsername,
 	ORACLE_PASSWORD as oraclePassword,
 	ORACLE_CONNECT_STRING as oracleConnectString,
-	Z106_LIBRARY as z106Library,
-	Z115_LIBRARY as z115Library
+	ALEPH_LIBRARY as alephLibrary
 } from './config';
 
 run();
@@ -49,7 +48,7 @@ async function run() {
 		httpPort, secretEncryptionKey, instanceUrl,
 		identifierPrefix, resumptionTokenTimeout,
 		oracleUsername, oraclePassword, oracleConnectString,
-		z106Library, z115Library
+		alephLibrary
 	});
 
 	function handleTermination({code = 0, message}) {

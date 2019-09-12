@@ -1,4 +1,0 @@
-{
-  "descr": "Should work with resumptionToken parameter",
-  "requestUrl": "/bibprv?verb=ListRecords&metadataPrefix=marc&resumptionToken=k4xOQi3EZk1%2Ba81zK8FYIWt2%2FaIcASFPCmcfcuWiIL%2B7KfSnGD%2FFX%2BlIyyGRBThvn2ZCPXOOPlI%2Fnmq70Ruept9%2B%2BBFA6kJttWPhN3x2Wyv5E8b33XfWBu%2B%2Biz9b%2Bwwq"
-}

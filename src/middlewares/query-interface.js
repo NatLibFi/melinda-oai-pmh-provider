@@ -24,9 +24,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 	const logger = createLogger();
 	const {
 		recordsAll, earliestTimestamp, recordsTimeframe,
-		recordsStartTime, recordsEndTime, identifiersAll,
-		identifiersTimeframe, identifiersStartTime, identifiersEndTime,
-		singleRecord
+		recordsStartTime, recordsEndTime, singleRecord
 	} = queries;
 
 	return {listRecords, listIdentifiers, getRecord, retrieveEarliestTimestamp};
@@ -57,25 +55,17 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 	}
 
 	async function listRecords(params) {
-		return listResources({...params, queries: {
-			resourcesTimeframe: recordsTimeframe,
-			resourcesStartTime: recordsStartTime,
-			resourcesEndTime: recordsEndTime,
-			resourcesAll: recordsAll
-		}});
+		return listResources(params);
 	}
 
 	async function listIdentifiers(params) {
-		return listResources({...params, queries: {
-			resourcesTimeframe: identifiersTimeframe,
-			resourcesStartTime: identifiersStartTime,
-			resourcesEndTime: identifiersEndTime,
-			resourcesAll: identifiersAll
-		}});
+		return listResources({
+			...params,
+			includeRecord: false
+		});
 	}
 
-	async function listResources({connection, from, until, set, cursor = 0, queries}) {
-		const {resourcesAll, resourcesTimeframe, resourcesStartTime, resourcesEndTime} = queries;
+	async function listResources({connection, includeRecord = true, from, until, set, cursor = 0}) {
 		const params = getParams();
 
 		return executeQuery(params);
@@ -84,40 +74,33 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 			const start = from;
 			const end = until;
 			const filter = set ? getFilter(set) : defaultFilter;
+			const rowCallback = r => recordRowCallback(r, filter, includeRecord);
 
 			if (start && end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => resourcesTimeframe({cursor, start, end})
+					genQuery: cursor => recordsTimeframe({cursor, start, end})
 				};
 			}
 
 			if (start) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => resourcesStartTime({cursor, start})
+					genQuery: cursor => recordsStartTime({cursor, start})
 				};
 			}
 
 			if (end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => resourcesEndTime({cursor, end})
+					genQuery: cursor => recordsEndTime({cursor, end})
 				};
 			}
 
 			return {
 				rowCallback, connection, cursor,
-				genQuery: cursor => resourcesAll({cursor})
+				genQuery: cursor => recordsAll({cursor})
 			};
-
-			function rowCallback(row) {
-				if (row.RECORD) {
-					return recordRowCallback(row, filter);
-				}
-
-				return {id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
-			}
 		}
 
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
@@ -168,11 +151,19 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		}
 	}
 
-	function recordRowCallback(row, filter) {
+	function recordRowCallback(row, filter, includeRecord = true) {
 		const record = parseRecord(row.RECORD);
 
 		if (filter === undefined || filter(record)) {
-			return {record: formatRecord(record), id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
+			if (includeRecord) {
+				return {
+					record: formatRecord(record),
+					id: fromAlephId(row.ID),
+					time: moment(row.TIME, DB_TIME_FORMAT)
+				};
+			}
+
+			return {id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
 		}
 	}
 

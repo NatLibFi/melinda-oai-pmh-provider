@@ -112,7 +112,7 @@ export default ({rootPath, getInterfaces}) => {
 				jsonpath.apply(obj, '$..expirationDate', () => timestamp);
 				jsonpath.apply(obj, '$..earliestTimestamp', () => timestamp);
 
-				jsonpath.apply(obj, '$..resumptionToken[:1]', ({_, _attr}) => ({
+				jsonpath.apply(obj, '$..resumptionToken[:1]', () => ({
 					_: 'foo',
 					_attr: {expirationDate: timestamp}
 				}));

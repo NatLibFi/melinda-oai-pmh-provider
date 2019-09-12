@@ -1,0 +1,4 @@
+{
+    "descr": "Should respond with all sets",
+    "requestUrl": "/bib?verb=ListSets"
+}

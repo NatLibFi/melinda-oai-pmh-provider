@@ -47,15 +47,14 @@ describe('app', () => {
 		const oracleUsername = 'foo';
 		const oraclePassword = 'bar';
 		const oracleConnectString = 'BAR';
-		const z106Library = 'foo1';
-		const z115Library = 'foo2';
+		const alephLibrary = 'foo1';
 
 		const app = await startApp({
 			httpPort, secretEncryptionKey, instanceUrl,
 			supportEmail, identifierPrefix,
 			maxResults, resumptionTokenTimeout,
 			oracleUsername, oraclePassword, oracleConnectString,
-			z106Library, z115Library
+			alephLibrary
 		});
 
 		requester = chai.request(app).keepOpen();
@@ -71,70 +70,29 @@ describe('app', () => {
 	});
 
 	describe('bib', () => {
-		/* Describe('unprivileged', () => {
-			describe.skip('GetRecord');
-			describe.skip('Identify');
-			describe.skip('ListIdentifiers');
-			describe.skip('ListMetadataFormats');
-			describe.skip('ListRecords');
-			describe.skip('ListSets');
-		}); */
-
-		describe('privileged', () => {
-			describe('Identify', generateTestSuite('bib', 'privileged', 'Identify'));
-			describe('ListMetadataFormats', generateTestSuite('bib', 'privileged', 'ListMetadataFormats'));
-			describe('ListSets', generateTestSuite('bib', 'privileged', 'ListSets'));
-			describe('GetRecord', generateTestSuite('bib', 'privileged', 'GetRecord'));
-			describe('ListIdentifiers', generateTestSuite('bib', 'privileged', 'ListIdentifiers'));
-			describe('ListRecords', generateTestSuite('bib', 'privileged', 'ListRecords'));
-		});
+		describe('Identify', generateTestSuite('bib', 'Identify'));
+		describe('ListMetadataFormats', generateTestSuite('bib', 'ListMetadataFormats'));
+		describe('ListSets', generateTestSuite('bib', 'ListSets'));
+		describe('GetRecord', generateTestSuite('bib', 'GetRecord'));
+		describe('ListIdentifiers', generateTestSuite('bib', 'ListIdentifiers'));
+		describe('ListRecords', generateTestSuite('bib', 'ListRecords'));
 	});
 
-	describe('aut-names', () => {
-		describe('unprivileged', () => {
-			it.skip('Should return an error because of a bad verb');
-
-			describe.skip('GetRecord');
-			describe.skip('Identify');
-			describe.skip('ListIdentifiers');
-			describe.skip('ListMetadataFormats');
-			describe.skip('ListRecords');
-			describe.skip('ListSets');
-		});
-
-		describe('privileged', () => {
-			it.skip('Should return an error because of a bad verb');
-
-			describe.skip('GetRecord');
-			describe.skip('Identify');
-			describe.skip('ListIdentifiers');
-			describe.skip('ListMetadataFormats');
-			describe.skip('ListRecords');
-			describe.skip('ListSets');
-		});
+	/* Describe('aut-names', () => {
+		describe('Identify', generateTestSuite('aut-names', 'Identify'));
+		describe('ListMetadataFormats', generateTestSuite('aut-names', 'ListMetadataFormats'));
+		describe('ListSets', generateTestSuite('aut-names', 'ListSets'));
+		describe('GetRecord', generateTestSuite('aut-names', 'GetRecord'));
+		describe('ListIdentifiers', generateTestSuite('aut-names', 'ListIdentifiers'));
+		describe('ListRecords', generateTestSuite('aut-names', 'ListRecords'));
 	});
 
 	describe('aut-subjects', () => {
-		describe('unprivileged', () => {
-			it.skip('Should return an error because of a bad verb');
-
-			describe.skip('GetRecord');
-			describe.skip('Identify');
-			describe.skip('ListIdentifiers');
-			describe.skip('ListMetadataFormats');
-			describe.skip('ListRecords');
-			describe.skip('ListSets');
-		});
-
-		describe('privileged', () => {
-			it.skip('Should return an error because of a bad verb');
-
-			describe.skip('GetRecord');
-			describe.skip('Identify');
-			describe.skip('ListIdentifiers');
-			describe.skip('ListMetadataFormats');
-			describe.skip('ListRecords');
-			describe.skip('ListSets');
-		});
-	});
+		describe('Identify', generateTestSuite('aut-subjects', 'Identify'));
+		describe('ListMetadataFormats', generateTestSuite('aut-subjects', 'ListMetadataFormats'));
+		describe('ListSets', generateTestSuite('aut-subjects', 'ListSets'));
+		describe('GetRecord', generateTestSuite('aut-subjects', 'GetRecord'));
+		describe('ListIdentifiers', generateTestSuite('aut-subjects', 'ListIdentifiers'));
+		describe('ListRecords', generateTestSuite('aut-subjects', 'ListRecords'));
+	}); */
 });

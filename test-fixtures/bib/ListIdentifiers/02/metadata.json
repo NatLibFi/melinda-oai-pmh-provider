@@ -1,0 +1,4 @@
+{
+    "descr": "Should work with from-parameter",
+    "requestUrl": "/bib?verb=ListIdentifiers&metadataPrefix=marc&from=2009-01-01"
+}

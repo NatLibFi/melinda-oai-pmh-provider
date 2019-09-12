@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="ListRecords" metadataPrefix="marc" resumptionToken="k4xOQi3EZk1+a81zK8FYIWt2/aIcASFPCmcfcuWiIL+7KfSnGD/FX+lIyyGRBThvn2ZCPXOOPlI/nmq70Ruept9++BFA6kJttWPhN3x2Wyv5E8b33XfWBu++iz9b+wwq">http://localhost:1337/bib</request>
+	<responseDate>2000-01-01T00:00:00Z</responseDate>
+	<ListRecords>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/89101112</identifier>
+				<datestamp>2000-01-01T00:00:00Z</datestamp>
+			</header>
+			<metadata>
+				<record>
+					<leader>03106cam^a2200721^i^4500</leader>
+					<controlfield tag="001">89101112</controlfield>
+					<datafield tag="042" ind1=" " ind2=" ">
+						<subfield code="a">finb</subfield>
+					</datafield>
+					<datafield tag="245" ind1=" " ind2=" ">
+						<subfield code="a">Bar Foo</subfield>
+					</datafield>
+					<datafield tag="LOW" ind1=" " ind2=" ">
+						<subfield code="a">FIKKA</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+	</ListRecords>
+</OAI-PMH>

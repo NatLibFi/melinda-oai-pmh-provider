@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="ListMetadataFormats">http://localhost:1337/bib</request>
+	<responseDate>2000-01-01T00:00:00Z</responseDate>
+	<ListMetadataFormats>
+		<metadataFormat>
+			<metadataPrefix>marc</metadataPrefix>
+			<schema>https://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd</schema>
+			<metadataNamespace>http://www.loc.gov/MARC21/slim</metadataNamespace>
+		</metadataFormat>
+		<metadataFormat>
+			<metadataPrefix>marc_melinda_v1</metadataPrefix>
+			<schema>https://schemas.melinda.kansalliskirjasto.fi/marc-melinda-v1.xsd</schema>
+			<metadataNamespace>https://melinda.kansalliskirjasto.fi/marc-melinda/v1</metadataNamespace>
+		</metadataFormat>
+	</ListMetadataFormats>
+</OAI-PMH>

@@ -14,178 +14,71 @@
 * limitations under the License.
 */
 
-export default ({z106Library, z115Library, limit}) => {
+export default ({z106Library: library, limit}) => {
+	const FORMAT_TIME = 'RPAD(CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))), 10, \'0\')';
+
 	return {
 		singleRecord: ({identifier}) => ({
-			query: `SELECT z00_doc_number id, z00_data record FROM ${z106Library}.z00 WHERE z00_doc_number = :identifier`,
+			query: `SELECT id, time, z00_data record FROM (
+						SELECT z00_doc_number id, MAX(${FORMAT_TIME}) time FROM ${library}.z00
+						JOIN ${library}.z106 ON z00_doc_number = :identifier AND z106_rec_key = z00_doc_number GROUP BY z00_doc_number
+			) JOIN ${library}.z00 ON z00_doc_number = id`,
 			args: {identifier}
 		}),
-		earliestTimestamp: `SELECT RPAD(CONCAT(z106_update_date, z106_time), 14, '0') time from ${z106Library}.z106 orig,
-			(SELECT MIN(z106_update_date) as value FROM ${z106Library}.z106) min
-			WHERE orig.z106_update_date = min.value
-		UNION
-		SELECT CONCAT(z115_today_date, SUBSTR(z115_today_time,0,6)) time from ${z115Library}.z115 orig,
-			(SELECT MIN(z115_today_date) as value FROM ${z115Library}.z115) min
-			WHERE orig.z115_today_date = min.value
-		ORDER by time ASC FETCH FIRST ROW ONLY`,
-		identifiersAll: ({cursor = 0}) => {
-			const startId = String(cursor).padStart(9, '0');
-			const endId = String(cursor + limit).padStart(9, '0');
-
-			return {
-				query: `SELECT id, MAX(time) time FROM (
-                            WITH records AS (
-                                SELECT z00_doc_number id FROM ${z106Library}.z00 WHERE z00_doc_number >= :startId AND z00_doc_number <= :endId
-                            )
-                            SELECT records.id, CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))) time FROM ${z106Library}.z106
-                                RIGHT JOIN records ON z106_rec_key = records.id
-                            UNION
-                            SELECT records.id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115
-                                RIGHT JOIN records ON z115_tab = records.id
-                ) GROUP BY id ORDER BY id`,
-				args: {startId, endId}
-			};
-		},
-		identifiersTimeframe: ({cursor = 0, start, end}) => {
-			const startDate = start.format('YYYYMMDD');
-			const endDate = end.format('YYYYMMDD');
-			const z106StartTime = start.format('HHmm');
-			const z106EndTime = end.format('HHmm');
-			const z115StartTime = start.format('HHmm000000');
-			const z115EndTime = end.format('HHmm000000');
-			return {
-				query: `SELECT id, MAX(time) time FROM (
-                            SELECT z106_rec_key id, CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))) time FROM ${z106Library}.z106 WHERE
-                                (z106_update_date = :startDate AND z106_time >= :z106StartTime) or
-                                (z106_update_date = :endDate AND z106_time <= :z106EndTime) or
-                                (z106_update_date > :startDate AND z106_update_date < :endDate)
-                            UNION
-                            SELECT z115_tab id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115 WHERE
-                                (z115_today_date = :startDate AND z115_today_time >= :z115StartTime) or
-                                (z115_today_date = :endDate AND z115_today_time <= :z115EndTime) or
-                                (z115_today_date > :startDate AND z115_today_date < :endDate)
-                        ) GROUP BY id ORDER BY id ASC OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`,
-				args: {startDate, endDate, z106StartTime, z106EndTime, z115StartTime, z115EndTime}
-			};
-		},
-		identifiersStartTime: ({cursor = 0, start}) => {
-			const startDate = start.format('YYYYMMDD');
-			const z106StartTime = start.format('HHmm');
-			const z115StartTime = start.format('HHmm000000');
-			return {
-				query: `SELECT id, MAX(time) time FROM (
-                            SELECT z106_rec_key id, CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))) time FROM ${z106Library}.z106 WHERE
-                                (z106_update_date = :startDate AND z106_time >= :z106StartTime) or
-                                z106_update_date > :startDate
-                            UNION
-                            SELECT z115_tab id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115 WHERE
-                                (z115_today_date = :startDate AND z115_today_time >= :z115StartTime) or
-                                z115_today_date > :startDate
-                        ) GROUP BY id ORDER BY id ASC OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`,
-				args: {startDate, z106StartTime, z115StartTime}
-			};
-		},
-		identifiersEndTime: ({cursor = 0, end}) => {
-			const endDate = end.format('YYYYMMDD');
-			const z106EndTime = end.format('HHmm');
-			const z115EndTime = end.format('HHmm000000');
-
-			return {
-				query: `SELECT id, MAX(time) time FROM (
-                            SELECT z106_rec_key id, CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))) time FROM ${z106Library}.z106 WHERE
-                                (z106_update_date = :endDate AND z106_time <= :z106EndTime) or
-                                z106_update_date < :endDate
-                            UNION
-                            SELECT z115_tab id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115 WHERE
-                                (z115_today_date = :endDate AND z115_today_time <= :z115EndTime) or
-                                z115_today_date < :endDate
-                        ) GROUP BY id ORDER BY id ASC OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`,
-				args: {endDate, z106EndTime, z115EndTime}
-			};
-		},
-		recordsAll: ({cursor}) => {
-			const startId = String(cursor).padStart(9, '0');
-			const endId = String(cursor + limit).padStart(9, '0');
-
-			return {
-				query: `SELECT id, time, z00_data data FROM (
-                            SELECT id, max(time) time FROM (
-                                WITH records AS (
-                                    SELECT z00_doc_number id, z00_data data FROM ${z106Library}.z00 WHERE z00_doc_number >= :startId AND z00_doc_number <= :endId
-                                )
-                                SELECT records.id, CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))) time FROM ${z106Library}.z106
-                                    RIGHT JOIN records ON z106_rec_key = records.id
-                                UNION
-                                SELECT records.id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115
-                                    RIGHT JOIN records ON z115_tab = records.id
-                            ) GROUP BY id ORDER BY id
-                        ) JOIN ${z106Library}.z00 ON id = z00_doc_number`,
-				args: {startId, endId}
-			};
-		},
+		earliestTimestamp: `SELECT ${FORMAT_TIME} time FROM (
+			WITH min AS (
+				SELECT MIN(z106_update_date) update_date FROM ${library}.z106
+			)
+			SELECT min.update_date, MIN(z106_time) time FROM ${library}.z106 JOIN min ON min.update_date = z106_update_date GROUP BY min.update_date`,
+		recordsAll: ({cursor}) => `SELECT id, time, z00_data record FROM (
+			WITH records AS (
+				SELECT z00_doc_number id FROM ${library}.z00 OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
+			)
+			SELECT records.id, MAX(${FORMAT_TIME}) time FROM ${library}.z106 JOIN records ON z106_rec_key = records.id GROUP BY id
+		) JOIN ${library}.z00 ON id = z00_doc_number`,
 		recordsTimeframe: ({cursor = 0, start, end}) => {
 			const startDate = start.format('YYYYMMDD');
 			const endDate = end.format('YYYYMMDD');
-			const z106StartTime = start.format('HHmm');
-			const z106EndTime = end.format('HHmm');
-			const z115StartTime = start.format('HHmm000000');
-			const z115EndTime = end.format('HHmm000000');
+			const startTime = start.format('HHmm');
+			const endTime = end.format('HHmm');
 
 			return {
+				args: {startDate, endDate, startTime, endTime},
 				query: `SELECT id, time, z00_data record FROM (
-                    SELECT id, MAX(time) time FROM (
-                        SELECT z106_rec_key id, CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))) time FROM ${z106Library}.z106 WHERE
-                            (z106_update_date = :startDate AND z106_time >= :z106StartTime) or
-                            (z106_update_date = :endDate AND z106_time <= :z106EndTime) or
-                            (z106_update_date > :startDate AND z106_update_date < '20190117')
-                        UNION ALL
-                        SELECT z115_tab id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115 WHERE
-                            (z115_today_date = :startDate AND z115_today_time >= :z115StartTime) or
-                            (z115_today_date = :endDate AND z115_today_time <= :z115EndTime) or
-                            (z115_today_date > :startDate AND z115_today_date < :endDate)
-                    ) GROUP BY id ORDER BY id ASC OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
-                ) JOIN ${z106Library}.z00 ON id = z00_doc_number`,
-				args: {startDate, endDate, z106StartTime, z106EndTime, z115StartTime, z115EndTime}
+					SELECT /*+ ORDERED */ z106_rec_key id, MAX(${FORMAT_TIME}) time FROM ${library}.z106 WHERE
+						(z106_update_date = :startDate AND z106_time >= :startTime) OR
+						(z106_update_date = :endTime AND z106_time <= :endTime) OR
+						(z106_update_date > :startDate AND z106_update_date < :endDate)
+						GROUP BY z106_rec_key OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
+				) JOIN ${library}.z00 ON id = z00_doc_number`
 			};
 		},
 		recordsStartTime: ({cursor = 0, start}) => {
 			const startDate = start.format('YYYYMMDD');
-			const z106StartTime = start.format('HHmm');
-			const z115StartTime = start.format('HHmm000000');
+			const startTime = start.format('HHmm');
 
 			return {
+				args: {startDate, startTime},
 				query: `SELECT id, time, z00_data record FROM (
-                    SELECT id, MAX(time) time FROM (
-                        SELECT z106_rec_key id, CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))) time FROM ${z106Library}.z106 WHERE
-                            (z106_update_date = :startDate AND z106_time >= :z106StartTime) or
-                            z106_update_date > :startDate
-                        UNION
-                        SELECT z115_tab id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115 WHERE
-                            (z115_today_date = :startDate AND z115_today_time >= :z115StartTime) or
-                            z115_today_date > :startDate
-                    ) GROUP BY id ORDER BY id ASC OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
-                ) JOIN ${z106Library}.z00 ON id = z00_doc_number`,
-				args: {startDate, z106StartTime, z115StartTime}
+					SELECT /*+ ORDERED */ z106_rec_key id, MAX(RPAD(CONCAT(z106_update_date, CAST(z106_time AS CHAR(4))), 10, '0')) time FROM fin01.z106 WHERE
+						(z106_update_date = ${startDate} AND z106_time >= ${startTime}) OR
+						z106_update_date > ${startDate}
+						GROUP BY z106_rec_key OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
+				) JOIN ${library}.z00 ON id = z00_doc_number`
 			};
 		},
 		recordsEndTime: ({cursor = 0, end}) => {
 			const endDate = end.format('YYYYMMDD');
-			const z106EndTime = end.format('HHmm');
-			const z115EndTime = end.format('HHmm000000');
+			const endTime = end.format('HHmm');
 
 			return {
+				args: {endDate, endTime},
 				query: `SELECT id, time, z00_data record FROM (
-                    SELECT id, MAX(time) time FROM (
-                        SELECT z106_rec_key id, CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))) time FROM ${z106Library}.z106 WHERE
-                            (z106_update_date = :endDate AND z106_time <= :z106EndTime) or
-                            z106_update_date < :endDate
-                        UNION
-                        SELECT z115_tab id, CONCAT(CAST(z115_today_date AS CHAR(8)), SUBSTR(z115_today_time,0,6)) time FROM ${z115Library}.z115 WHERE
-                            (z115_today_date = :endDate AND z115_today_time <= :z115EndTime) or
-                            z115_today_date < :endDate)
-                    ) GROUP BY id ORDER BY id ASC OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
-                ) JOIN ${z106Library}.z00 ON id = z00_doc_number`,
-				args: {endDate, z106EndTime, z115EndTime}
+					SELECT /*+ ORDERED */ z106_rec_key id, MAX(${FORMAT_TIME}) time FROM ${library}.z106 WHERE
+						(z106_update_date = ${endDate} AND z106_time <= ${endTime}) OR
+						z106_update_date < ${endDate}
+						GROUP BY z106_rec_key OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
+				) JOIN fin01.z00 ON id = z00_doc_number`
 			};
 		}
 	};

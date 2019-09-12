@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="Identify">http://localhost:1337/bib</request>
+	<responseDate>2000-01-01T00:00:00Z</responseDate>
+	<Identify>
+		<repositoryName>Melinda OAI-PMH provider for bibliographic records</repositoryName>
+		<baseURL>http://localhost:1337/bib</baseURL>
+		<procotolVersion>2.0</procotolVersion>
+		<earliestTimestamp>2000-01-01T00:00:00Z</earliestTimestamp>
+		<deletedRecord>persistent</deletedRecord>
+		<granularity>YYYY-MM-DDthh:mm:ssZ</granularity>
+		<adminEmail>foo@fu.bar</adminEmail>
+	</Identify>
+</OAI-PMH>

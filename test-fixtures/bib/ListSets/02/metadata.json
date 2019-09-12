@@ -1,0 +1,4 @@
+{
+    "descr": "Should respond an errors because of an invalid resumption token",
+    "requestUrl": "/bib?verb=ListSets&resumptionToken=foo"
+}

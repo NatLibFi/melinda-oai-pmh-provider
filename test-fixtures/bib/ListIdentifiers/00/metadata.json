@@ -1,0 +1,4 @@
+{
+    "descr": "Should return an error because of an invalid metadata format specifier",
+    "requestUrl": "/bib?verb=ListIdentifiers&metadataPrefix=foo"
+}

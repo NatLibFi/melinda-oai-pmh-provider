@@ -1,4 +1,0 @@
-{
-  "descr": "Should work with until parameter",
-  "requestUrl": "/bibprv?verb=ListRecords&metadataPrefix=marc&until=2010-01-01T00:00:00"
-}

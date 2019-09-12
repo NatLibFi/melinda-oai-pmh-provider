@@ -1,4 +1,0 @@
-{
-    "descr": "Should respond with an error because the record cannot be found",
-    "requestUrl": "/bibprv?verb=GetRecord&metadataPrefix=marc&identifier=oai:foo.bar/12345"
-}

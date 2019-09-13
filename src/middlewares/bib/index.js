@@ -21,8 +21,9 @@ import requestFactory from '../request';
 
 export default params => {
 	const sets = generateSets();
-	const {maxResults, alephLibrary} = params;
-	const queries = queryFactory({alephLibrary, limit: maxResults});
+	const {maxResults, alephLibrary: library} = params;
+
+	const queries = queryFactory({library, limit: maxResults});
 	const queryInterface = queryInterfaceFactory({
 		maxResults,
 		getFilter,

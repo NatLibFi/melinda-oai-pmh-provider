@@ -67,7 +67,6 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 
 	async function listResources({connection, includeRecord = true, from, until, set, cursor = 0}) {
 		const params = getParams();
-
 		return executeQuery(params);
 
 		function getParams() {
@@ -111,7 +110,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 
 				debugQuery(query, args);
 
-				const {resultSet} = await connection.execute(query, args, {resultSet: true});
+				const {resultSet} = await connection.execute(query, args || [], {resultSet: true});
 
 				previousCursor = cursor;
 				await pump(resultSet);
@@ -168,7 +167,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 	}
 
 	function debugQuery(query, args) {
-		logger.log('debug', `Executing query '${query}' with args: ${JSON.stringify(args)}`);
+		logger.log('debug', `Executing query '${query}'${args ? `with args: ${JSON.stringify(args)}` : ''}`);
 	}
 }
 

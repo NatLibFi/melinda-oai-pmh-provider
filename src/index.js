@@ -23,6 +23,7 @@ import {
 	SECRET_ENCRYPTION_KEY as secretEncryptionKey,
 	RESUMPTION_TOKEN_TIMEOUT as resumptionTokenTimeout,
 	OAI_IDENTIFIER_PREFIX as identifierPrefix,
+	MAX_RESULTS as maxResults,
 	ORACLE_USERNAME as oracleUsername,
 	ORACLE_PASSWORD as oraclePassword,
 	ORACLE_CONNECT_STRING as oracleConnectString,
@@ -46,7 +47,7 @@ async function run() {
 	const server = await startApp({
 		enableProxy, supportEmail,
 		httpPort, secretEncryptionKey, instanceUrl,
-		identifierPrefix, resumptionTokenTimeout,
+		identifierPrefix, resumptionTokenTimeout, maxResults,
 		oracleUsername, oraclePassword, oracleConnectString,
 		alephLibrary
 	});

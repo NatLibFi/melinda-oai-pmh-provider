@@ -117,7 +117,7 @@ export default ({
 					logger.log('debug', 'Connection closed');
 				}
 
-				await sendResponse({result});
+				await sendResponse({result, params});
 
 				async function getParams(useDb = true) {
 					const obj = {};
@@ -134,10 +134,7 @@ export default ({
 
 							return {
 								...obj,
-								...parse({
-									...params,
-									metadataPrefix: req.query.metadataPrefix
-								})
+								...parse(params)
 							};
 						}
 
@@ -195,12 +192,13 @@ export default ({
 
 					function parseResumptionToken(token) {
 						const str = decryptToken();
-						const [expirationTime, cursorString, set, from, until] = str.split(/;/g);
+
+						const [expirationTime, cursorString, metadataPrefix, from, until, set] = str.split(/;/g);
 						const expires = moment(expirationTime, TOKEN_EXPIRATION_FORMAT, true);
 						const cursor = Number(cursorString);
 
-						if (expires.isValid() && moment().isAfter(expires) && Number.isNaN(cursor) === false) {
-							return {cursor, set, from, until};
+						if (expires.isValid() && moment().isBefore(expires) && Number.isNaN(cursor) === false) {							
+							return {cursor, metadataPrefix, set, from, until};
 						}
 
 						throw new ApiError({verb, code: ERRORS.BAD_RESUMPTION_TOKEN});
@@ -218,7 +216,7 @@ export default ({
 			}
 		}
 
-		async function sendResponse({error, result}) {
+		async function sendResponse({error, result, params}) {
 			const query = clone(req.query);
 			const requestURL = `${instanceUrl}${req.path}`;
 
@@ -264,21 +262,28 @@ export default ({
 					}
 
 					if (cursor) {
-						const {token, tokenExpirationTime} = generateResumptionToken(cursor);
+						const {token, tokenExpirationTime} = generateResumptionToken();
 						return callback({requestURL, query, records, token, tokenExpirationTime});
 					}
 
 					return callback({requestURL, query, records});
-				}
 
-				function generateResumptionToken(cursor) {
-					const tokenExpirationTime = generateResumptionExpirationTime();
-					const token = encryptString({key: secretEncryptionKey, value: `${tokenExpirationTime};${cursor}`, algorithm: 'aes-256-cbc'});
+					function generateResumptionToken() {
+						const tokenExpirationTime = generateResumptionExpirationTime();
+						const value = generateValue();
+						const token = encryptString({key: secretEncryptionKey, value, algorithm: 'aes-256-cbc'});
 
-					return {token, tokenExpirationTime};
+						return {token, tokenExpirationTime};
 
-					function generateResumptionExpirationTime() {
-						return moment().add(resumptionTokenTimeout, 'milliseconds');
+						function generateResumptionExpirationTime() {
+							return moment().add(resumptionTokenTimeout, 'milliseconds');
+						}
+
+						function generateValue() {
+							const {metadataPrefix, from, until, set} = params;
+							const time = tokenExpirationTime.format(TOKEN_EXPIRATION_FORMAT);
+							return `${time};${cursor};${metadataPrefix};${from || ''};${until || ''};${set || ''}`;
+						}
 					}
 				}
 			}

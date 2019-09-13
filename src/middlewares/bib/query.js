@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-export default ({z106Library: library, limit}) => {
+export default ({library, limit}) => {
 	const FORMAT_TIME = 'RPAD(CONCAT(z106_update_date, CAST(z106_time AS CHAR(6))), 10, \'0\')';
 
 	return {
@@ -29,13 +29,17 @@ export default ({z106Library: library, limit}) => {
 			WITH min AS (
 				SELECT MIN(z106_update_date) update_date FROM ${library}.z106
 			)
-			SELECT min.update_date, MIN(z106_time) time FROM ${library}.z106 JOIN min ON min.update_date = z106_update_date GROUP BY min.update_date`,
-		recordsAll: ({cursor}) => `SELECT id, time, z00_data record FROM (
-			WITH records AS (
-				SELECT z00_doc_number id FROM ${library}.z00 OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
-			)
-			SELECT records.id, MAX(${FORMAT_TIME}) time FROM ${library}.z106 JOIN records ON z106_rec_key = records.id GROUP BY id
-		) JOIN ${library}.z00 ON id = z00_doc_number`,
+			SELECT min.update_date z106_update_date, MIN(z106_time)z106_time FROM ${library}.z106
+				JOIN min ON min.update_date = z106_update_date GROUP BY min.update_date
+		)`,
+		recordsAll: ({cursor}) => ({
+			query: `SELECT id, time, z00_data record FROM (
+				WITH records AS (
+					SELECT z00_doc_number id FROM ${library}.z00 OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
+				)
+				SELECT records.id, MAX(${FORMAT_TIME}) time FROM ${library}.z106 JOIN records ON z106_rec_key = records.id GROUP BY id
+			) JOIN ${library}.z00 ON id = z00_doc_number`
+		}),
 		recordsTimeframe: ({cursor = 0, start, end}) => {
 			const startDate = start.format('YYYYMMDD');
 			const endDate = end.format('YYYYMMDD');

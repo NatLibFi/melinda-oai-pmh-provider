@@ -28,9 +28,7 @@ export default async function ({
 	alephLibrary
 }) {
 	MarcRecord.setValidationOptions({subfieldValues: false});
-
-	oracledb.outFormat = oracledb.OBJECT;
-	oracledb.queueTimeout = 10000;
+	setOracleOptions();
 
 	const {createLogger, createExpressLogger} = Utils;
 	const logger = createLogger();
@@ -55,7 +53,9 @@ export default async function ({
 		app.enable('trust proxy', true);
 	}
 
-	app.use(createExpressLogger());
+	app.use(createExpressLogger({
+		msg: '{{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
+	}));
 
 	app.get('/bib', bib);
 	app.get('/aut-names', autNames);
@@ -67,6 +67,14 @@ export default async function ({
 	server.on('close', async () => pool.close(2));
 
 	return server;
+
+	function setOracleOptions() {
+		oracledb.outFormat = oracledb.OBJECT;
+		oracledb.queueTimeout = 10000;
+		oracledb.poolTimeout = 20;
+		oracledb.events = false;
+		oracledb.poolPingInterval = 10;
+	}
 
 	function getMiddlewares() {
 		const params = {

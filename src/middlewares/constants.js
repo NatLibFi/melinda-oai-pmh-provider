@@ -55,9 +55,6 @@ export const METADATA_FORMATS = [
 
 export const REPOSITORY_NAMES = {
 	bib: 'Melinda OAI-PMH provider for bibliographic records',
-	bibprv: 'Melinda OAI-PMH provider for bibliographic records (Privileged)',
 	'aut-names': 'Melinda OAI-PMH provider for authority name records',
-	'autprv-names': 'Melinda OAI-PMH provider for authority name records (Privileged)',
-	'aut-subjects': 'Melinda OAI-PMH provider for authority subject records',
-	'autprv-subjects': 'Melinda OAI-PMH provider for authority subject records (Privileged)'
+	'aut-subjects': 'Melinda OAI-PMH provider for authority subject records'
 };

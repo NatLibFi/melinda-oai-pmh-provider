@@ -197,7 +197,7 @@ export default ({
 						const expires = moment(expirationTime, TOKEN_EXPIRATION_FORMAT, true);
 						const cursor = Number(cursorString);
 
-						if (expires.isValid() && moment().isBefore(expires) && Number.isNaN(cursor) === false) {							
+						if (expires.isValid() && moment().isBefore(expires) && Number.isNaN(cursor) === false) {
 							return {cursor, metadataPrefix, set, from, until};
 						}
 

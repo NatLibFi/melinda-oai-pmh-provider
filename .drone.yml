@@ -1,24 +1,32 @@
-matrix:
-  NODE_VERSION:
-  - 8
-  - latest
-pipeline:
-  generate-tags:
-    image: quay.io/natlibfi/drone-gen-tags
-  test:
-    image: node:${NODE_VERSION}
-    commands:
+kind: pipeline
+name: default
+steps:
+- name: generate-tags
+  image: quay.io/natlibfi/drone-gen-tags
+- name: install-instantclient
+  image: quay.io/tike/drone-install-instantclient:12.2  
+- name: test
+  # node:10 points to 10.15 which don't work with latest oracledb (130919)
+  #image: node:10
+  image: node:10.16
+  commands:
+    - export OCI_LIB_DIR=$PWD/instantclient
+    - export OCI_INC_DIR=$PWD/instantclient/sdk/include
     - npm install
     - npm test
-  #docker:
-  #  image: plugins/docker
-  #  registry: quay.io
-  #  repo: quay.io/tike/melinda-oai-pmh-server
-  #  secrets:
-  #  - docker_username
-  #  - docker_password
-  #  when:
-  #    event: [push, tag]
-  #    branch: [master, test]
-  #    matrix:
-  #      NODE_VERSION: 8
+- name: docker 
+  image: plugins/docker
+  settings:
+    repo: quay.io/tike/melinda-oai-pmh-provider
+    registry: quay.io
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+  when:
+    branch: [dev]  
+    #branch: [master, test]
+trigger:  
+  event: [push, tag]
+image_pull_secrets:
+- pull_docker_config

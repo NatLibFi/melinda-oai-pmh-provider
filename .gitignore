@@ -7,4 +7,4 @@ dist
 tnsnames.ora
 sqlnet.ora
 wallet
-test.sh
+instantclient

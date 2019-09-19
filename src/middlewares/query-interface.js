@@ -19,8 +19,8 @@ import {Utils} from '@natlibfi/melinda-commons';
 import {DB_TIME_FORMAT} from './constants';
 import {parseRecord, toAlephId, fromAlephId} from '../record';
 
-export default function ({maxResults, queries, getFilter = getDefaultFilter, formatRecord = defaultFormatRecord}) {
-	const {createLogger} = Utils;
+export default function ({maxResults, queries, getFilter}) {
+	const {createLogger, isDeletedRecord} = Utils;
 	const logger = createLogger();
 	const {
 		recordsAll, earliestTimestamp, recordsTimeframe,
@@ -39,7 +39,7 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		return moment(row.TIME, 'YYYYMMDDHHmmss');
 	}
 
-	async function getRecord({connection, identifier}) {
+	async function getRecord({connection, identifier, metadataPrefix}) {
 		const {query, args} = singleRecord({identifier: toAlephId(identifier)});
 
 		debugQuery(query, args);
@@ -50,7 +50,10 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		await resultSet.close();
 
 		if (row) {
-			return recordRowCallback(row);
+			return recordRowCallback({
+				row,
+				formatRecord: generateFormatter(metadataPrefix)
+			});
 		}
 	}
 
@@ -65,15 +68,21 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		});
 	}
 
-	async function listResources({connection, includeRecord = true, from, until, set, cursor = 0}) {
+	async function listResources({
+		connection, from, until, set, metadataPrefix,
+		includeRecord = true, cursor = 0
+	}) {
 		const params = getParams();
 		return executeQuery(params);
 
 		function getParams() {
 			const start = from;
 			const end = until;
-			const filter = set ? getFilter(set) : defaultFilter;
-			const rowCallback = r => recordRowCallback(r, filter, includeRecord);
+			const filter = getFilter(set);
+			const rowCallback = row => recordRowCallback({
+				row, filter, includeRecord,
+				formatRecord: generateFormatter(metadataPrefix)
+			});
 
 			if (start && end) {
 				return {
@@ -150,35 +159,42 @@ export default function ({maxResults, queries, getFilter = getDefaultFilter, for
 		}
 	}
 
-	function recordRowCallback(row, filter, includeRecord = true) {
+	function recordRowCallback({row, formatRecord, includeRecord = true, filter = defaultFilter}) {
 		const record = parseRecord(row.RECORD);
 
-		if (filter === undefined || filter(record)) {
-			if (includeRecord) {
+		if (filter(record)) {
+			const isDeleted = isDeletedRecord(record);
+
+			if (includeRecord && isDeleted === false) {
 				return {
-					record: formatRecord(record),
 					id: fromAlephId(row.ID),
-					time: moment(row.TIME, DB_TIME_FORMAT)
+					time: moment(row.TIME, DB_TIME_FORMAT),
+					record: formatRecord(record)
 				};
 			}
 
-			return {id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT)};
+			return {id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT), isDeleted};
 		}
+	}
+
+	function defaultFilter() {
+		return true;
 	}
 
 	function debugQuery(query, args) {
 		logger.log('debug', `Executing query '${query}'${args ? `with args: ${JSON.stringify(args)}` : ''}`);
 	}
+
+	function generateFormatter(metadataPrefix) {
+		return metadataPrefix === 'marc' ?
+			formatToStandard :
+			r => r;
+
+		function formatToStandard(record) {
+			// Get all fields with non-numeric tags
+			record.get(/[^0-9]+/).forEach(f => record.removeField(f));
+			return record;
+		}
+	}
 }
 
-function defaultFormatRecord(record) {
-	return record;
-}
-
-function defaultFilter() {
-	return true;
-}
-
-function getDefaultFilter() {
-	return defaultFilter;
-}

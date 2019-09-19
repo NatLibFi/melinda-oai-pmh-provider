@@ -14,6 +14,52 @@
 * limitations under the License.
 */
 
-export default () => {
-	return () => {};
+import queryInterfaceFactory from '../query-interface';
+import queryFactory from './query';
+import requestFactory from '../request';
+import {createHasFieldFilter} from '../utils';
+
+export default params => {
+	const sets = generateSets();
+	const {maxResults, library} = params;
+
+	const queries = queryFactory({library, limit: maxResults});
+	const queryInterface = queryInterfaceFactory({
+		maxResults,
+		getFilter,
+		queries
+	});
+
+	return requestFactory({...params, ...queryInterface, listSets});
+
+	function getFilter(id) {
+		const set = sets.find(({spec}) => spec === id);
+		return set ? set.filter : undefined;
+	}
+
+	function listSets() {
+		return sets.map(({spec, name}) => ({spec, name}));
+	}
+
+	function generateSets() {
+		return [
+			{
+				spec: 'topical', name: 'Topical terms',
+				filter: createHasFieldFilter(/^150$/)
+			},
+			{
+				spec: 'geographic', name: 'Geographic names',
+				filter: createHasFieldFilter(/^151$/)
+			},
+			{
+				spec: 'genre', name: 'Genre/form terms',
+				filter: createHasFieldFilter(/^155$/)
+			},
+			{
+				spec: 'mediumperf', name: 'Medium of performance terms',
+				filter: createHasFieldFilter(/^162$/)
+			}
+
+		];
+	}
 };

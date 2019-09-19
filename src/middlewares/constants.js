@@ -47,9 +47,9 @@ export const METADATA_FORMATS = [
 		namespace: 'http://www.loc.gov/MARC21/slim'
 	},
 	{
-		prefix: 'marc_melinda_v1',
-		schema: 'https://schemas.melinda.kansalliskirjasto.fi/marc-melinda-v1.xsd',
-		namespace: 'https://melinda.kansalliskirjasto.fi/marc-melinda/v1'
+		prefix: 'melinda_marc',
+		schema: 'https://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd',
+		namespace: 'https://melinda.kansalliskirjasto.fi/melinda-marc'
 	}
 ];
 

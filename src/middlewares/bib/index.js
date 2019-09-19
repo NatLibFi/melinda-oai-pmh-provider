@@ -15,13 +15,16 @@
 */
 
 import queryInterfaceFactory from '../query-interface';
-import {createSubfieldValueFilter, createSidFilter, create960Filter} from '../utils';
 import queryFactory from './query';
 import requestFactory from '../request';
+import {
+	createSubfieldValueFilter, createSidFilter,
+	create960Filter, createLeaderFilter
+} from '../utils';
 
 export default params => {
 	const sets = generateSets();
-	const {maxResults, alephLibrary: library} = params;
+	const {maxResults, library} = params;
 
 	const queries = queryFactory({library, limit: maxResults});
 	const queryInterface = queryInterfaceFactory({
@@ -42,10 +45,14 @@ export default params => {
 	}
 
 	function generateSets() {
+		const fennicaFilter = createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finb'}]);
+		const monographicFilter = createLeaderFilter({start: 7, end: 7, value: 'm'});
+		const serialFilter = createLeaderFilter({start: 7, end: 7, value: 's'});
+
 		return [
 			{
 				spec: 'fennica', name: 'Fennica',
-				filter: createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finb'}])
+				filter: fennicaFilter
 			},
 			{
 				spec: 'viola', name: 'Viola',
@@ -58,6 +65,22 @@ export default params => {
 			{
 				spec: 'helmet', name: 'Helmet',
 				filter: createSidFilter(/^helme$/)
+			},
+			{
+				spec: 'monographic', name: 'Monographic records',
+				filter: monographicFilter
+			},
+			{
+				spec: 'serial', name: 'Serial records',
+				filter: serialFilter
+			},
+			{
+				spec: 'monographic:fennica', name: 'Monographic records (Fennica)',
+				filter: r => fennicaFilter(r) && monographicFilter(r)
+			},
+			{
+				spec: 'serial:fennica', name: 'Serial records (Fennica)',
+				filter: r => fennicaFilter(r) && serialFilter(r)
 			}
 		];
 	}

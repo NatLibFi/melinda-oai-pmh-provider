@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
-	<request verb="ListIdentifiers" metadataPrefix="marc" resumptionToken="k4xOQi3EZk1+a81zK8FYIWt2/aIcASFPCmcfcuWiIL+7KfSnGD/FX+lIyyGRBThvn2ZCPXOOPlI/nmq70Ruept9++BFA6kJttWPhN3x2Wyv5E8b33XfWBu++iz9b+wwq">http://localhost:1337/bib</request>
+	<request verb="ListIdentifiers" resumptionToken="pOr1miRkDdZkOz/vEdkyhOjxbhGAuK0Zsc3sc/PjNGmvGDLr4X6iMxz3ZQ7IeUMK">http://localhost:1337/bib</request>
 	<responseDate>2000-01-01T00:00:00Z</responseDate>
 	<ListIdentifiers>
 		<record>

@@ -192,7 +192,6 @@ export default ({
 
 					function parseResumptionToken(token) {
 						const str = decryptToken();
-
 						const [expirationTime, cursorString, metadataPrefix, from, until, set] = str.split(/;/g);
 						const expires = moment(expirationTime, TOKEN_EXPIRATION_FORMAT, true);
 						const cursor = Number(cursorString);

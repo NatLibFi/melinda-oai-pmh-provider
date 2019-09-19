@@ -9,9 +9,9 @@
 			<metadataNamespace>http://www.loc.gov/MARC21/slim</metadataNamespace>
 		</metadataFormat>
 		<metadataFormat>
-			<metadataPrefix>marc_melinda_v1</metadataPrefix>
-			<schema>https://schemas.melinda.kansalliskirjasto.fi/marc-melinda-v1.xsd</schema>
-			<metadataNamespace>https://melinda.kansalliskirjasto.fi/marc-melinda/v1</metadataNamespace>
+			<metadataPrefix>melinda_marc</metadataPrefix>
+			<schema>https://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd</schema>
+			<metadataNamespace>https://melinda.kansalliskirjasto.fi/melinda-marc</metadataNamespace>
 		</metadataFormat>
 	</ListMetadataFormats>
 </OAI-PMH>

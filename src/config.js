@@ -34,7 +34,9 @@ export const OAI_IDENTIFIER_PREFIX = readEnvironmentVariable('OAI_IDENTIFIER_PRE
 export const INSTANCE_URL = readEnvironmentVariable('INSTANCE_URL');
 export const SUPPORT_EMAIL = readEnvironmentVariable('SUPPORT_EMAIL');
 
-export const ALEPH_LIBRARY = readEnvironmentVariable('ALEPH_LIBRARY');
+export const ALEPH_BIB_LIBRARY = readEnvironmentVariable('ALEPH_BIB_LIBRARY');
+export const ALEPH_AUT_NAMES_LIBRARY = readEnvironmentVariable('ALEPH_AUT_SUBJECTS_LIBRARY');
+export const ALEPH_AUT_SUBJECTS_LIBRARY = readEnvironmentVariable('ALEPH_AUT_SUBJECTS_LIBRARY');
 
 export const ORACLE_USERNAME = readEnvironmentVariable('ORACLE_USERNAME');
 export const ORACLE_PASSWORD = readEnvironmentVariable('ORACLE_PASSWORD');

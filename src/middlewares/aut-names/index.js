@@ -14,6 +14,47 @@
 * limitations under the License.
 */
 
-export default () => {
-	return () => {};
+import queryInterfaceFactory from '../query-interface';
+import queryFactory from './query';
+import requestFactory from '../request';
+import {createHasFieldFilter} from '../utils';
+
+export default params => {
+	const sets = generateSets();
+	const {maxResults, library} = params;
+
+	const queries = queryFactory({library, limit: maxResults});
+	const queryInterface = queryInterfaceFactory({
+		maxResults,
+		getFilter,
+		queries
+	});
+
+	return requestFactory({...params, ...queryInterface, listSets});
+
+	function getFilter(id) {
+		const set = sets.find(({spec}) => spec === id);
+		return set ? set.filter : undefined;
+	}
+
+	function listSets() {
+		return sets.map(({spec, name}) => ({spec, name}));
+	}
+
+	function generateSets() {
+		return [
+			{
+				spec: 'personal', name: 'Personal names',
+				filter: createHasFieldFilter(/^100$/)
+			},
+			{
+				spec: 'corporate', name: 'Corporate names',
+				filter: createHasFieldFilter(/^110$/)
+			},
+			{
+				spec: 'meetings', name: 'Meeting names',
+				filter: createHasFieldFilter(/^111$/)
+			}
+		];
+	}
 };

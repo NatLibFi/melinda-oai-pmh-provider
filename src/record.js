@@ -47,8 +47,6 @@ export function parseRecord(data) {
 
 		function transformRecord(str) {
 			const record = AlephSequential.from(str);
-
-			// Format record (Lookup fin01 tab)
 			return record;
 		}
 	}

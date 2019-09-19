@@ -27,7 +27,9 @@ import {
 	ORACLE_USERNAME as oracleUsername,
 	ORACLE_PASSWORD as oraclePassword,
 	ORACLE_CONNECT_STRING as oracleConnectString,
-	ALEPH_LIBRARY as alephLibrary
+	ALEPH_BIB_LIBRARY as alephBibLibrary,
+	ALEPH_AUT_NAMES_LIBRARY as alephAutNamesLibrary,
+	ALEPH_AUT_SUBJECTS_LIBRARY as alephAutSubjectsLibrary
 } from './config';
 
 run();
@@ -49,7 +51,7 @@ async function run() {
 		httpPort, secretEncryptionKey, instanceUrl,
 		identifierPrefix, resumptionTokenTimeout, maxResults,
 		oracleUsername, oraclePassword, oracleConnectString,
-		alephLibrary
+		alephBibLibrary, alephAutNamesLibrary, alephAutSubjectsLibrary
 	});
 
 	function handleTermination({code = 0, message}) {

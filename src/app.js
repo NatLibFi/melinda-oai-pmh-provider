@@ -25,10 +25,16 @@ export default async function ({
 	identifierPrefix, httpPort, enableProxy, name, supportEmail,
 	secretEncryptionKey, resumptionTokenTimeout, maxResults,
 	oracleUsername, oraclePassword, oracleConnectString, instanceUrl,
-	alephLibrary
+	alephBibLibrary, alephAutNamesLibrary, alephAutSubjectsLibrary
 }) {
-	MarcRecord.setValidationOptions({subfieldValues: false});
 	setOracleOptions();
+
+	// Disable all validation because invalid records shouldn't crash the app
+	MarcRecord.setValidationOptions({
+		fields: false,
+		subfields: false,
+		subfieldValues: false
+	});
 
 	const {createLogger, createExpressLogger} = Utils;
 	const logger = createLogger();
@@ -85,9 +91,9 @@ export default async function ({
 		};
 
 		return {
-			bib: bibFactory({...params, alephLibrary}),
-			autNames: autNamesFactory(params),
-			autSubjects: autSubjectsFactory(params)
+			bib: bibFactory({...params, library: alephBibLibrary}),
+			autNames: autNamesFactory({...params, library: alephAutNamesLibrary}),
+			autSubjects: autSubjectsFactory({...params, library: alephAutSubjectsLibrary})
 		};
 	}
 

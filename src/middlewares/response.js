@@ -16,10 +16,14 @@
 
 import moment from 'moment';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
+import {Utils} from '@natlibfi/melinda-commons';
 import {ERRORS, PROTOCOL_VERSION, RESPONSE_TIMESTAMP_FORMAT} from './constants';
 import {Parser, Builder} from 'xml2js';
 
 export default ({identifierPrefix, supportEmail}) => {
+	const {createLogger} = Utils;
+	const logger = createLogger();
+
 	return {
 		generateErrorResponse, generateListMetadataFormatsResponse, generateListSetsResponse,
 		generateIdentifyResponse, generateListRecordsResponse, generateListIdentifiersResponse,
@@ -133,17 +137,21 @@ export default ({identifierPrefix, supportEmail}) => {
 	}
 
 	function responseToXML(obj) {
-		return new Builder({
-			xmldec: {
-				version: '1.0',
-				encoding: 'UTF-8',
-				standalone: false
-			},
-			renderOpts: {
-				pretty: true,
-				indent: '\t'
-			}
-		}).buildObject(obj);
+		try {
+			return new Builder({
+				xmldec: {
+					version: '1.0',
+					encoding: 'UTF-8',
+					standalone: false
+				},
+				renderOpts: {
+					pretty: true,
+					indent: '\t'
+				}
+			}).buildObject(obj);
+		} catch (err) {
+			throw new Error(`XML conversion failed ${err.message} for data: ${JSON.stringify(obj)}`);
+		}
 	}
 
 	function generate(params) {
@@ -170,7 +178,7 @@ export default ({identifierPrefix, supportEmail}) => {
 		return obj;
 	}
 
-	async function generateRecordObject({time, id, record}) {
+	async function generateRecordObject({time, id, record, isDeleted}) {
 		const obj = {
 			header: [{
 				identifier: [`${identifierPrefix}/${id}`],
@@ -185,10 +193,36 @@ export default ({identifierPrefix, supportEmail}) => {
 			};
 		}
 
+		if (isDeleted) {
+			return {
+				...obj,
+				header: [{
+					...obj.header.shift(),
+					$: {
+						status: 'deleted'
+					}
+				}]
+			};
+		}
+
 		return obj;
 
 		async function convertRecord() {
-			const str = MARCXML.to(record, {omitDeclaration: true});
+			const str = convert();
+
+			function convert() {
+				const PATTERN = /[\x00-\x1F\x7F-\x9F]/g; // eslint-disable-line no-control-regex
+				const str = MARCXML.to(record, {omitDeclaration: true});
+
+				// Remove control characters because they will break XML conversion
+				if (PATTERN.test(str)) {
+					const {value: id} = record.get(/^001$/).shift();
+					logger.log('warn', `Record ${id} contains control characters`);
+					return str.replace(PATTERN, '');
+				}
+
+				return str;
+			}
 
 			return new Promise((resolve, reject) => {
 				new Parser().parseString(str, (err, obj) => {

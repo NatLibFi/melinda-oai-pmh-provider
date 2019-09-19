@@ -18,9 +18,6 @@
 					<datafield tag="245" ind1=" " ind2=" ">
 						<subfield code="a">Bar Foo</subfield>
 					</datafield>
-					<datafield tag="LOW" ind1=" " ind2=" ">
-						<subfield code="a">FIKKA</subfield>
-					</datafield>
 				</record>
 			</metadata>
 		</record>

@@ -30,6 +30,21 @@ export function create960Filter(value) {
 	return createSubfieldValueFilter([{tag: '960', code: /^a$/, value}]);
 }
 
+export function createLeaderFilter({start, end, value}) {
+	return record => compareSubstring({
+		start, end, value,
+		context: record.leader
+	});
+}
+
+export function createControlFieldFilter({tag, start, end, value}) {
+	return record => {
+		return record.get(tag).every(({value: context}) => compareSubstring({
+			context, start, end, value
+		}));
+	};
+}
+
 export function createSubfieldValueFilter(conditions) {
 	const pattern = getPattern();
 
@@ -49,4 +64,13 @@ export function createSubfieldValueFilter(conditions) {
 		const str = conditions.map(({tag}) => tag).join('|');
 		return new RegExp(`^(${str})$`);
 	}
+}
+
+export function createHasFieldFilter(tag) {
+	return record => record.get(tag).length > 0;
+}
+
+function compareSubstring({context, start, end, value}) {
+	const chunk = context.substring(start, end + 1);
+	return chunk === value;
 }

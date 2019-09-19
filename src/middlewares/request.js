@@ -121,7 +121,7 @@ export default ({
 
 				async function x() {
 					return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
-						req.on('abort', async () => {
+						req.on('close', async () => {
 							if (params.connection) {
 								await params.connection.close();
 							}

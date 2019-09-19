@@ -40,6 +40,9 @@ export default ({
 	} = responseFactory({identifierPrefix, supportEmail});
 
 	return async (req, res, next) => {
+		req.on('abort', () => {
+			console.log('REQUEST ABORTED');
+		});
 		const {query: {verb}} = req;
 
 		if (!req.accepts('application/xml')) {

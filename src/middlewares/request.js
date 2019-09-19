@@ -40,9 +40,6 @@ export default ({
 	} = responseFactory({identifierPrefix, supportEmail});
 
 	return async (req, res, next) => {
-		req.on('abort', () => {
-			console.log('REQUEST ABORTED');
-		});
 		const {query: {verb}} = req;
 
 		if (!req.accepts('application/xml')) {
@@ -113,7 +110,7 @@ export default ({
 
 			async function callMethod({method, useDb, allowedParams = QUERY_PARAMETERS, requiredParams = ['verb']}) {
 				const params = await getParams(useDb);
-				const result = await method(params);
+				const result = await x();
 
 				if (params.connection) {
 					await params.connection.close();
@@ -121,6 +118,24 @@ export default ({
 				}
 
 				await sendResponse({result, params});
+
+				async function x() {
+					return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
+						req.on('abort', async () => {
+							if (params.connection) {
+								await params.connection.close();
+							}
+
+							resolve();
+						});
+
+						try {
+							resolve(method(params));
+						} catch (err) {
+							reject(err);
+						}
+					});
+				}
 
 				async function getParams(useDb = true) {
 					const obj = {};

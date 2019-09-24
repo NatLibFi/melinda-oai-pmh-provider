@@ -189,7 +189,7 @@ export default async function ({maxResults, sets, queries, connection}) {
 	}
 
 	function recordRowCallback({row, formatRecord, includeRecord = true}) {
-		if (row.INDEXING === 'false') {
+		if (row.INDEXING === 'true') {
 			throw new IndexingError(row.ID);
 		}
 

@@ -62,8 +62,8 @@ export default ({library, limit}) => {
 						(z106_update_date > :startDate AND z106_update_date < :endDate)
 						GROUP BY z106_rec_key OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
 				)
-				${headingsIndexes ? generateHeadingsQueries(headingsIndexes) : ''}
-				${headingsIndexes ? `LEFT JOIN ${library}.z07 ON id = z07_rec_key` : ''}	
+				${headingsIndexes ? generateHeadingsQueries(headingsIndexes, true) : ''}
+				${headingsIndexes ? `LEFT JOIN ${library}.z07 ON id = z07_rec_key` : ''}
 				JOIN ${library}.z00 ON id = z00_doc_number`
 			};
 		},
@@ -79,7 +79,7 @@ export default ({library, limit}) => {
 						z106_update_date > ${startDate}
 						GROUP BY z106_rec_key OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
 				)
-				${headingsIndexes ? generateHeadingsQueries(headingsIndexes) : ''}
+				${headingsIndexes ? generateHeadingsQueries(headingsIndexes, true) : ''}
 				${headingsIndexes ? `LEFT JOIN ${library}.z07 ON id = z02_rec_key` : ''}	
 				JOIN ${library}.z00 ON id = z00_doc_number`
 			};
@@ -96,22 +96,22 @@ export default ({library, limit}) => {
 						z106_update_date < ${endDate}
 						GROUP BY z106_rec_key OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY
 				)
-				${headingsIndexes ? generateHeadingsQueries(headingsIndexes) : ''}
+				${headingsIndexes ? generateHeadingsQueries(headingsIndexes, true) : ''}
 				${headingsIndexes ? `LEFT JOIN ${library}.z07 ON id = z02_rec_key` : ''}	
 				JOIN fin01.z00 ON id = z00_doc_number`
 			};
 		}
 	};
 
-	function generateHeadingsQueries(headingsIndexes) {
+	function generateHeadingsQueries(headingsIndexes, join) {
 		return headingsIndexes
 			.map(query => `z02_rec_key LIKE '${query}'`)
 			.reduce((acc, query, index) => {
-				return `${index > 0 ? ' AND ' : ' '}${query}${genTail()}`;
+				return `${acc}${index > 0 ? ' AND ' : ' '}${query}${genTail()}`;
 
 				function genTail() {
 					return index < headingsIndexes.length - 1 ? ' AND z02_doc_number = records.id' : '';
 				}
-			}, `JOIN ${library}.z02 ON`);
+			}, join ? `JOIN ${library}.z02 ON` : '');
 	}
 };

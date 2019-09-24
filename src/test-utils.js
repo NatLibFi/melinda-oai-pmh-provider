@@ -14,6 +14,9 @@
 * limitations under the License.
 */
 
+import chai from 'chai';
+import chaiHttp from 'chai-http';
+
 import HttpStatus from 'http-status';
 import jsonpath from 'jsonpath';
 import {expect} from 'chai';
@@ -23,8 +26,26 @@ import fixtureFactory, {READERS} from '@natlibfi/fixura';
 import {Parser as XMLParser, Builder as XMLBuilder} from 'xml2js';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {formatRecord} from './record';
+import startApp, {__RewireAPI__ as RewireAPI} from './app'; // eslint-disable-line import/named
+import oracledbMockFactory from './oracledb-mock';
 
-export default ({rootPath, getInterfaces}) => {
+chai.use(chaiHttp);
+
+export default ({rootPath}) => {
+	let requester;
+	const oracledbMock = oracledbMockFactory();
+
+	RewireAPI.__Rewire__('oracledb', oracledbMock);
+
+	after(() => {
+		RewireAPI.__ResetDependency__('oracledb');
+	});
+
+	afterEach(async () => {
+		await requester.close();
+		oracledbMock._clear();
+	});
+
 	return (...args) => {
 		return async () => {
 			const dir = rootPath.concat(args);
@@ -43,11 +64,38 @@ export default ({rootPath, getInterfaces}) => {
 						it.skip(`${sub} ${descr}`);
 					} else {
 						it(`${sub} ${descr}`, async () => {
-							const {requester, oracledbMock} = getInterfaces();
+							// Const {requester, oracledbMock} = getInterfaces();
 
 							if (dbResults) {
-								oracledbMock._execute([{results: dbResults}]);
+								// OracledbMock._execute([{results: dbResults}]);
+								oracledbMock._execute(dbResults.map(results => ({results})));
 							}
+
+							//
+							const httpPort = 1337;
+							const secretEncryptionKey = 'yuKf7ly1xml33H5+fThvzhdY4XlFMJwQ';
+
+							const supportEmail = 'foo@fu.bar';
+							const instanceUrl = `http://localhost:${httpPort}`;
+							const identifierPrefix = 'oai:foo.bar';
+							const maxResults = 5;
+							// Tests will break in the 4th millennium
+							const resumptionTokenTimeout = 31536000000000;
+							const oracleUsername = 'foo';
+							const oraclePassword = 'bar';
+							const oracleConnectString = 'BAR';
+							const alephLibrary = 'foo1';
+
+							const app = await startApp({
+								httpPort, secretEncryptionKey, instanceUrl,
+								supportEmail, identifierPrefix,
+								maxResults, resumptionTokenTimeout,
+								oracleUsername, oraclePassword, oracleConnectString,
+								alephLibrary
+							});
+
+							requester = chai.request(app).keepOpen();
+							//
 
 							const response = await requester.get(requestUrl).buffer(true);
 							expect(response).to.have.status(HttpStatus.OK);

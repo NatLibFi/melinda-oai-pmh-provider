@@ -16,16 +16,20 @@
 
 /* eslint-enable max-nested-callbacks */
 
-import chai from 'chai';
-import chaiHttp from 'chai-http';
-import oracledbMockFactory from './oracledb-mock';
-import startApp, {__RewireAPI__ as RewireAPI} from './app'; // eslint-disable-line import/named
+// import chai from 'chai';
+// import chaiHttp from 'chai-http';
+// Import oracledbMockFactory from './oracledb-mock';
+// import startApp, {__RewireAPI__ as RewireAPI} from './app'; // eslint-disable-line import/named
 import testSuiteFactory from './test-utils';
 
-chai.use(chaiHttp);
+// Chai.use(chaiHttp);
 
 describe('app', () => {
-	let requester;
+	const generateTestSuite = testSuiteFactory({
+		rootPath: [__dirname, '..', 'test-fixtures']
+	});
+
+	/** Let requester;
 	const oracledbMock = oracledbMockFactory();
 	const generateTestSuite = testSuiteFactory({
 		rootPath: [__dirname, '..', 'test-fixtures'],
@@ -34,7 +38,7 @@ describe('app', () => {
 
 	RewireAPI.__Rewire__('oracledb', oracledbMock);
 
-	beforeEach(async () => {
+	beforeEach(asy
 		const httpPort = 1337;
 		const secretEncryptionKey = 'yuKf7ly1xml33H5+fThvzhdY4XlFMJwQ';
 
@@ -67,7 +71,7 @@ describe('app', () => {
 
 	after(() => {
 		RewireAPI.__ResetDependency__('oracledb');
-	});
+	}); */
 
 	describe('bib', () => {
 		describe('Identify', generateTestSuite('bib', 'Identify'));

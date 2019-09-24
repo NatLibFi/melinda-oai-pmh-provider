@@ -29,7 +29,7 @@ export const SECRET_ENCRYPTION_KEY = readEnvironmentVariable('SECRET_ENCRYPTION_
 // 15 min
 export const RESUMPTION_TOKEN_TIMEOUT = readEnvironmentVariable('RESUMPTION_TOKEN_TIMEOUT', {defaultValue: '900000'});
 
-export const MAX_RESULTS = readEnvironmentVariable('MAX_RESULTS', {defaultValue: 1000, format: v => Number(v)});
+export const MAX_RESULTS = readEnvironmentVariable('MAX_RESULTS', {defaultValue: 100, format: v => Number(v)});
 export const OAI_IDENTIFIER_PREFIX = readEnvironmentVariable('OAI_IDENTIFIER_PREFIX', {defaultValue: 'oai:melinda.kansalliskirjasto.fi'});
 export const INSTANCE_URL = readEnvironmentVariable('INSTANCE_URL');
 export const SUPPORT_EMAIL = readEnvironmentVariable('SUPPORT_EMAIL');

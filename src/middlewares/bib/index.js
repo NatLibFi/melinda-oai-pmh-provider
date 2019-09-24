@@ -17,71 +17,54 @@
 import queryInterfaceFactory from '../query-interface';
 import queryFactory from './query';
 import requestFactory from '../request';
-import {
-	createSubfieldValueFilter, createSidFilter,
-	create960Filter, createLeaderFilter
-} from '../utils';
 
-export default params => {
+export default async params => {
+	const {maxResults, library, connection} = params;
 	const sets = generateSets();
-	const {maxResults, library} = params;
-
 	const queries = queryFactory({library, limit: maxResults});
-	const queryInterface = queryInterfaceFactory({
+	const queryInterface = await queryInterfaceFactory({
 		maxResults,
-		getFilter,
-		queries
+		queries,
+		sets,
+		connection
 	});
 
 	return requestFactory({...params, ...queryInterface, listSets});
-
-	function getFilter(id) {
-		const set = sets.find(({spec}) => spec === id);
-		return set ? set.filter : undefined;
-	}
 
 	function listSets() {
 		return sets.map(({spec, name}) => ({spec, name}));
 	}
 
 	function generateSets() {
-		const fennicaFilter = createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finb'}]);
-		const monographicFilter = createLeaderFilter({start: 7, end: 7, value: 'm'});
-		const serialFilter = createLeaderFilter({start: 7, end: 7, value: 's'});
-
 		return [
 			{
 				spec: 'fennica', name: 'Fennica',
-				filter: fennicaFilter
+				headingsIndexes: ['LOW  LFENNI%']
 			},
 			{
 				spec: 'viola', name: 'Viola',
-				filter: createSubfieldValueFilter([{tag: 'LOW', code: 'a', value: 'FIKKA'}, {tag: '042', code: 'a', value: 'finbd'}])
-			},
+				headingsIndexes: ['LOW  LVIOLA%']
+			}/* ,
 			{
 				spec: 'arto', name: 'Arto',
-				filter: create960Filter(/^ARTO$/)
-			},
-			{
-				spec: 'helmet', name: 'Helmet',
-				filter: createSidFilter(/^helme$/)
+				headingsIndexes: []
 			},
 			{
 				spec: 'monographic', name: 'Monographic records',
-				filter: monographicFilter
+				headingsIndexes: []
 			},
 			{
 				spec: 'serial', name: 'Serial records',
-				filter: serialFilter
+				headingsIndexes: []
 			},
 			{
 				spec: 'monographic:fennica', name: 'Monographic records (Fennica)',
-				filter: r => fennicaFilter(r) && monographicFilter(r)
+				headingsIndexes: []
 			},
 			{
 				spec: 'serial:fennica', name: 'Serial records (Fennica)',
-				filter: r => fennicaFilter(r) && serialFilter(r)
-			}
+				headingsIndexes: []
+			} */
 		];
 	}
 };

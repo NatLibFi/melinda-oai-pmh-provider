@@ -22,7 +22,7 @@ export default () => {
 			};
 
 			function getRows() {
-				const match = options.find(({queryPattern, expectedArgs}) => {
+				const index = options.findIndex(({queryPattern, expectedArgs}) => {
 					if (queryPattern.test(query) && (expectedArgs === undefined || deepEqual(args, expectedArgs))) {
 						return true;
 					}
@@ -30,9 +30,9 @@ export default () => {
 					return false;
 				});
 
-				if (match) {
-					const {results} = match;
-					return results.length === 0 ? [] : results.shift();
+				if (index >= 0) {
+					const {results} = options.splice(index, 1).shift();
+					return results;
 				}
 
 				return [];

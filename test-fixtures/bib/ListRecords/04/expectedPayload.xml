@@ -10,7 +10,7 @@
 			</header>
 			<metadata>
 				<record>
-					<leader>03106cam^a2200721^i^4500</leader>
+					<leader>03106cam a2200721 i 4500</leader>
 					<controlfield tag="001">1234567</controlfield>
 					<datafield tag="245" ind1=" " ind2=" ">
 						<subfield code="a">Foo Bar</subfield>
@@ -25,7 +25,7 @@
 			</header>
 			<metadata>
 				<record>
-					<leader>03106cam^a2200721^i^4500</leader>
+					<leader>03106cam a2200721 i 4500</leader>
 					<controlfield tag="001">89101112</controlfield>
 					<datafield tag="245" ind1=" " ind2=" ">
 						<subfield code="a">Bar Foo</subfield>

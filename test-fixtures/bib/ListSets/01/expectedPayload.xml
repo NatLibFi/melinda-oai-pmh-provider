@@ -11,29 +11,5 @@
 			<setSpec>viola</setSpec>
 			<setName>Viola</setName>
 		</set>
-		<set>
-			<setSpec>arto</setSpec>
-			<setName>Arto</setName>
-		</set>
-		<set>
-			<setSpec>helmet</setSpec>
-			<setName>Helmet</setName>
-		</set>
-		<set>
-			<setSpec>monographic</setSpec>
-			<setName>Monographic records</setName>
-		</set>
-		<set>
-			<setSpec>serial</setSpec>
-			<setName>Serial records</setName>
-		</set>
-		<set>
-			<setSpec>monographic:fennica</setSpec>
-			<setName>Monographic records (Fennica)</setName>
-		</set>
-		<set>
-			<setSpec>serial:fennica</setSpec>
-			<setName>Serial records (Fennica)</setName>
-		</set>
 	</ListSets>
 </OAI-PMH>

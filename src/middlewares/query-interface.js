@@ -18,21 +18,50 @@ import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
 import {DB_TIME_FORMAT} from './constants';
 import {parseRecord, toAlephId, fromAlephId} from '../record';
+import IndexingError from '../indexing-error';
 
-export default function ({maxResults, queries, getFilter}) {
+export default async function ({maxResults, sets, queries, connection}) {
 	const {createLogger, isDeletedRecord} = Utils;
 	const logger = createLogger();
 	const {
-		recordsAll, earliestTimestamp, recordsTimeframe,
+		getEarliestTimestamp, getHeadingsIndex,
+		recordsAll, recordsTimeframe,
 		recordsStartTime, recordsEndTime, singleRecord
 	} = queries;
 
-	return {listRecords, listIdentifiers, getRecord, retrieveEarliestTimestamp};
+	const headingsIndexes = await getHeadingsIndexes();
+	const earliestTimestamp = await retrieveEarliestTimestamp();
 
-	async function retrieveEarliestTimestamp({connection}) {
-		debugQuery(earliestTimestamp);
+	return {listRecords, listIdentifiers, getRecord, earliestTimestamp};
 
-		const {resultSet} = await connection.execute(earliestTimestamp, [], {resultSet: true});
+	async function getHeadingsIndexes() {
+		if (sets.length === 0) {
+			return;
+		}
+
+		const results = await Promise.all(sets.map(mapIndexes));
+		return results.reduce((acc, obj) => ({...acc, ...obj}), {});
+
+		async function mapIndexes({spec, headingsIndexes: setIndexes}) {
+			const indexes = await Promise.all(setIndexes.map(getIndex));
+			return {[spec]: indexes};
+
+			async function getIndex(value) {
+				debugQuery(getHeadingsIndex, {value});
+
+				const {resultSet} = await connection.execute(getHeadingsIndex, {value}, {resultSet: true});
+				const row = await resultSet.getRow();
+
+				await resultSet.close();
+				return `${row.ID}%`;
+			}
+		}
+	}
+
+	async function retrieveEarliestTimestamp() {
+		debugQuery(getEarliestTimestamp);
+
+		const {resultSet} = await connection.execute(getEarliestTimestamp, [], {resultSet: true});
 		const row = await resultSet.getRow();
 
 		await resultSet.close();
@@ -76,38 +105,38 @@ export default function ({maxResults, queries, getFilter}) {
 		return executeQuery(params);
 
 		function getParams() {
+			const setIndexes = headingsIndexes[set];
 			const start = from;
 			const end = until;
-			const filter = getFilter(set);
 			const rowCallback = row => recordRowCallback({
-				row, filter, includeRecord,
+				row, includeRecord,
 				formatRecord: generateFormatter(metadataPrefix)
 			});
 
 			if (start && end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => recordsTimeframe({cursor, start, end})
+					genQuery: cursor => recordsTimeframe({cursor, start, end, headingsIndexes: setIndexes})
 				};
 			}
 
 			if (start) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => recordsStartTime({cursor, start})
+					genQuery: cursor => recordsStartTime({cursor, start, headingsIndexes: setIndexes})
 				};
 			}
 
 			if (end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => recordsEndTime({cursor, end})
+					genQuery: cursor => recordsEndTime({cursor, end, headingsIndexes: setIndexes})
 				};
 			}
 
 			return {
 				rowCallback, connection, cursor,
-				genQuery: cursor => recordsAll({cursor})
+				genQuery: cursor => recordsAll({cursor, headingsIndexes: setIndexes})
 			};
 		}
 
@@ -159,30 +188,28 @@ export default function ({maxResults, queries, getFilter}) {
 		}
 	}
 
-	function recordRowCallback({row, formatRecord, includeRecord = true, filter = defaultFilter}) {
+	function recordRowCallback({row, formatRecord, includeRecord = true}) {
+		if (row.INDEXING === 'false') {
+			throw new IndexingError(row.ID);
+		}
+
 		const record = parseRecord(row.RECORD);
 
-		if (filter(record)) {
-			const isDeleted = isDeletedRecord(record);
+		const isDeleted = isDeletedRecord(record);
 
-			if (includeRecord && isDeleted === false) {
-				return {
-					id: fromAlephId(row.ID),
-					time: moment(row.TIME, DB_TIME_FORMAT),
-					record: formatRecord(record)
-				};
-			}
-
-			return {id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT), isDeleted};
+		if (includeRecord && isDeleted === false) {
+			return {
+				id: fromAlephId(row.ID),
+				time: moment(row.TIME, DB_TIME_FORMAT),
+				record: formatRecord(record)
+			};
 		}
-	}
 
-	function defaultFilter() {
-		return true;
+		return {id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT), isDeleted};
 	}
 
 	function debugQuery(query, args) {
-		logger.log('debug', `Executing query '${query}'${args ? `with args: ${JSON.stringify(args)}` : ''}`);
+		logger.log('debug', `Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
 	}
 
 	function generateFormatter(metadataPrefix) {

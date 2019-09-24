@@ -11,13 +11,13 @@
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
-* limitations under the License.
+* limitations under the License.a
 */
 
 import HttpStatus from 'http-status';
 import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
-import ApiError from './error';
+import ApiError from './api-error';
 import responseFactory from './response';
 
 import {
@@ -28,8 +28,9 @@ import {
 export default ({
 	pool, secretEncryptionKey, supportEmail,
 	instanceUrl, identifierPrefix, resumptionTokenTimeout,
-	retrieveEarliestTimestamp, getRecord, listIdentifiers,
-	listRecords, listSets
+	getRecord, listIdentifiers,
+	listRecords, listSets,
+	earliestTimestamp
 }) => {
 	const {createLogger, encryptString, decryptString, clone} = Utils;
 	const logger = createLogger();
@@ -76,7 +77,6 @@ export default ({
 						requiredParams: ['verb', 'identifier', 'metadataPrefix']
 					},
 					Identify: {
-						method: retrieveEarliestTimestamp,
 						allowedParams: ['verb']
 					},
 					ListIdentifiers: {
@@ -110,16 +110,21 @@ export default ({
 
 			async function callMethod({method, useDb, allowedParams = QUERY_PARAMETERS, requiredParams = ['verb']}) {
 				const params = await getParams(useDb);
-				const result = await x();
 
-				if (params.connection) {
-					await params.connection.close();
-					logger.log('debug', 'Connection closed');
+				if (method) {
+					const result = await wrapMethodCall();
+
+					if (params.connection) {
+						await params.connection.close();
+						logger.log('debug', 'Connection closed');
+					}
+
+					return sendResponse({result, params});
 				}
 
-				await sendResponse({result, params});
+				return sendResponse({params});
 
-				async function x() {
+				async function wrapMethodCall() {
 					return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
 						req.on('close', async () => {
 							if (params.connection) {
@@ -183,6 +188,12 @@ export default ({
 									obj.identifier = obj.identifier.slice(identifierPrefix.length + 1);
 								}
 
+								if (obj.set) {
+									if (hasSet(obj.set) === false) {
+										throw new ApiError({verb, code: ERRORS.BAD_ARGUMENT});
+									}
+								}
+
 								return obj;
 							}
 
@@ -196,6 +207,10 @@ export default ({
 
 							return {...acc, [key]: value};
 						}, {});
+
+						function hasSet(set) {
+							return listSets().some(({spec}) => set === spec);
+						}
 
 						function parseDatestamp(stamp) {
 							const m = moment.utc(stamp);
@@ -265,7 +280,7 @@ export default ({
 					Identify: async () => {
 						// Remove the preceding slash
 						const descr = REPOSITORY_NAMES[req.path.slice(1)];
-						return generateIdentifyResponse({requestURL, query, descr, earliestTimestamp: result});
+						return generateIdentifyResponse({requestURL, query, descr, earliestTimestamp});
 					}
 				};
 

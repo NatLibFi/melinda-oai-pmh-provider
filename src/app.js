@@ -19,13 +19,15 @@ import oracledb from 'oracledb';
 import HttpStatus from 'http-status';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
-import {bibFactory, autNamesFactory, autSubjectsFactory} from './middlewares';
+// Import {bibFactory, autNamesFactory, autSubjectsFactory} from './middlewares';
+import {bibFactory} from './middlewares';
+import IndexingError from './indexing-error';
 
 export default async function ({
 	identifierPrefix, httpPort, enableProxy, name, supportEmail,
 	secretEncryptionKey, resumptionTokenTimeout, maxResults,
 	oracleUsername, oraclePassword, oracleConnectString, instanceUrl,
-	alephBibLibrary, alephAutNamesLibrary, alephAutSubjectsLibrary
+	alephBibLibrary/* , alephAutNamesLibrary, alephAutSubjectsLibrary */
 }) {
 	setOracleOptions();
 
@@ -50,10 +52,10 @@ export default async function ({
 	logger.log('debug', 'Connected to database!');
 
 	const {
-		bib,
+		bib/* ,
 		autNames,
-		autSubjects
-	} = getMiddlewares();
+		autSubjects */
+	} = await getMiddlewares();
 
 	if (enableProxy) {
 		app.enable('trust proxy', true);
@@ -64,8 +66,8 @@ export default async function ({
 	}));
 
 	app.get('/bib', bib);
-	app.get('/aut-names', autNames);
-	app.get('/aut-subjects', autSubjects);
+	// App.get('/aut-names', autNames);
+	// app.get('/aut-subjects', autSubjects);
 
 	app.use(handleError);
 
@@ -82,23 +84,30 @@ export default async function ({
 		oracledb.poolPingInterval = 10;
 	}
 
-	function getMiddlewares() {
+	async function getMiddlewares() {
+		const connection = await pool.getConnection();
+
 		const params = {
 			pool, httpPort, enableProxy, name, supportEmail,
 			secretEncryptionKey, resumptionTokenTimeout, identifierPrefix,
 			instanceUrl, maxResults,
-			oracleUsername, oraclePassword, oracleConnectString
+			oracleUsername, oraclePassword, oracleConnectString,
+			connection
 		};
 
-		return {
-			bib: bibFactory({...params, library: alephBibLibrary}),
-			autNames: autNamesFactory({...params, library: alephAutNamesLibrary}),
-			autSubjects: autSubjectsFactory({...params, library: alephAutSubjectsLibrary})
+		const middlewares = {
+			bib: await bibFactory({...params, library: alephBibLibrary})/* ,
+			autNames: await autNamesFactory({...params, library: alephAutNamesLibrary}),
+			autSubjects: await autSubjectsFactory({...params, library: alephAutSubjectsLibrary}) */
 		};
+
+		await connection.close();
+		return middlewares;
 	}
 
 	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
-		res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+		const {INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE} = HttpStatus;
+		res.sendStatus(err instanceof IndexingError ? SERVICE_UNAVAILABLE : INTERNAL_SERVER_ERROR);
 		logger.log('error', err.stack);
 	}
 }

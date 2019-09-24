@@ -27,39 +27,39 @@ export function fromAlephId(id) {
 export function parseRecord(data) {
 	const buffer = Buffer.from(data);
 	return iterate();
-	
+
 	function iterate(offset = 0, lines = []) {
 		if (offset + 4 > buffer.length) {
 			const str = lines.join('\n');
 			return transformRecord(str);
 		}
-		
+
 		const length = Number(buffer.toString('utf8', offset, offset + 4));
 		const line = buffer.toString('utf8', offset + 4, offset + 4 + length);
-		
+
 		return iterate(offset + 4 + length, lines.concat(format(line)));
-		
+
 		function format(l) {
 			const start = l.substr(0, 5);
 			const end = l.substr(6);
 			return `000000000 ${start} L ${end}`;
 		}
-		
+
 		function transformRecord(str) {
 			const record = AlephSequential.from(str);
-			
+
 			format();
 
 			return record;
-			
+
 			function format() {
 				record.leader = formatWhitespace(record.leader);
 				record.fields
-				.filter(field => 'value' in field)
-				forEach(field => {
-					field.value = formatWhitespace(field.value);
-				});
-				
+					.filter(field => 'value' in field)
+					.forEach(field => {
+						field.value = formatWhitespace(field.value);
+					});
+
 				function formatWhitespace(value) {
 					return value.replace(/\^/g, ' ');
 				}
@@ -78,9 +78,9 @@ export function formatRecord(record) {
 		// We need a buffer so that the total number of bytes can calculated
 		const dataBuffer = Buffer.from(`${start}L${end}`);
 		const lengthPrefix = String(dataBuffer.length).padStart(4, '0');
-		
+
 		return Buffer.concat([Buffer.from(lengthPrefix), dataBuffer]);
 	});
-	
+
 	return Buffer.concat(buffers);
 }

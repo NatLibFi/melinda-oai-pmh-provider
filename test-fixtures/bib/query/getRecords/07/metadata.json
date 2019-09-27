@@ -1,0 +1,5 @@
+{
+    "descr": "Should return the expected query with getRecords parameter",
+    "params": {},
+    "skip": true
+}

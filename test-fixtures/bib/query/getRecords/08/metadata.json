@@ -1,0 +1,5 @@
+{
+    "descr": "Should return the expected query with start-, end-, cursor-, getRecords- and headingsIndexes-parameters",
+    "params": {},
+    "skip": true
+}

@@ -1,0 +1,9 @@
+{
+    "descr": "Should return the expected query with headingsIndexes parameter (Multiple indexes)",
+    "params": {
+        "headingsIndexes": [
+            "LOW  LFOO%",
+            "LOW  LBAR%"
+        ]
+    }
+}

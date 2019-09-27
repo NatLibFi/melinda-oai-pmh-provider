@@ -1,0 +1,8 @@
+SELECT /*+ ORDERED */ id, time FROM (
+					SELECT z106_rec_key id, MAX(RPAD(CONCAT(z106_update_date, LPAD(z106_time, 4, '0')), 12, '0')) time FROM foo01.z106
+						
+						
+						OFFSET 5000 ROWS FETCH NEXT 1000 ROWS ONLY
+				)
+				
+				

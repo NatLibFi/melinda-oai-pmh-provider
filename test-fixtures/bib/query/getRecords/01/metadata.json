@@ -1,0 +1,6 @@
+{
+    "descr": "Should return the expected query with cursor parameter",
+    "params": {
+        "cursor": 5000
+    }
+}

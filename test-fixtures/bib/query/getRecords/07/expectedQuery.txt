@@ -1,8 +1,0 @@
-SELECT /*+ ORDERED */ id, time FROM (
-					SELECT z106_rec_key id,  FROM foo01.z106
-						
-						
-						OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
-				)
-				
-				

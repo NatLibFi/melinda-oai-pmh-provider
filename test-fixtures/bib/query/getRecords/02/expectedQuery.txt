@@ -1,8 +1,0 @@
-SELECT /*+ ORDERED */ id, time, CASE WHEN z07_rec_key IS NULL THEN 'false' ELSE 'true' END indexing FROM (
-					SELECT z106_rec_key id, MAX(RPAD(CONCAT(z106_update_date, LPAD(z106_time, 4, '0')), 12, '0')) time FROM foo01.z106
-						JOIN foo01.z02 ON z02_doc_number = z106_rec_key AND (z02_rec_key LIKE 'LOW  LFOO%')
-						
-						OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
-				)
-				
-				LEFT JOIN foo01.z07 ON id = z07_rec_key

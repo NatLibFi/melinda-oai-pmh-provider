@@ -19,65 +19,64 @@ import {Utils} from '@natlibfi/melinda-commons';
 import {DB_TIME_FORMAT} from './constants';
 import {parseRecord, toAlephId, fromAlephId} from '../record';
 import IndexingError from '../indexing-error';
+import buildQuery from '../build-query';
 
 export default async function ({maxResults, sets, queries, connection}) {
 	const {createLogger, isDeletedRecord} = Utils;
 	const logger = createLogger();
 	const {
 		getEarliestTimestamp, getHeadingsIndex,
-		getRecords, getRecordsTimeframe,
-		getRecordsStartTime, getRecordsEndTime, getSingleRecord
+		getRecords, getSingleRecord
 	} = queries;
-	
+
 	const headingsIndexes = await getHeadingsIndexes();
 	const earliestTimestamp = await retrieveEarliestTimestamp();
-	
+
 	return {listRecords, listIdentifiers, getRecord, earliestTimestamp};
-	
+
 	async function getHeadingsIndexes() {
 		if (sets.length === 0) {
 			return;
 		}
-		
+
 		const results = await Promise.all(sets.map(mapIndexes));
 		return results.reduce((acc, obj) => ({...acc, ...obj}), {});
-		
+
 		async function mapIndexes({spec, headingsIndexes: setIndexes}) {
 			const indexes = await Promise.all(setIndexes.map(getIndex));
 			return {[spec]: indexes};
-			
+
 			async function getIndex(value) {
-				debugQuery(getHeadingsIndex, {value});
-				
-				const {resultSet} = await connection.execute(getHeadingsIndex, {value}, {resultSet: true});
+				const {query} = getQuery(getHeadingsIndex({value}));
+				const {resultSet} = await connection.execute(query, value, {resultSet: true});
 				const row = await resultSet.getRow();
-				
+
 				await resultSet.close();
 				return `${row.ID}%`;
 			}
 		}
 	}
-	
+
 	async function retrieveEarliestTimestamp() {
-		debugQuery(getEarliestTimestamp);
-		
-		const {resultSet} = await connection.execute(getEarliestTimestamp, [], {resultSet: true});
+		const {query, args} = getQuery(getEarliestTimestamp());
+
+		const {resultSet} = await connection.execute(query, args, {resultSet: true});
 		const row = await resultSet.getRow();
-		
+
 		await resultSet.close();
 		return moment(row.TIME, 'YYYYMMDDHHmmss');
 	}
-	
+
 	async function getRecord({connection, identifier, metadataPrefix}) {
-		const {query, args} = getSingleRecord({identifier: toAlephId(identifier)});
-		
-		debugQuery(query, args);
-		
+		const {query, args} = getQuery(getSingleRecord({
+			identifier: toAlephId(identifier)
+		}));
+
 		const {resultSet} = await connection.execute(query, args, {resultSet: true});
 		const row = await resultSet.getRow();
-		
+
 		await resultSet.close();
-		
+
 		if (row) {
 			return recordRowCallback({
 				row,
@@ -85,170 +84,135 @@ export default async function ({maxResults, sets, queries, connection}) {
 			});
 		}
 	}
-	
+
 	async function listRecords(params) {
-		return listResources({
-			...params,
-			getRecords: true
+		return queryRecords({
+			...params
 		});
 	}
-	
+
 	async function listIdentifiers(params) {
-		return queryRecords(params);
+		return queryRecords({
+			...params,
+			includeRecords: false
+		});
 	}
-	
+
 	async function queryRecords({
 		connection, from, until, set, metadataPrefix,
-		getRecords = false, cursor = 0
+		includeRecords = true, cursor = 0
 	}) {
 		const params = getParams();
 		return executeQuery(params);
-		
+
 		function getParams() {
 			const setIndexes = headingsIndexes[set];
 			const start = from;
 			const end = until;
 			const rowCallback = row => recordRowCallback({
-				row, getRecords,
+				row, includeRecords,
 				formatRecord: generateFormatter(metadataPrefix)
 			});
-			
+
 			if (start && end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => getRecords({cursor, start, end, getRecords, headingsIndexes: setIndexes})
+					genQuery: cursor => getRecords({cursor, start, end, headingsIndexes: setIndexes})
 				};
 			}
-			
+
 			if (start) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => getRecords({cursor, start, getRecords, headingsIndexes: setIndexes})
+					genQuery: cursor => getRecords({cursor, start, headingsIndexes: setIndexes})
 				};
 			}
-			
+
 			if (end) {
 				return {
 					rowCallback, connection, cursor,
-					genQuery: cursor => getRecords({cursor, end, getRecords, headingsIndexes: setIndexes})
+					genQuery: cursor => getRecords({cursor, end, headingsIndexes: setIndexes})
 				};
 			}
-			
+
 			return {
 				rowCallback, connection, cursor,
-				genQuery: cursor => getRecords({cursor, getRecords, headingsIndexes: setIndexes})
+				genQuery: cursor => getRecords({cursor, headingsIndexes: setIndexes})
 			};
 		}
-		
-		
+
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
-			const {query, args} = genQuery(cursor);
-			
-			debugQuery(query, args);
-			
+			const {query, args} = getQuery(genQuery(cursor));
 			const {resultSet} = await connection.execute(query, args || [], {resultSet: true});
-			
+
 			return pump();
-						
-			async function pump(results) {
+
+			async function pump(records = []) {
 				const row = await resultSet.getRow();
-				
+
 				if (row) {
 					const result = rowCallback(row);
-					return pump(results.concat(result));
+
+					if (records.length + 1 === maxResults) {
+						return {
+							records: records.concat(result),
+							cursor: cursor + maxResults
+						};
+					}
+
+					return pump(records.concat(result));
 				}
 
 				await resultSet.close();
 
-				if (results.length === maxResults) {					
-					return {results, cursor: cursor + maxResults}
+				if (records.length === maxResults) {
+					return {records, cursor: cursor + maxResults};
 				}
 
-				return {results};
+				return {records};
 			}
 		}
-		
-		/*async function executeQuery({connection, genQuery, rowCallback, cursor}) {
-			return execute({cursor});
-			
-			async function execute({records = [], cursor, previousCursor = cursor}) {
-				const {query, args} = genQuery(cursor);
-				
-				debugQuery(query, args);
-				
-				const {resultSet} = await connection.execute(query, args || [], {resultSet: true});
-				
-				previousCursor = cursor;
-				await pump(resultSet);
-				
-				if (cursor === previousCursor) {
-					return {records};
-				}
-				
-				if (records.length === maxResults) {
-					return {records, cursor};
-				}
-				
-				return execute({records, cursor, previousCursor});
-				
-				async function pump(resultSet) {
-					const row = await resultSet.getRow();
-					
-					if (row) {
-						cursor++;
-						const result = rowCallback(row);
-						
-						if (result) {
-							records.push(result);
-							
-							if (records.length === maxResults) {
-								await resultSet.close();
-								return;
-							}
-							
-							return pump(resultSet);
-						}
-					}
-					
-					await resultSet.close();
-				}
-			}
-		}*/		
 	}
-	
-	function recordRowCallback({row, formatRecord, includeRecord = true}) {
+
+	function recordRowCallback({row, formatRecord, includeRecords = true}) {
 		if (row.INDEXING === 'true') {
 			throw new IndexingError(row.ID);
 		}
-		
+
 		const record = parseRecord(row.RECORD);
-		
+
 		const isDeleted = isDeletedRecord(record);
-		
-		if (includeRecord && isDeleted === false) {
+
+		if (includeRecords && isDeleted === false) {
 			return {
 				id: fromAlephId(row.ID),
 				time: moment(row.TIME, DB_TIME_FORMAT),
 				record: formatRecord(record)
 			};
 		}
-		
+
 		return {id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT), isDeleted};
 	}
-	
-	function debugQuery(query, args) {
-		logger.log('debug', `Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
-	}
-	
+
 	function generateFormatter(metadataPrefix) {
 		return metadataPrefix === 'marc' ?
-		formatToStandard :
-		r => r;
-		
+			formatToStandard :
+			r => r;
+
 		function formatToStandard(record) {
 			// Get all fields with non-numeric tags
 			record.get(/[^0-9]+/).forEach(f => record.removeField(f));
 			return record;
+		}
+	}
+
+	function getQuery({query: queryObj, args}) {
+		const query = buildQuery(queryObj);
+		debugQuery(query, args);
+		return {query, args};
+
+		function debugQuery(query, args) {
+			logger.log('debug', `Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
 		}
 	}
 }

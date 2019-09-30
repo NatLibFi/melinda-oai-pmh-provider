@@ -1,0 +1,3 @@
+[
+    "SELECT z01_acc_sequence id FROM foo01.z01 WHERE z01_rec_key like :value"
+]

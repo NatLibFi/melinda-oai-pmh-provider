@@ -1,4 +1,0 @@
-SELECT id, time, z00_data record FROM (
-						SELECT z00_doc_number id, MAX(RPAD(CONCAT(z106_update_date, LPAD(z106_time, 4, '0')), 12, '0')) time FROM foo01.z00
-						JOIN foo01.z106 ON z00_doc_number = :identifier AND z106_rec_key = z00_doc_number GROUP BY z00_doc_number
-			) JOIN foo01.z00 ON z00_doc_number = id

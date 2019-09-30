@@ -29,50 +29,6 @@ describe('app', () => {
 		rootPath: [__dirname, '..', 'test-fixtures']
 	});
 
-	/** Let requester;
-	const oracledbMock = oracledbMockFactory();
-	const generateTestSuite = testSuiteFactory({
-		rootPath: [__dirname, '..', 'test-fixtures'],
-		getInterfaces: () => ({requester, oracledbMock})
-	});
-
-	RewireAPI.__Rewire__('oracledb', oracledbMock);
-
-	beforeEach(asy
-		const httpPort = 1337;
-		const secretEncryptionKey = 'yuKf7ly1xml33H5+fThvzhdY4XlFMJwQ';
-
-		const supportEmail = 'foo@fu.bar';
-		const instanceUrl = `http://localhost:${httpPort}`;
-		const identifierPrefix = 'oai:foo.bar';
-		const maxResults = 5;
-		// Tests will break in the 4th millennium
-		const resumptionTokenTimeout = 31536000000000;
-		const oracleUsername = 'foo';
-		const oraclePassword = 'bar';
-		const oracleConnectString = 'BAR';
-		const alephLibrary = 'foo1';
-
-		const app = await startApp({
-			httpPort, secretEncryptionKey, instanceUrl,
-			supportEmail, identifierPrefix,
-			maxResults, resumptionTokenTimeout,
-			oracleUsername, oraclePassword, oracleConnectString,
-			alephLibrary
-		});
-
-		requester = chai.request(app).keepOpen();
-	});
-
-	afterEach(async () => {
-		await requester.close();
-		oracledbMock._clear();
-	});
-
-	after(() => {
-		RewireAPI.__ResetDependency__('oracledb');
-	}); */
-
 	describe('bib', () => {
 		describe('Identify', generateTestSuite('bib', 'Identify'));
 		describe('ListMetadataFormats', generateTestSuite('bib', 'ListMetadataFormats'));

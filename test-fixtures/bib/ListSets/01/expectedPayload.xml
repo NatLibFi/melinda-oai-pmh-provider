@@ -11,5 +11,9 @@
 			<setSpec>viola</setSpec>
 			<setName>Viola</setName>
 		</set>
+		<set>
+			<setSpec>arto</setSpec>
+			<setName>Arto</setName>
+		</set>
 	</ListSets>
 </OAI-PMH>

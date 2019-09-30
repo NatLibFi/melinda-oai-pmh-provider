@@ -1,3 +1,6 @@
 {
-    "descr": "Should return the expected query"
+    "descr": "Should return the expected query",
+    "params": {
+        "value": "LOW  LFOO%"
+    }
 }

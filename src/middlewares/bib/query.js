@@ -14,11 +14,11 @@
 * limitations under the License.
 */
 
-import {generateOr} from './build-query';
+import {generateOr} from '../../build-query';
 
 export default ({library, limit}) => {
 	const FORMAT_TIME = 'RPAD(CONCAT(z106_update_date, LPAD(z106_time, 4, \'0\')), 12, \'0\')';
-	const INDEXING_COLUMN = ', CASE WHEN z07_rec_key IS NULL THEN \'false\' ELSE \'true\' END indexing';
+	const INDEXING_COLUMN = 'CASE WHEN z07_rec_key IS NULL THEN \'false\' ELSE \'true\' END indexing';
 
 	return {
 		getSingleRecord: ({identifier}) => ({
@@ -34,10 +34,11 @@ export default ({library, limit}) => {
 				`) JOIN ${library}.z00 ON z00_doc_number = id`
 			]
 		}),
-		getHeadingsIndex: () => ({
+		getHeadingsIndex: ({value}) => ({
 			query: [
 				`SELECT z01_acc_sequence id FROM ${library}.z01 WHERE z01_rec_key like :value`
-			]
+			],
+			args: {value}
 		}),
 		getEarliestTimestamp: () => ({
 			query: [
@@ -58,7 +59,7 @@ export default ({library, limit}) => {
 				')'
 			]
 		}),
-		getRecords: ({cursor = 0, start, end, getRecords = false, headingsIndexes}) => {
+		getRecords: ({cursor = 0, start, end, headingsIndexes}) => {
 			return {
 				args: getArgs(),
 				query: build()
@@ -83,7 +84,7 @@ export default ({library, limit}) => {
 			function build() {
 				const obj = [
 					{
-						stmt: `SELECT id, time, ${getRecords ? 'z00_data record' : ''}${headingsIndexes ? `, ${INDEXING_COLUMN}` : ''} FROM (`,
+						stmt: `SELECT id, time, z00_data record${headingsIndexes ? `, ${INDEXING_COLUMN}` : ''} FROM (`,
 						sub: [
 							{
 								stmt: `SELECT /*+ ORDERED */ z106_rec_key id, MAX(${FORMAT_TIME}) time FROM ${library}.z106`,
@@ -102,9 +103,7 @@ export default ({library, limit}) => {
 					obj.push(`LEFT JOIN ${library}.z07 ON id = z07_rec_key`);
 				}
 
-				if (getRecords) {
-					obj.push(`JOIN ${library}.z00 ON id = z00_doc_number`);
-				}
+				obj.push(`JOIN ${library}.z00 ON id = z00_doc_number`);
 
 				return obj;
 			}
@@ -119,7 +118,7 @@ export default ({library, limit}) => {
 					statements.push({
 						stmt: `JOIN ${library}.z02 ON`,
 						sub: [
-							`JOIN ${library}.z02 ON z02_doc_number = z106_rec_key AND ${generateOr(conditions)}`
+							`z02_doc_number = z106_rec_key AND ${generateOr(conditions)}`
 						]
 					});
 				}
@@ -141,7 +140,7 @@ export default ({library, limit}) => {
 
 					statements.push({
 						stmt: 'WHERE',
-						sub: generateOr(conditions)
+						sub: generateOr(conditions, true)
 					});
 				}
 

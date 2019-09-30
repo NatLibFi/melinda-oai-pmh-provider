@@ -35,10 +35,12 @@ export default obj => {
 	}
 };
 
-export function generateOr(conditions) {
-	return conditions
+export function generateOr(conditions, toSub = false) {
+	const parts = conditions
 		.slice()
 		.reverse()
-		.map((v, i) => i === 0 ? v : `${v} OR`)
+		.map((v, i) => i === 0 ? v : `${v} OR `)
 		.reverse();
+
+	return toSub ? parts : `(${parts.join('')})`;
 }

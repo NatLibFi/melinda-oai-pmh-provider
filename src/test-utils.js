@@ -64,10 +64,7 @@ export default ({rootPath}) => {
 						it.skip(`${sub} ${descr}`);
 					} else {
 						it(`${sub} ${descr}`, async () => {
-							// Const {requester, oracledbMock} = getInterfaces();
-
 							if (dbResults) {
-								// OracledbMock._execute([{results: dbResults}]);
 								oracledbMock._execute(dbResults.map(results => ({results})));
 							}
 
@@ -84,14 +81,14 @@ export default ({rootPath}) => {
 							const oracleUsername = 'foo';
 							const oraclePassword = 'bar';
 							const oracleConnectString = 'BAR';
-							const alephLibrary = 'foo1';
+							const alephBibLibrary = 'foo01';
 
 							const app = await startApp({
 								httpPort, secretEncryptionKey, instanceUrl,
 								supportEmail, identifierPrefix,
 								maxResults, resumptionTokenTimeout,
 								oracleUsername, oraclePassword, oracleConnectString,
-								alephLibrary
+								alephBibLibrary
 							});
 
 							requester = chai.request(app).keepOpen();

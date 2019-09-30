@@ -39,16 +39,16 @@ export default async params => {
 		return [
 			{
 				spec: 'fennica', name: 'Fennica',
-				headingsIndexes: ['LOW  LFENNI%']
+				headingsIndexes: ['LOW  LFIKKA%', 'H042 LFINB %']
 			},
 			{
 				spec: 'viola', name: 'Viola',
-				headingsIndexes: ['LOW  LVIOLA%']
-			}/* ,
+				headingsIndexes: ['LOW  LFIKKA%', 'H042 LFINBD%']
+			},
 			{
 				spec: 'arto', name: 'Arto',
-				headingsIndexes: []
-			},
+				headingsIndexes: ['H960 LARTO%']
+			}/* ,
 			{
 				spec: 'monographic', name: 'Monographic records',
 				headingsIndexes: []

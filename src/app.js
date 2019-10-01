@@ -19,15 +19,14 @@ import oracledb from 'oracledb';
 import HttpStatus from 'http-status';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
-// Import {bibFactory, autNamesFactory, autSubjectsFactory} from './middlewares';
-import {bibFactory} from './middlewares';
+import {bibFactory, autNamesFactory, autSubjectsFactory} from './middlewares';
 import IndexingError from './indexing-error';
 
 export default async function ({
 	identifierPrefix, httpPort, enableProxy, name, supportEmail,
 	secretEncryptionKey, resumptionTokenTimeout, maxResults,
 	oracleUsername, oraclePassword, oracleConnectString, instanceUrl,
-	alephBibLibrary/* , alephAutNamesLibrary, alephAutSubjectsLibrary */
+	alephBibLibrary, alephAutNamesLibrary, alephAutSubjectsLibrary
 }) {
 	setOracleOptions();
 
@@ -52,9 +51,9 @@ export default async function ({
 	logger.log('debug', 'Connected to database!');
 
 	const {
-		bib/* ,
+		bib,
 		autNames,
-		autSubjects */
+		autSubjects
 	} = await getMiddlewares();
 
 	if (enableProxy) {
@@ -66,13 +65,17 @@ export default async function ({
 	}));
 
 	app.get('/bib', bib);
-	// App.get('/aut-names', autNames);
-	// app.get('/aut-subjects', autSubjects);
+	app.get('/aut-names', autNames);
+	app.get('/aut-subjects', autSubjects);
 
 	app.use(handleError);
 
 	const server = app.listen(httpPort, () => logger.log('info', 'Started Melinda OAI-PMH provider'));
-	server.on('close', async () => pool.close(2));
+
+	server.on('close', async () => {
+		console.log('CLOSE CALLBACK');
+		await pool.close(0);
+	});
 
 	return server;
 
@@ -96,9 +99,9 @@ export default async function ({
 		};
 
 		const middlewares = {
-			bib: await bibFactory({...params, library: alephBibLibrary})/* ,
+			bib: await bibFactory({...params, library: alephBibLibrary}),
 			autNames: await autNamesFactory({...params, library: alephAutNamesLibrary}),
-			autSubjects: await autSubjectsFactory({...params, library: alephAutSubjectsLibrary}) */
+			autSubjects: await autSubjectsFactory({...params, library: alephAutSubjectsLibrary})
 		};
 
 		await connection.close();

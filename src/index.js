@@ -35,18 +35,20 @@ import {
 run();
 
 async function run() {
+	let server;
+
 	process.on('SIGTERM', handleSignal);
 	process.on('SIGINT', handleSignal);
 
-	process.on('uncaughtException', async err => {
-		handleTermination({code: 1, message: err.stack});
+	process.on('uncaughtException', ({stack}) => {
+		handleTermination({code: 1, message: stack});
 	});
 
-	process.on('unhandledRejection', async err => {
-		handleTermination({code: 1, message: err.stack});
+	process.on('unhandledRejection', ({stack}) => {
+		handleTermination({code: 1, message: stack});
 	});
 
-	const server = await startApp({
+	server = await startApp({
 		enableProxy, supportEmail,
 		httpPort, secretEncryptionKey, instanceUrl,
 		identifierPrefix, resumptionTokenTimeout, maxResults,

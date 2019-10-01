@@ -35,11 +35,25 @@ export default obj => {
 	}
 };
 
-export function generateOr(conditions, toSub = false) {
+export function generateOr({conditions, toSub = false}) {
+	return genConditionalStatements({
+		conditions, toSub,
+		separator: 'OR'
+	});
+}
+
+export function generateAnd({conditions, toSub = false}) {
+	return genConditionalStatements({
+		conditions, toSub,
+		separator: 'AND'
+	});
+}
+
+function genConditionalStatements({conditions, toSub = false, separator}) {
 	const parts = conditions
 		.slice()
 		.reverse()
-		.map((v, i) => i === 0 ? v : `${v} OR `)
+		.map((v, i) => i === 0 ? v : `${v} ${separator} `)
 		.reverse();
 
 	return toSub ? parts : `(${parts.join('')})`;

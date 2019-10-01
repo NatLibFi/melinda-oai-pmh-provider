@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-import {generateOr} from '../../build-query';
+import {generateOr, generateAnd} from '../build-query';
 
 export default ({library, limit}) => {
 	const FORMAT_TIME = 'RPAD(CONCAT(z106_update_date, LPAD(z106_time, 4, \'0\')), 12, \'0\')';
@@ -84,15 +84,19 @@ export default ({library, limit}) => {
 			function build() {
 				const obj = [
 					{
-						stmt: `SELECT id, time, z00_data record${headingsIndexes ? `, ${INDEXING_COLUMN}` : ''} FROM (`,
+						stmt: `SELECT /*+ ORDERED */ id, time, z00_data record${headingsIndexes ? `, ${INDEXING_COLUMN}` : ''} FROM (`,
 						sub: [
 							{
-								stmt: `SELECT /*+ ORDERED */ z106_rec_key id, MAX(${FORMAT_TIME}) time FROM ${library}.z106`,
-								sub: generateConditions().concat([
-									'GROUP BY z106_rec_key',
-									`OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`
-
-								])
+								stmt: `SELECT z106_rec_key id, MAX(${FORMAT_TIME}) time FROM ${library}.z106`,
+								sub: [
+									`JOIN ${library}.z00 ON z106_rec_key = z00_doc_number`
+								].concat(
+									generateConditions(),
+									[
+										'GROUP BY z106_rec_key',
+										`OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`
+									]
+								)
 							}
 						]
 					},
@@ -116,9 +120,9 @@ export default ({library, limit}) => {
 						.map(query => `z02_rec_key LIKE '${query}'`);
 
 					statements.push({
-						stmt: `JOIN ${library}.z02 ON`,
+						stmt: `JOIN /*+ ORDERED */ ${library}.z02 ON`,
 						sub: [
-							`z02_doc_number = z106_rec_key AND ${generateOr(conditions)}`
+							`z02_doc_number = z106_rec_key AND ${generateAnd({conditions})}`
 						]
 					});
 				}
@@ -140,7 +144,7 @@ export default ({library, limit}) => {
 
 					statements.push({
 						stmt: 'WHERE',
-						sub: generateOr(conditions, true)
+						sub: generateOr({conditions, toSub: true})
 					});
 				}
 

@@ -36,22 +36,29 @@ export default async function ({maxResults, sets, queries, connection}) {
 
 	async function getHeadingsIndexes() {
 		if (sets.length === 0) {
-			return;
+			return {};
 		}
 
-		const results = await Promise.all(sets.map(mapIndexes));
-		return results.reduce((acc, obj) => ({...acc, ...obj}), {});
+		return getIndexes(sets.slice());
 
-		async function mapIndexes({spec, headingsIndexes: setIndexes}) {
-			const indexes = await Promise.all(setIndexes.map(getIndex));
-			return {[spec]: indexes};
+		async function getIndexes(sets, results = {}) {
+			const set = sets.shift();
+
+			if (set) {
+				const {spec, headingsIndexes: setIndexes} = set;
+				const indexes = await Promise.all(setIndexes.map(getIndex));
+				return getIndexes(sets, {...results, [spec]: indexes});
+			}
+
+			return results;
 
 			async function getIndex(value) {
-				const {query} = getQuery(getHeadingsIndex({value}));
-				const {resultSet} = await connection.execute(query, value, {resultSet: true});
+				const {query, args} = getQuery(getHeadingsIndex({value}));
+				const {resultSet} = await connection.execute(query, args, {resultSet: true});
 				const row = await resultSet.getRow();
 
 				await resultSet.close();
+				console.log(value);
 				return `${row.ID}%`;
 			}
 		}
@@ -64,7 +71,7 @@ export default async function ({maxResults, sets, queries, connection}) {
 		const row = await resultSet.getRow();
 
 		await resultSet.close();
-		return moment(row.TIME, 'YYYYMMDDHHmmss');
+		return moment(row.TIME, DB_TIME_FORMAT);
 	}
 
 	async function getRecord({connection, identifier, metadataPrefix}) {
@@ -143,7 +150,7 @@ export default async function ({maxResults, sets, queries, connection}) {
 
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
 			const {query, args} = getQuery(genQuery(cursor));
-			const {resultSet} = await connection.execute(query, args || [], {resultSet: true});
+			const {resultSet} = await connection.execute(query, args, {resultSet: true});
 
 			return pump();
 
@@ -152,14 +159,6 @@ export default async function ({maxResults, sets, queries, connection}) {
 
 				if (row) {
 					const result = rowCallback(row);
-
-					if (records.length + 1 === maxResults) {
-						return {
-							records: records.concat(result),
-							cursor: cursor + maxResults
-						};
-					}
-
 					return pump(records.concat(result));
 				}
 
@@ -209,7 +208,10 @@ export default async function ({maxResults, sets, queries, connection}) {
 	function getQuery({query: queryObj, args}) {
 		const query = buildQuery(queryObj);
 		debugQuery(query, args);
-		return {query, args};
+		return {
+			query,
+			args: args || {}
+		};
 
 		function debugQuery(query, args) {
 			logger.log('debug', `Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);

@@ -8,7 +8,7 @@
 					{
 						"stmt": "JOIN foo01.z02 ON",
 						"sub": [
-							"z02_doc_number = z106_rec_key AND (z02_rec_key LIKE 'LOW  LFOO%' OR z02_rec_key LIKE 'LOW  LBAR%')"
+							"z02_doc_number = z106_rec_key AND (z02_rec_key LIKE 'LOW  LFOO%' AND z02_rec_key LIKE 'LOW  LBAR%')"
 						]
 					},
 					"GROUP BY z106_rec_key",

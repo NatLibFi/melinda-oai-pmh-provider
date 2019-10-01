@@ -20,6 +20,11 @@ export const RESPONSE_TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss[Z]';
 export const TOKEN_EXPIRATION_FORMAT = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
 export const DB_TIME_FORMAT = 'YYYYMMDDHHmmss';
 
+export const REQUEST_DATE_STAMP_FORMATS = [
+	'YYYY-MM-DD',
+	'YYYY-MM-DD[T]hh:mm:ss'
+];
+
 export const ERRORS = {
 	BAD_ARGUMENT: 'badArgument',
 	BAD_RESUMPTION_TOKEN: 'badResumptionToken',

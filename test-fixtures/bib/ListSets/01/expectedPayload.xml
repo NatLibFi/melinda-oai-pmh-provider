@@ -6,14 +6,17 @@
 		<set>
 			<setSpec>fennica</setSpec>
 			<setName>Fennica</setName>
+			<setDescription>The Finnish national bibliography</setDescription>
 		</set>
 		<set>
 			<setSpec>viola</setSpec>
 			<setName>Viola</setName>
+			<setDescription>The Finnish national discography</setDescription>
 		</set>
 		<set>
 			<setSpec>arto</setSpec>
 			<setName>Arto</setName>
+			<setDescription>Finnish periodical and monograph articles</setDescription>
 		</set>
 	</ListSets>
 </OAI-PMH>

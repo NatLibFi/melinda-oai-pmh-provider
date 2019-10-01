@@ -14,57 +14,52 @@
 * limitations under the License.
 */
 
-import queryInterfaceFactory from '../query-interface';
-import queryFactory from './query';
-import requestFactory from '../request';
+import createInterface from './interface';
 
-export default async params => {
-	const {maxResults, library, connection} = params;
-	const sets = generateSets();
-	const queries = queryFactory({library, limit: maxResults});
-	const queryInterface = await queryInterfaceFactory({
-		maxResults,
-		queries,
-		sets,
-		connection
-	});
-
-	return requestFactory({...params, ...queryInterface, listSets});
-
-	function listSets() {
-		return sets.map(({spec, name}) => ({spec, name}));
-	}
+export default params => {
+	return createInterface(params, generateSets());
 
 	function generateSets() {
 		return [
 			{
 				spec: 'fennica', name: 'Fennica',
+				description: 'The Finnish national bibliography',
 				headingsIndexes: ['LOW  LFIKKA%', 'H042 LFINB %']
 			},
 			{
 				spec: 'viola', name: 'Viola',
+				description: 'The Finnish national discography',
 				headingsIndexes: ['LOW  LFIKKA%', 'H042 LFINBD%']
 			},
 			{
 				spec: 'arto', name: 'Arto',
+				description: 'Finnish periodical and monograph articles',
 				headingsIndexes: ['H960 LARTO%']
-			}/* ,
+			},
+			/* {
+				spec: 'gmc', name: 'GMC',
+				description: 'Global Music Centre'
+			}, */
 			{
 				spec: 'monographic', name: 'Monographic records',
-				headingsIndexes: []
+				description: 'Monographic records',
+				headingsIndexes: ['HBL  LM %']
 			},
 			{
 				spec: 'serial', name: 'Serial records',
-				headingsIndexes: []
+				description: 'Serial records',
+				headingsIndexes: ['HBL  LS %']
 			},
 			{
 				spec: 'monographic:fennica', name: 'Monographic records (Fennica)',
-				headingsIndexes: []
+				description: 'The Finnish national bibliograpy - Monographic records',
+				headingsIndexes: ['LOW  LFIKKA%', 'H042 LFINB %', 'HBL  LM %']
 			},
 			{
 				spec: 'serial:fennica', name: 'Serial records (Fennica)',
-				headingsIndexes: []
-			} */
+				description: 'The Finnish national bibliograpy - Serial records',
+				headingsIndexes: ['LOW  LFIKKA%', 'H042 LFINB %', 'HBL  LS %']
+			}
 		];
 	}
 };

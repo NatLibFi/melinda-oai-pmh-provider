@@ -17,6 +17,7 @@
 import HttpStatus from 'http-status';
 import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
+import {REQUEST_DATE_STAMP_FORMATS} from './constants';
 import ApiError from './api-error';
 import responseFactory from './response';
 
@@ -127,6 +128,8 @@ export default ({
 				async function wrapMethodCall() {
 					return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
 						req.on('close', async () => {
+							logger.log('info', 'Request cancelled');
+
 							if (params.connection) {
 								await params.connection.close();
 							}
@@ -213,7 +216,7 @@ export default ({
 						}
 
 						function parseDatestamp(stamp) {
-							const m = moment.utc(stamp);
+							const m = moment.utc(stamp, REQUEST_DATE_STAMP_FORMATS);
 
 							if (m.isValid()) {
 								return m;

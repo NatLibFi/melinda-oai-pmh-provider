@@ -79,9 +79,10 @@ export default ({identifierPrefix, supportEmail}) => {
 	async function generateListSetsResponse({requestURL, query, sets}) {
 		return generate({requestURL, query, payload: {
 			ListSets: {
-				set: sets.map(({spec, name}) => ({
+				set: sets.map(({spec, name, description}) => ({
 					setSpec: [spec],
-					setName: [name]
+					setName: [name],
+					setDescription: [description]
 				}))
 			}
 		}});

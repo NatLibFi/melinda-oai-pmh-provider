@@ -14,52 +14,33 @@
 * limitations under the License.
 */
 
-import queryInterfaceFactory from '../query-interface';
-import queryFactory from './query';
-import requestFactory from '../request';
-import {createHasFieldFilter} from '../utils';
+import createInterface from './interface';
 
 export default params => {
-	const sets = generateSets();
-	const {maxResults, library} = params;
-
-	const queries = queryFactory({library, limit: maxResults});
-	const queryInterface = queryInterfaceFactory({
-		maxResults,
-		getFilter,
-		queries
-	});
-
-	return requestFactory({...params, ...queryInterface, listSets});
-
-	function getFilter(id) {
-		const set = sets.find(({spec}) => spec === id);
-		return set ? set.filter : undefined;
-	}
-
-	function listSets() {
-		return sets.map(({spec, name}) => ({spec, name}));
-	}
+	return createInterface(params, generateSets());
 
 	function generateSets() {
 		return [
-			{
+			/* {
 				spec: 'topical', name: 'Topical terms',
-				filter: createHasFieldFilter(/^150$/)
+				description: 'Topical terms',
+				headingsIndexes: []
 			},
 			{
 				spec: 'geographic', name: 'Geographic names',
-				filter: createHasFieldFilter(/^151$/)
+				description: 'Geographic names',
+				headingsIndexes: []
 			},
 			{
 				spec: 'genre', name: 'Genre/form terms',
-				filter: createHasFieldFilter(/^155$/)
+				description: 'Genre/form terms',
+				headingsIndexes: []
 			},
 			{
 				spec: 'mediumperf', name: 'Medium of performance terms',
-				filter: createHasFieldFilter(/^162$/)
-			}
-
+				description: 'Medium of performance terms',
+				headingsIndexes: []
+			} */
 		];
 	}
 };

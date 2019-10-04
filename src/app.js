@@ -81,6 +81,7 @@ export default async function ({
 
 	function setOracleOptions() {
 		oracledb.outFormat = oracledb.OBJECT;
+		// Oracledb.fetchArraySize = 100;
 		oracledb.queueTimeout = 10000;
 		oracledb.poolTimeout = 20;
 		oracledb.events = false;
@@ -110,7 +111,13 @@ export default async function ({
 
 	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
 		const {INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE} = HttpStatus;
-		res.sendStatus(err instanceof IndexingError ? SERVICE_UNAVAILABLE : INTERNAL_SERVER_ERROR);
-		logger.log('error', err.stack);
+
+		if (err instanceof IndexingError) {
+			res.sendStatus(SERVICE_UNAVAILABLE);
+			logger.log('error', err.stack);
+		} else {
+			res.sendStatus(INTERNAL_SERVER_ERROR);
+			throw err;
+		}
 	}
 }

@@ -149,26 +149,49 @@ export default async function ({maxResults, sets, queries, connection}) {
 		}
 
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
-			const {query, args} = getQuery(genQuery(cursor));
-			const {resultSet} = await connection.execute(query, args, {resultSet: true});
+			return pump(cursor);
 
-			return pump();
+			async function pump(cursor, records = []) {
+				logger.log('debug', 'EXECUTE');
 
-			async function pump(records = []) {
-				const row = await resultSet.getRow();
-
-				if (row) {
-					const result = rowCallback(row);
-					return pump(records.concat(result));
-				}
+				const {query, args} = getQuery(genQuery(cursor));
+				const {resultSet} = await connection.execute(query, args, {resultSet: true});
+				const [newRecords, noMore] = await pump2(records, true);
 
 				await resultSet.close();
-
-				if (records.length === maxResults) {
-					return {records, cursor: cursor + maxResults};
+				
+				if (newRecords.length < maxResults) {
+					return pump(cursor + maxResults, newRecords);
 				}
 
-				return {records};
+				return {
+					records: newRecords,
+					cursor: cursor + 
+				}
+
+				async function pump2(records, firstRun) {
+					logger.log('debug', 'GET ROW');
+
+					const row = await resultSet.getRow();
+
+					if (row) {
+						const result = rowCallback(row);
+
+						logger.log('debug', `${records.length}-${maxResults}`);
+
+						if (records.length + 1 === maxResults) {
+							return [records.concat(result), true];							
+						}
+
+						return pump2(records.concat(result));
+					}
+
+					if (firstRun) {
+						return [records, true];
+					}
+
+					return [records];
+				}
 			}
 		}
 	}

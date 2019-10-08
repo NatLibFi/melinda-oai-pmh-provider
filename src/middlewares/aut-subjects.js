@@ -23,23 +23,19 @@ export default params => {
 		return [
 			/* {
 				spec: 'topical', name: 'Topical terms',
-				description: 'Topical terms',
-				headingsIndexes: []
+				description: 'Topical terms'
 			},
 			{
 				spec: 'geographic', name: 'Geographic names',
-				description: 'Geographic names',
-				headingsIndexes: []
+				description: 'Geographic names'
 			},
 			{
 				spec: 'genre', name: 'Genre/form terms',
-				description: 'Genre/form terms',
-				headingsIndexes: []
+				description: 'Genre/form terms'
 			},
 			{
 				spec: 'mediumperf', name: 'Medium of performance terms',
-				description: 'Medium of performance terms',
-				headingsIndexes: []
+				description: 'Medium of performance terms'
 			} */
 		];
 	}

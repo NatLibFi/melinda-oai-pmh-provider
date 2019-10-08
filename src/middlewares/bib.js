@@ -25,56 +25,56 @@ export default params => {
 				spec: 'fennica', name: 'Fennica',
 				description: 'The Finnish national bibliography',
 				indexes: {
-					headings: ['LOW  LFIKKA%', 'H042 LFINB %']
-				}											
+					heading: ['LOW  LFIKKA%', 'H042 LFINB %']
+				}
 			},
 			{
 				spec: 'viola', name: 'Viola',
 				description: 'The Finnish national discography',
 				indexes: {
-					headings: ['LOW  LFIKKA%', 'H042 LFINBD%']
-				}				
+					heading: ['LOW  LFIKKA%', 'H042 LFINBD %']
+				}
 			},
 			{
 				spec: 'arto', name: 'Arto',
 				description: 'Finnish periodical and monograph articles',
 				indexes: {
-					headings: ['H960 LARTO %']
+					heading: ['H960 LARTO %']
 				}
 			},
 			{
 				spec: 'gmc', name: 'GMC',
 				description: 'Global Music Centre',
 				indexes: {
-					headings: ['H960 LMUSA %']
+					heading: ['LOW  LMUSA %']
 				}
 			},
 			{
 				spec: 'monographic', name: 'Monographic records',
 				description: 'Monographic records',
 				indexes: {
-					headings: ['HBL  LM %']
+					heading: ['HBL  LM %']
 				}
 			},
 			{
 				spec: 'serial', name: 'Serial records',
 				description: 'Serial records',
 				indexes: {
-					headings: ['HBL  LS %']
+					heading: ['HBL  LS %']
 				}
 			},
 			{
 				spec: 'monographic:fennica', name: 'Monographic records (Fennica)',
 				description: 'The Finnish national bibliograpy - Monographic records',
 				indexes: {
-					headings: ['LOW  LFIKKA%', 'H042 LFINB %', 'HBL  LM %']
-				}				
+					heading: ['LOW  LFIKKA%', 'H042 LFINB %', 'HBL  LM %']
+				}
 			},
 			{
 				spec: 'serial:fennica', name: 'Serial records (Fennica)',
 				description: 'The Finnish national bibliograpy - Serial records',
 				indexes: {
-					headings: ['LOW  LFIKKA%', 'H042 LFINB %', 'HBL  LS %']
+					heading: ['LOW  LFIKKA%', 'H042 LFINB %', 'HBL  LS %']
 				}
 			}
 		];

@@ -29,37 +29,59 @@ export default async function ({maxResults, sets, queries, connection}) {
 		getRecords, getSingleRecord
 	} = queries;
 
-	const headingsIndexes = await getHeadingsIndexes();
+	const indexes = await getIndexes();
 	const earliestTimestamp = await retrieveEarliestTimestamp();
 
 	return {listRecords, listIdentifiers, getRecord, earliestTimestamp};
 
-	async function getHeadingsIndexes() {
+	async function getIndexes() {
 		if (sets.length === 0) {
 			return {};
 		}
 
-		return getIndexes(sets.slice());
+		const cache = {};
 
-		async function getIndexes(sets, results = {}) {
+		return get(sets.slice());
+
+		async function get(sets, results = {}) {
 			const set = sets.shift();
 
 			if (set) {
-				const {spec, headingsIndexes: setIndexes} = set;
-				const indexes = await Promise.all(setIndexes.map(getIndex));
-				return getIndexes(sets, {...results, [spec]: indexes});
+				const {spec, indexes} = set;
+
+				if (indexes.heading) {
+					const headingIndexes = await getHeadingIndexes(indexes.heading.slice());
+
+					return get(sets, {...results, [spec]: {
+						...indexes,
+						heading: headingIndexes
+					}});
+				}
+
+				return get(sets, {...results, [spec]: indexes});
 			}
 
 			return results;
 
-			async function getIndex(value) {
-				const {query, args} = getQuery(getHeadingsIndex({value}));
-				const {resultSet} = await connection.execute(query, args, {resultSet: true});
-				const row = await resultSet.getRow();
+			async function getHeadingIndexes(values, results = []) {
+				const value = values.shift();
 
-				await resultSet.close();
-				console.log(value);
-				return `${row.ID}%`;
+				if (value) {
+					if ([value] in cache) {
+						return getHeadingIndexes(values, results.concat(cache[value]));
+					}
+
+					const {query, args} = getQuery(getHeadingsIndex({value}));
+					const {resultSet} = await connection.execute(query, args, {resultSet: true});
+					const row = await resultSet.getRow();
+
+					await resultSet.close();
+
+					cache[value] = `${row.ID}%`; // eslint-disable-line require-atomic-updates
+					return getHeadingIndexes(values, results.concat(cache[value]));
+				}
+
+				return results;
 			}
 		}
 	}
@@ -113,85 +135,61 @@ export default async function ({maxResults, sets, queries, connection}) {
 		return executeQuery(params);
 
 		function getParams() {
-			const setIndexes = headingsIndexes[set];
-			const start = from;
-			const end = until;
+			const setIndexes = indexes[set];
+			const startTime = from;
+			const endTime = until;
 			const rowCallback = row => recordRowCallback({
 				row, includeRecords,
 				formatRecord: generateFormatter(metadataPrefix)
 			});
 
-			if (start && end) {
-				return {
-					rowCallback, connection, cursor,
-					genQuery: cursor => getRecords({cursor, start, end, headingsIndexes: setIndexes})
-				};
-			}
-
-			if (start) {
-				return {
-					rowCallback, connection, cursor,
-					genQuery: cursor => getRecords({cursor, start, headingsIndexes: setIndexes})
-				};
-			}
-
-			if (end) {
-				return {
-					rowCallback, connection, cursor,
-					genQuery: cursor => getRecords({cursor, end, headingsIndexes: setIndexes})
-				};
-			}
-
 			return {
 				rowCallback, connection, cursor,
-				genQuery: cursor => getRecords({cursor, headingsIndexes: setIndexes})
+				genQuery: cursor => getRecords({cursor, startTime, endTime, indexes: setIndexes})
 			};
 		}
 
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
-			return pump(cursor);
+			const resultSet = await doQuery(cursor);
+			const {records, newCursor} = await pump();
 
-			async function pump(cursor, records = []) {
-				logger.log('debug', 'EXECUTE');
+			await resultSet.close();
 
+			if (records.length < maxResults) {
+				return {records};
+			}
+
+			return {
+				records,
+				cursor: newCursor
+			};
+
+			async function doQuery(cursor) {
 				const {query, args} = getQuery(genQuery(cursor));
 				const {resultSet} = await connection.execute(query, args, {resultSet: true});
-				const [newRecords, noMore] = await pump2(records, true);
+				return resultSet;
+			}
 
-				await resultSet.close();
-				
-				if (newRecords.length < maxResults) {
-					return pump(cursor + maxResults, newRecords);
+			async function pump(records = []) {
+				const row = await resultSet.getRow();
+
+				if (row) {
+					const result = rowCallback(row);
+
+					if (records.length + 1 === maxResults) {
+						return {
+							records: records.concat(result),
+							newCursor: cursor + records.length
+						};
+					}
+
+					return pump(records.concat(result));
 				}
 
 				return {
-					records: newRecords,
-					cursor: cursor + 
-				}
-
-				async function pump2(records, firstRun) {
-					logger.log('debug', 'GET ROW');
-
-					const row = await resultSet.getRow();
-
-					if (row) {
-						const result = rowCallback(row);
-
-						logger.log('debug', `${records.length}-${maxResults}`);
-
-						if (records.length + 1 === maxResults) {
-							return [records.concat(result), true];							
-						}
-
-						return pump2(records.concat(result));
-					}
-
-					if (firstRun) {
-						return [records, true];
-					}
-
-					return [records];
-				}
+					records,
+					newCursor: cursor + records.length
+				};
 			}
 		}
 	}

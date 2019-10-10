@@ -81,7 +81,7 @@ export default async function ({
 
 	function setOracleOptions() {
 		oracledb.outFormat = oracledb.OBJECT;
-		oracledb.fetchArraySize = 10;
+		oracledb.fetchArraySize = maxResults;
 		oracledb.queueTimeout = 10000;
 		oracledb.poolTimeout = 20;
 		oracledb.events = false;

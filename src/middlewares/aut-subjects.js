@@ -21,22 +21,55 @@ export default params => {
 
 	function generateSets() {
 		return [
-			/* {
+			{
 				spec: 'topical', name: 'Topical terms',
-				description: 'Topical terms'
+				description: 'Topical terms',
+				indexes: {
+					heading: ['HATYPL150 %']
+				}
 			},
 			{
 				spec: 'geographic', name: 'Geographic names',
-				description: 'Geographic names'
+				description: 'Geographic names',
+				indexes: {
+					heading: ['HATYPL151 %']
+				}
 			},
 			{
 				spec: 'genre', name: 'Genre/form terms',
-				description: 'Genre/form terms'
+				description: 'Genre/form terms',
+				indexes: {
+					heading: ['HATYPL155 %']
+				}
 			},
 			{
 				spec: 'mediumperf', name: 'Medium of performance terms',
-				description: 'Medium of performance terms'
-			} */
+				description: 'Medium of performance terms',
+				indexes: {
+					heading: ['HATYPL162 %']
+				}
+			},
+			{
+				spec: 'topical:yso', name: 'Topical terms (YSO)',
+				description: 'YSO - General Finnish ontology',
+				indexes: {
+					heading: ['HATYPL150 %', 'H040FLYSO FIN %']
+				}
+			},
+			{
+				spec: 'geographic:yso', name: 'Geographic names (YSO)',
+				description: 'YSO places',
+				indexes: {
+					heading: ['HATYPL151 %', 'H040FLYSO FIN %']
+				}
+			},
+			{
+				spec: 'genre:slm', name: 'Genre/form terms (SLM)',
+				description: 'SLM - Suomalainen lajityyppi- ja muotosanasto',
+				indexes: {
+					heading: ['HATYPL155 %', 'H040FLSLM FIN %']
+				}
+			}
 		];
 	}
 };

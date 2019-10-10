@@ -21,21 +21,27 @@ export default params => {
 
 	function generateSets() {
 		return [
-			/* {
+			{
 				spec: 'personal', name: 'Personal names',
 				description: 'Personal names',
-				headingsIndexes: []
+				indexes: {
+					heading: ['HATYPL100A %']
+				}
 			},
 			{
 				spec: 'corporate', name: 'Corporate names',
 				description: 'Corporate names',
-				headingsIndexes: []
+				indexes: {
+					heading: ['HATYPL110A %']
+				}
 			},
 			{
 				spec: 'meetings', name: 'Meeting names',
 				description: 'Meeting names',
-				headingsIndexes: []
-			} */
+				indexes: {
+					heading: ['HATYPL111A %']
+				}
+			}
 		];
 	}
 };

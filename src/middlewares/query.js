@@ -17,18 +17,15 @@
 import {generateAnd} from '../build-query';
 
 export default ({library, limit}) => {
-	// Const DEFAULT_TIMESTAMP = '200001011200000';
-	const INDEXING_COLUMN = 'CASE WHEN z07_rec_key IS NULL THEN \'false\' ELSE \'true\' END indexing';
-
 	return {
 		getSingleRecord: ({identifier}) => ({
 			args: {identifier},
 			query: [
-				`SELECT z00_doc_number, time, z00_data record FROM ${library}.z00`,
+				`SELECT z106_rec_key id, z106_upd_time_stamp time, z00_data record FROM ${library}.z00`,
 				{
 					stmt: `JOIN ${library}.z106 ON z106_rec_key = z00_doc_number AND z106_upd_time_stamp =`,
 					sub: [
-						`(SELECT MAX(z106_upd_time_stamp) FROM ${library}.z106 s1 WHERE z00_doc_number = s1.z106_rec_key)`
+						`(SELECT MAX(z106_upd_time_stamp) FROM ${library}.z106 s1 WHERE z00_doc_number = s1.z106_rec_key FETCH FIRST ROW ONLY)`
 					]
 				},
 				'WHERE z00_doc_number = :identifier'
@@ -67,7 +64,7 @@ export default ({library, limit}) => {
 
 			function build() {
 				if (startTime || endTime) {
-					return buildTimeLimitedQuery();
+					return buildTimeRangeQuery();
 				}
 
 				if (indexes.heading) {
@@ -76,23 +73,6 @@ export default ({library, limit}) => {
 
 				return buildQuery();
 
-				function buildIndexQuery() {
-					return [
-						`SELECT s1.z02_doc_number id, z106_upd_time_stamp time, z00_data record, ${INDEXING_COLUMN} FROM fin01.z02 s1`
-					].concat(
-						genIndexingStatements('s1.z02_doc_number'),
-						`JOIN ${library}.z00 ON s1.z02_doc_number = z00_doc_number`,
-						genIndexCheckStatement('s1.z02_doc_number'),
-						{
-							stmt: `JOIN ${library}.z106 s2 ON s1.z02_doc_number = s2.z106_rec_key AND s2.z106_upd_time_stamp = `,
-							sub: [
-								`(SELECT MAX(z106_upd_time_stamp) FROM ${library}.z106 s3 WHERE s2.z106_rec_key = s3.z106_rec_key)`
-							]
-						},
-						`OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`
-					);
-				}
-
 				function buildQuery() {
 					return [
 						`SELECT z00_doc_number id, z106_upd_time_stamp time, z00_data record FROM ${library}.z00`,
@@ -100,9 +80,14 @@ export default ({library, limit}) => {
 							stmt: `JOIN ${library}.z106 s1 ON`,
 							sub: [
 								{
-									stmt: 'z00_doc_number = z106_rec_key AND z106_upd_time_stamp =',
+									stmt: 'z00_doc_number = z106_rec_key AND',
 									sub: [
-										`(SELECT MAX(z106_upd_time_stamp) FROM ${library}.z106 s2 WHERE s1.z106_rec_key = s2.z106_rec_key)`
+										{
+											stmt: 'z106_upd_time_stamp =',
+											sub: [
+												`(SELECT MAX(z106_upd_time_stamp) FROM ${library}.z106 s2 WHERE s1.z106_rec_key = s2.z106_rec_key FETCH FIRST ROW ONLY)`
+											]
+										}
 									]
 								}
 							]
@@ -111,59 +96,117 @@ export default ({library, limit}) => {
 					];
 				}
 
-				function buildTimeLimitedQuery() {
-					const start = [
-						`SELECT s1.z106_rec_key id, s1.z106_upd_time_stamp time, z00_data record${indexes.heading ? `, ${INDEXING_COLUMN}` : ''} FROM ${library}.z106 s1`,
-						'JOIN fin01.z00 ON s1.z106_rec_key = z00_doc_number'
-					];
+				function buildIndexQuery() {
+					const headingIndexes = indexes.heading.slice();
 
-					const end = [
-						{
-							stmt: 'JOIN fin01.z106 s2 ON s1.z106_rec_key = s2.z106_rec_key AND s2.z106_upd_time_stamp =',
-							sub: [
-								'(SELECT MAX(z106_upd_time_stamp) FROM fin01.z106 s3 WHERE s2.z106_rec_key = s3.z106_rec_key)'
-							]
-						},
-						{
-							stmt: 'WHERE',
-							sub: genTimeConditions()
-						},
-						`OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`
-					];
+					const selectStmt = 	`SELECT z106_rec_key id, z106_upd_time_stamp time, z00_data record, CASE WHEN z07_rec_key IS NULL THEN 'false' ELSE 'true' END indexing FROM ${library}.z02 s1`;
+					const recordJoinStmt = `JOIN ${library}.z00 ON s1.z02_doc_number = z00_doc_number`;
+					const indexCheckStmt = `LEFT JOIN ${library}.z07 ON s1.z02_doc_number = z07_rec_key AND z07_sequence NOT LIKE '3018%'`;
+					const rangeStmt = `OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`;
+					const timestampStmt = {
+						stmt: `JOIN ${library}.z106 s2 ON s1.z02_doc_number = s2.z106_rec_key AND`,
+						sub: genTimeConditions()
+					};
 
-					if (indexes.heading) {
-						return start.concat(
-							genIndexCheckStatement('s1.z106_rec_key'),
-							genIndexingStatements('s1.z106_rec_key', indexes.heading),
-							end
+					const whereStmt = `WHERE s1.z02_rec_key LIKE '${headingIndexes.shift()}'`;
+
+					const indexStatements = headingIndexes.map((value, index) => {
+						return `JOIN ${library}.z02 h${index} ON s1.z02_doc_number = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`;
+					});
+
+					if (indexStatements.length > 0) {
+						return [].concat(
+							selectStmt,
+							indexStatements,
+							recordJoinStmt,
+							indexCheckStmt,
+							timestampStmt,
+							whereStmt,
+							rangeStmt
 						);
 					}
 
-					return start.concat(end);
+					return [
+						selectStmt,
+						recordJoinStmt,
+						indexCheckStmt,
+						timestampStmt,
+						whereStmt,
+						rangeStmt
+					];
 
 					function genTimeConditions() {
-						const conditions = [];
+						const timeStampCondition = {
+							stmt: 's2.z106_upd_time_stamp = ',
+							sub: [
+								`(SELECT MAX(z106_upd_time_stamp) FROM ${library}.z106 s3 WHERE s2.z106_rec_key = s3.z106_rec_key FETCH FIRST ROW ONLY)`
+							]
+						};
 
-						if (startTime) {
-							conditions.push('s1.z106_upd_time_stamp >= :startTime');
+						if (startTime || endTime) {
+							return [
+								`${genTimeRangeConditions('s2')} AND`,
+								timeStampCondition
+							];
 						}
 
-						if (endTime) {
-							conditions.push('s1.z106_upd_time_stamp <= :endTime');
-						}
-
-						return generateAnd({conditions, toSub: true});
+						return [timeStampCondition];
 					}
 				}
 
-				function genIndexingStatements(idColumn) {
-					return indexes.heading.map((value, index) =>
-						`JOIN ${library}.z02 h${index} ON ${idColumn} = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`
-					);
+				function buildTimeRangeQuery() {
+					const selectStmt = `SELECT z106_rec_key id, z106_upd_time_stamp time, z00_data record FROM ${library}.z106 s1`;
+					const recordJoinStmt = `JOIN ${library}.z00 ON s1.z106_rec_key = z00_doc_number`;
+
+					const timeStmt = {
+						stmt: `WHERE ${genTimeRangeConditions('s1')} AND`,
+						sub: [
+							{
+								stmt: 's1.z106_upd_time_stamp =',
+								sub: [
+									`(SELECT MAX(z106_upd_time_stamp) FROM ${library}.z106 s2 WHERE s1.z106_rec_key = s2.z106_rec_key FETCH FIRST ROW ONLY)`
+								]
+							}
+						]
+					};
+
+					const rangeStmt = `OFFSET ${cursor} ROWS FETCH NEXT ${limit} ROWS ONLY`;
+
+					if (indexes.heading) {
+						const indexStatements = indexes.heading.map((value, index) => {
+							return `JOIN ${library}.z02 h${index} ON s1.z106_rec_key = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`;
+						});
+
+						return [].concat(
+							selectStmt,
+							recordJoinStmt,
+							indexStatements,
+							`LEFT JOIN ${library}.z07 ON s1.z106_rec_key = z07_rec_key AND z07_sequence NOT LIKE '3018%'`,
+							timeStmt,
+							rangeStmt
+						);
+					}
+
+					return [
+						selectStmt,
+						recordJoinStmt,
+						timeStmt,
+						rangeStmt
+					];
 				}
 
-				function genIndexCheckStatement(idColumn) {
-					return `LEFT JOIN ${library}.z07 ON ${idColumn} = z07_rec_key AND z07_sequence NOT LIKE '3018%'`;
+				function genTimeRangeConditions(table, toSub) {
+					const conditions = [];
+
+					if (startTime) {
+						conditions.push(`${table}.z106_upd_time_stamp >= :startTime`);
+					}
+
+					if (endTime) {
+						conditions.push(`${table}.z106_upd_time_stamp <= :endTime`);
+					}
+
+					return generateAnd({conditions, toSub});
 				}
 			}
 		}

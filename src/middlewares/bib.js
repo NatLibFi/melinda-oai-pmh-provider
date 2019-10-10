@@ -43,8 +43,8 @@ export default params => {
 				}
 			},
 			{
-				spec: 'gmc', name: 'GMC',
-				description: 'Global Music Centre',
+				spec: 'musa', name: 'Music Archive Finland',
+				description: 'A national central archive that stores materials relating to Finnish music',
 				indexes: {
 					heading: ['LOW  LMUSA %']
 				}

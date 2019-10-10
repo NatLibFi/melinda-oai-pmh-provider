@@ -150,6 +150,7 @@ export default async function ({maxResults, sets, queries, connection}) {
 		}
 
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
+			console.log(cursor);
 			const resultSet = await doQuery(cursor);
 			const {records, newCursor} = await pump();
 
@@ -179,7 +180,7 @@ export default async function ({maxResults, sets, queries, connection}) {
 					if (records.length + 1 === maxResults) {
 						return {
 							records: records.concat(result),
-							newCursor: cursor + records.length
+							newCursor: cursor + records.length + 1
 						};
 					}
 

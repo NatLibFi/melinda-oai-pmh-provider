@@ -23,7 +23,7 @@ import responseFactory from './response';
 
 import {
 	ERRORS, QUERY_PARAMETERS, METADATA_FORMATS,
-	TOKEN_EXPIRATION_FORMAT, REPOSITORY_NAMES
+	RESUMPTION_TOKEN_TIME_FORMAT, REPOSITORY_NAMES
 } from './constants';
 
 export default ({
@@ -229,7 +229,7 @@ export default ({
 					function parseResumptionToken(token) {
 						const str = decryptToken();
 						const [expirationTime, cursorString, metadataPrefix, from, until, set] = str.split(/;/g);
-						const expires = moment(expirationTime, TOKEN_EXPIRATION_FORMAT, true);
+						const expires = moment(expirationTime, RESUMPTION_TOKEN_TIME_FORMAT, true);
 						const cursor = Number(cursorString);
 
 						if (expires.isValid() && moment().isBefore(expires) && Number.isNaN(cursor) === false) {
@@ -316,8 +316,9 @@ export default ({
 
 						function generateValue() {
 							const {metadataPrefix, from, until, set} = params;
-							const time = tokenExpirationTime.format(TOKEN_EXPIRATION_FORMAT);
-							return `${time};${cursor};${metadataPrefix};${from || ''};${until || ''};${set || ''}`;
+							const expirationTime = tokenExpirationTime.format(RESUMPTION_TOKEN_TIME_FORMAT);
+
+							return `${expirationTime};${cursor};${metadataPrefix};${from ? from.format(RESUMPTION_TOKEN_TIME_FORMAT) : ''};${until ? until.format(RESUMPTION_TOKEN_TIME_FORMAT) : ''};${set || ''}`;
 						}
 					}
 				}

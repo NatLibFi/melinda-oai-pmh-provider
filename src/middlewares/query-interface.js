@@ -150,7 +150,6 @@ export default async function ({maxResults, sets, queries, connection}) {
 		}
 
 		async function executeQuery({connection, genQuery, rowCallback, cursor}) {
-			console.log(cursor);
 			const resultSet = await doQuery(cursor);
 			const {records, newCursor} = await pump();
 

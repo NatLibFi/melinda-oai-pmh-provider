@@ -82,8 +82,6 @@ export default async function ({
 	function setOracleOptions() {
 		oracledb.outFormat = oracledb.OBJECT;
 		oracledb.fetchArraySize = maxResults;
-		// Seems to cause problems
-		// oracledb.queueTimeout = 10000;
 		oracledb.poolTimeout = 20;
 		oracledb.events = false;
 		oracledb.poolPingInterval = 10;
@@ -113,12 +111,18 @@ export default async function ({
 	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
 		const {INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE} = HttpStatus;
 
+		// Certain Oracle errors don't matter if the request was closed by the client
+		if (err.message && err.message.startsWith('NJS-018:') && req.aborted) {
+			return next();
+		}
+
 		if (err instanceof IndexingError) {
 			res.sendStatus(SERVICE_UNAVAILABLE);
 			logger.log('error', err.stack);
-		} else {
-			res.sendStatus(INTERNAL_SERVER_ERROR);
-			throw err;
+			return next();
 		}
+
+		res.sendStatus(INTERNAL_SERVER_ERROR);
+		throw err;
 	}
 }

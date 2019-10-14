@@ -4,7 +4,11 @@ steps:
 - name: generate-tags
   image: quay.io/natlibfi/drone-gen-tags
 - name: install-instantclient
-  image: quay.io/tike/drone-install-instantclient:12.2  
+  image: quay.io/tike/drone-install-instantclient:12.2
+- name: test-init
+  image: busybox
+  commands:
+  - chmod -R o+w /drone/src  
 - name: test
   image: node:10
   user: node

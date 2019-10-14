@@ -19,7 +19,7 @@ import {
 	RESUMPTION_TOKEN_TIMEOUT as resumptionTokenTimeout
 } from './config';
 
-import {parseResumptionToken, generateResumptionToken} from './middlewares/utils'; // eslint-disable-line no-unused-vars
+import {parseResumptionToken, generateResumptionToken} from './middlewares/utils';
 
 const [op, ...args] = process.argv.slice(2);
 

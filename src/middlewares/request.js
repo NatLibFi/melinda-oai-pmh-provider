@@ -272,7 +272,7 @@ export default ({
 				return generators[method]();
 
 				async function listResources(callback) {
-					const {records, cursor} = result;
+					const {records, cursor, previousCursor} = result;
 
 					if (records.length === 0) {
 						return generateErrorResponse({query, requestURL, error: ERRORS.NO_RECORDS_MATCH});
@@ -284,7 +284,11 @@ export default ({
 							cursor, ...params
 						});
 
-						return callback({requestURL, query, records, token, tokenExpirationTime, cursor});
+						if (Number.isNaN(previousCursor)) {
+							return callback({requestURL, query, records, token, tokenExpirationTime});
+						}
+
+						return callback({requestURL, query, records, token, tokenExpirationTime, cursor: previousCursor});
 					}
 
 					return callback({requestURL, query, records});

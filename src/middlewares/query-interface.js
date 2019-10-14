@@ -115,9 +115,8 @@ export default async function ({maxResults, sets, queries, connection}) {
 	}
 
 	async function listRecords(params) {
-		return queryRecords({
-			...params
-		});
+		const results = await queryRecords(params);
+		return {...results, previousCursor: params.cursor};
 	}
 
 	async function listIdentifiers(params) {

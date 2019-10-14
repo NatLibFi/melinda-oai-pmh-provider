@@ -168,16 +168,18 @@ export default ({identifierPrefix, supportEmail}) => {
 			return {
 				...obj,
 				resumptionToken: {
-					$: {
-						expirationDate: tokenExpirationTime.toISOString(true),
-						cursor
-					},
+					$: genAttr(),
 					_: token
 				}
 			};
 		}
 
 		return obj;
+
+		function genAttr() {
+			const expirationDate = tokenExpirationTime.toISOString(true);
+			return cursor === undefined ? {expirationDate} : {expirationDate, cursor};
+		}
 	}
 
 	async function generateRecordObject({time, id, record, isDeleted}) {

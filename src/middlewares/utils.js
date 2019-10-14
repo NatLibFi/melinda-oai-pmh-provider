@@ -123,7 +123,7 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
 		try {
 			const decoded = decodeURIComponent(token);
 			return decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
-		} catch (err) {
+		} catch (_) {
 			throw new ApiError({verb, code: ERRORS.BAD_RESUMPTION_TOKEN});
 		}
 	}

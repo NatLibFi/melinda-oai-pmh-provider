@@ -14,6 +14,11 @@
 * limitations under the License.
 */
 
+import moment from 'moment';
+import {Utils} from '@natlibfi/melinda-commons';
+import {ERRORS, RESUMPTION_TOKEN_TIME_FORMAT} from './constants';
+import ApiError from './api-error';
+
 export function createLowFilter(value) {
 	return createSubfieldValueFilter([{tag: 'LOW', code: /^a$/, value}]);
 }
@@ -73,4 +78,53 @@ export function createHasFieldFilter(tag) {
 function compareSubstring({context, start, end, value}) {
 	const chunk = context.substring(start, end + 1);
 	return chunk === value;
+}
+
+export function generateResumptionToken({
+	secretEncryptionKey, resumptionTokenTimeout,
+	cursor, metadataPrefix, from, until, set
+}) {
+	const {encryptString} = Utils;
+	const tokenExpirationTime = generateResumptionExpirationTime();
+	const value = generateValue();
+	const token = encryptString({key: secretEncryptionKey, value, algorithm: 'aes-256-cbc'});
+
+	return {token, tokenExpirationTime};
+
+	function generateResumptionExpirationTime() {
+		return moment().add(resumptionTokenTimeout, 'milliseconds');
+	}
+
+	function generateValue() {
+		const expirationTime = tokenExpirationTime.format(RESUMPTION_TOKEN_TIME_FORMAT);
+
+		return `${expirationTime};${cursor};${metadataPrefix};${from ? from.format(RESUMPTION_TOKEN_TIME_FORMAT) : ''};${until ? until.format(RESUMPTION_TOKEN_TIME_FORMAT) : ''};${set || ''}`;
+	}
+}
+
+export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false}) {
+	const {decryptString} = Utils;
+	const str = decryptToken();
+	const [expirationTime, cursorString, metadataPrefix, from, until, set] = str.split(/;/g);
+	const expires = moment(expirationTime, RESUMPTION_TOKEN_TIME_FORMAT, true);
+	const cursor = Number(cursorString);
+
+	if (expires.isValid() && moment().isBefore(expires) && Number.isNaN(cursor) === false) {
+		return {cursor, metadataPrefix, set, from, until};
+	}
+
+	if (ignoreError) {
+		return {cursor, metadataPrefix, set, from, until};
+	}
+
+	throw new ApiError({verb, code: ERRORS.BAD_RESUMPTION_TOKEN});
+
+	function decryptToken() {
+		try {
+			const decoded = decodeURIComponent(token);
+			return decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
+		} catch (err) {
+			throw new ApiError({verb, code: ERRORS.BAD_RESUMPTION_TOKEN});
+		}
+	}
 }

@@ -20,10 +20,11 @@ import {Utils} from '@natlibfi/melinda-commons';
 import {REQUEST_DATE_STAMP_FORMATS} from './constants';
 import ApiError from './api-error';
 import responseFactory from './response';
+import {parseResumptionToken, generateResumptionToken} from './utils';
 
 import {
 	ERRORS, QUERY_PARAMETERS, METADATA_FORMATS,
-	RESUMPTION_TOKEN_TIME_FORMAT, REPOSITORY_NAMES
+	REPOSITORY_NAMES
 } from './constants';
 
 export default ({
@@ -33,7 +34,7 @@ export default ({
 	listRecords, listSets,
 	earliestTimestamp
 }) => {
-	const {createLogger, encryptString, decryptString, clone} = Utils;
+	const {createLogger, clone} = Utils;
 	const logger = createLogger();
 	const {
 		generateErrorResponse, generateIdentifyResponse,
@@ -156,7 +157,10 @@ export default ({
 
 					if (checkArguments()) {
 						if (allowedParams.includes('resumptionToken') && 'resumptionToken' in req.query) {
-							const params = parseResumptionToken(req.query.resumptionToken);
+							const params = parseResumptionToken({
+								secretEncryptionKey, verb,
+								token: req.query.resumptionToken
+							});
 
 							return {
 								...obj,
@@ -225,28 +229,6 @@ export default ({
 							throw new ApiError({verb, code: ERRORS.BAD_ARGUMENT});
 						}
 					}
-
-					function parseResumptionToken(token) {
-						const str = decryptToken();
-						const [expirationTime, cursorString, metadataPrefix, from, until, set] = str.split(/;/g);
-						const expires = moment(expirationTime, RESUMPTION_TOKEN_TIME_FORMAT, true);
-						const cursor = Number(cursorString);
-
-						if (expires.isValid() && moment().isBefore(expires) && Number.isNaN(cursor) === false) {
-							return {cursor, metadataPrefix, set, from, until};
-						}
-
-						throw new ApiError({verb, code: ERRORS.BAD_RESUMPTION_TOKEN});
-
-						function decryptToken() {
-							try {
-								const decoded = decodeURIComponent(token);
-								return decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
-							} catch (err) {
-								throw new ApiError({verb, code: ERRORS.BAD_RESUMPTION_TOKEN});
-							}
-						}
-					}
 				}
 			}
 		}
@@ -297,30 +279,15 @@ export default ({
 					}
 
 					if (cursor) {
-						const {token, tokenExpirationTime} = generateResumptionToken();
+						const {token, tokenExpirationTime} = generateResumptionToken({
+							secretEncryptionKey, resumptionTokenTimeout,
+							cursor, ...params
+						});
+
 						return callback({requestURL, query, records, token, tokenExpirationTime});
 					}
 
 					return callback({requestURL, query, records});
-
-					function generateResumptionToken() {
-						const tokenExpirationTime = generateResumptionExpirationTime();
-						const value = generateValue();
-						const token = encryptString({key: secretEncryptionKey, value, algorithm: 'aes-256-cbc'});
-
-						return {token, tokenExpirationTime};
-
-						function generateResumptionExpirationTime() {
-							return moment().add(resumptionTokenTimeout, 'milliseconds');
-						}
-
-						function generateValue() {
-							const {metadataPrefix, from, until, set} = params;
-							const expirationTime = tokenExpirationTime.format(RESUMPTION_TOKEN_TIME_FORMAT);
-
-							return `${expirationTime};${cursor};${metadataPrefix};${from ? from.format(RESUMPTION_TOKEN_TIME_FORMAT) : ''};${until ? until.format(RESUMPTION_TOKEN_TIME_FORMAT) : ''};${set || ''}`;
-						}
-					}
 				}
 			}
 		}

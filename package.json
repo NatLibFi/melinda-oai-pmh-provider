@@ -28,7 +28,7 @@
 		"test:base": "cross-env NODE_ENV=test mocha --require @babel/register",
 		"test": "npm run lint && npm run test:base -- src/app.spec.js src/middlewares/bib/query.spec.js",
 		"test:dev": "npm run lint:dev && npm run test:base -- src/app.spec.js src/middlewares/bib/query.spec.js",
-		"build": "babel src --source-maps --delete-dir-on-start --out-dir=dist --minified",
+		"build": "babel src --source-maps --delete-dir-on-start --out-dir=dist",
 		"build:dev": "npm run build && npm run check-deps",
 		"watch:test": "cross-env NODE_ENV=test nodemon --watch src --exec 'npm run test:dev'",
 		"watch:dev": "cross-env DEBUG=1 nodemon --watch src --exec 'babel-node ./src/index.js'"

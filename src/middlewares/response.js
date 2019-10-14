@@ -217,7 +217,6 @@ export default ({identifierPrefix, supportEmail}) => {
 
 				// Remove control characters because they will break XML conversion
 				if (PATTERN.test(str)) {
-					const {value: id} = record.get(/^001$/).shift();
 					logger.log('warn', `Record ${id} contains control characters`);
 					return str.replace(PATTERN, '');
 				}

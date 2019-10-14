@@ -108,17 +108,22 @@ export default async function ({
 	}
 
 	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
-		const {INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE} = HttpStatus;
+		const {
+			INTERNAL_SERVER_ERROR,
+			SERVICE_UNAVAILABLE,
+			REQUEST_TIMEOUT
+		} = HttpStatus;
 
 		// Certain Oracle errors don't matter if the request was closed by the client
 		if (err.message && err.message.startsWith('NJS-018:') && req.aborted) {
-			return next();
+			res.sendStatus(REQUEST_TIMEOUT);
+			return;
 		}
 
 		if (err instanceof IndexingError) {
 			res.sendStatus(SERVICE_UNAVAILABLE);
 			logger.log('error', err.stack);
-			return next();
+			return;
 		}
 
 		res.sendStatus(INTERNAL_SERVER_ERROR);

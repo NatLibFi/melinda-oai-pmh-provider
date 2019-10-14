@@ -284,7 +284,7 @@ export default ({
 							cursor, ...params
 						});
 
-						return callback({requestURL, query, records, token, tokenExpirationTime});
+						return callback({requestURL, query, records, token, tokenExpirationTime, cursor});
 					}
 
 					return callback({requestURL, query, records});

@@ -88,15 +88,15 @@ export default ({identifierPrefix, supportEmail}) => {
 		}});
 	}
 
-	async function generateListRecordsResponse({requestURL, query, token, tokenExpirationTime, records}) {
+	async function generateListRecordsResponse({requestURL, query, token, tokenExpirationTime, cursor, records}) {
 		return generate({requestURL, query, payload: {
-			ListRecords: await generateListResourcesResponse({records, token, tokenExpirationTime})
+			ListRecords: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor})
 		}});
 	}
 
-	async function generateListIdentifiersResponse({requestURL, query, token, tokenExpirationTime, records}) {
+	async function generateListIdentifiersResponse({requestURL, query, token, tokenExpirationTime, cursor, records}) {
 		return generate({requestURL, query, payload: {
-			ListIdentifiers: await generateListResourcesResponse({records, token, tokenExpirationTime})
+			ListIdentifiers: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor})
 		}});
 	}
 
@@ -159,7 +159,7 @@ export default ({identifierPrefix, supportEmail}) => {
 		return responseToXML(generateResponse(params));
 	}
 
-	async function generateListResourcesResponse({records, token, tokenExpirationTime}) {
+	async function generateListResourcesResponse({records, token, tokenExpirationTime, cursor}) {
 		const obj = {
 			record: await Promise.all(records.map(generateRecordObject))
 		};
@@ -169,7 +169,8 @@ export default ({identifierPrefix, supportEmail}) => {
 				...obj,
 				resumptionToken: {
 					$: {
-						expirationDate: tokenExpirationTime.toISOString(true)
+						expirationDate: tokenExpirationTime.toISOString(true),
+						cursor
 					},
 					_: token
 				}

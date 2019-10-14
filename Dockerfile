@@ -13,7 +13,7 @@ ENV ORACLE_CONNECT_TIMEOUT 10
 COPY --chown=node:node . build
 
 RUN node -v
-RUN apt-get update && apt-get install -y build-essential git sudo libaio1 \
+RUN apt-get update && apt-get install -y build-essential git sudo libaio1 tzdata \
   && mkdir /data && chown node:node /data \  
   && sudo -u node \
     OCI_LIB_DIR=/home/node/build/instantclient \

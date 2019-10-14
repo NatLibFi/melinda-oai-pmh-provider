@@ -6,9 +6,8 @@ steps:
 - name: install-instantclient
   image: quay.io/tike/drone-install-instantclient:12.2  
 - name: test
-  # node:10 points to 10.15 which don't work with latest oracledb (130919)
-  #image: node:10
-  image: node:10.16
+  image: node:10
+  user: node
   commands:
     - export OCI_LIB_DIR=$PWD/instantclient
     - export OCI_INC_DIR=$PWD/instantclient/sdk/include

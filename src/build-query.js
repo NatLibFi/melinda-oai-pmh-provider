@@ -35,21 +35,15 @@ export default obj => {
 	}
 };
 
-export function generateOr({conditions, toSub = false}) {
-	return genConditionalStatements({
-		conditions, toSub,
-		separator: 'OR'
-	});
+export function generateOr(conditions, toSub) {
+	return genConditionalStatements(conditions, toSub, 'OR');
 }
 
-export function generateAnd({conditions, toSub = false}) {
-	return genConditionalStatements({
-		conditions, toSub,
-		separator: 'AND'
-	});
+export function generateAnd(conditions, toSub) {
+	return genConditionalStatements(conditions, toSub, 'AND');
 }
 
-function genConditionalStatements({conditions, toSub = false, separator}) {
+function genConditionalStatements(conditions, toSub, separator) {
 	const parts = conditions
 		.slice()
 		.reverse()

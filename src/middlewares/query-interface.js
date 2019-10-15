@@ -128,7 +128,8 @@ export default async function ({maxResults, sets, queries, connection}) {
 
 	async function queryRecords({
 		connection, from, until, set, metadataPrefix,
-		includeRecords = true, cursor = 0
+		includeRecords = true, cursor
+		// IncludeRecords = true, cursor = 0
 	}) {
 		const params = getParams();
 		return executeQuery(params);
@@ -178,7 +179,8 @@ export default async function ({maxResults, sets, queries, connection}) {
 					if (records.length + 1 === maxResults) {
 						return {
 							records: records.concat(result),
-							newCursor: cursor + records.length + 1
+							newCursor: toAlephId(result.id)
+							// NewCursor: cursor + records.length + 1
 						};
 					}
 
@@ -187,7 +189,8 @@ export default async function ({maxResults, sets, queries, connection}) {
 
 				return {
 					records,
-					newCursor: cursor + records.length
+					newCursor: toAlephId(records.slice(-1).shift().id)
+					// NewCursor: cursor + records.length
 				};
 			}
 		}

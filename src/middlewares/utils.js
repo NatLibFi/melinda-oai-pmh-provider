@@ -105,11 +105,13 @@ export function generateResumptionToken({
 export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false}) {
 	const {decryptString} = Utils;
 	const str = decryptToken();
-	const [expirationTime, cursorString, metadataPrefix, from, until, set] = str.split(/;/g);
+	const [expirationTime, cursor, metadataPrefix, from, until, set] = str.split(/;/g);
+	// Const [expirationTime, cursorString, metadataPrefix, from, until, set] = str.split(/;/g);
 	const expires = moment(expirationTime, RESUMPTION_TOKEN_TIME_FORMAT, true);
-	const cursor = Number(cursorString);
+	// Const cursor = Number(cursorString);
 
-	if (expires.isValid() && moment().isBefore(expires) && Number.isNaN(cursor) === false) {
+	if (expires.isValid() && moment().isBefore(expires)) {
+	// If (expires.isValid() && moment().isBefore(expires) && Number.isNaN(cursor) === false) {
 		return {cursor, metadataPrefix, set, from, until};
 	}
 

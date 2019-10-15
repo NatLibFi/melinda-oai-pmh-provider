@@ -15,7 +15,8 @@
 */
 
 import queryInterfaceFactory from './query-interface';
-import queryFactory from './query';
+// Import queryFactory from './query-offset-limit';
+import queryFactory from './query-keyset';
 import requestFactory from './request';
 
 export default async (params, sets) => {

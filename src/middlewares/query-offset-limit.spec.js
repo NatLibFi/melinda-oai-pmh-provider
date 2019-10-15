@@ -19,7 +19,7 @@ import {readdirSync} from 'fs';
 import {join as joinPath} from 'path';
 import moment from 'moment';
 import {expect} from 'chai';
-import factory from './query';
+import factory from './query-offset-limit';
 import fixtureFactory, {READERS} from '@natlibfi/fixura';
 
 describe('middlewares/bib/query', () => {

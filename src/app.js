@@ -20,7 +20,7 @@ import HttpStatus from 'http-status';
 import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
 import {bibFactory, autNamesFactory, autSubjectsFactory} from './middlewares';
-import IndexingError from './indexing-error';
+// Import IndexingError from './indexing-error';
 
 export default async function ({
 	identifierPrefix, httpPort, enableProxy, name, supportEmail,
@@ -110,7 +110,7 @@ export default async function ({
 	async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
 		const {
 			INTERNAL_SERVER_ERROR,
-			SERVICE_UNAVAILABLE,
+			// SERVICE_UNAVAILABLE,
 			REQUEST_TIMEOUT
 		} = HttpStatus;
 
@@ -120,11 +120,11 @@ export default async function ({
 			return;
 		}
 
-		if (err instanceof IndexingError) {
+		/* If (err instanceof IndexingError) {
 			res.sendStatus(SERVICE_UNAVAILABLE);
 			logger.log('error', err.stack);
 			return;
-		}
+		} */
 
 		res.sendStatus(INTERNAL_SERVER_ERROR);
 		throw err;

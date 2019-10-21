@@ -18,8 +18,8 @@ import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
 import {DB_TIME_FORMAT} from './constants';
 import {parseRecord, toAlephId, fromAlephId} from '../record';
-import IndexingError from '../indexing-error';
-import buildQuery from '../build-query';
+// Import IndexingError from '../indexing-error';
+// import buildQuery from '../build-query';
 
 export default async function ({maxResults, sets, queries, connection}) {
 	const {createLogger, isDeletedRecord} = Utils;
@@ -129,7 +129,6 @@ export default async function ({maxResults, sets, queries, connection}) {
 	async function queryRecords({
 		connection, from, until, set, metadataPrefix,
 		includeRecords = true, cursor
-		// IncludeRecords = true, cursor = 0
 	}) {
 		const params = getParams();
 		return executeQuery(params);
@@ -180,7 +179,6 @@ export default async function ({maxResults, sets, queries, connection}) {
 						return {
 							records: records.concat(result),
 							newCursor: toAlephId(result.id)
-							// NewCursor: cursor + records.length + 1
 						};
 					}
 
@@ -190,16 +188,15 @@ export default async function ({maxResults, sets, queries, connection}) {
 				return {
 					records,
 					newCursor: toAlephId(records.slice(-1).shift().id)
-					// NewCursor: cursor + records.length
 				};
 			}
 		}
 	}
 
 	function recordRowCallback({row, formatRecord, includeRecords = true}) {
-		if (row.INDEXING === 'true') {
+		/*		If (row.INDEXING === 'true') {
 			throw new IndexingError(row.ID);
-		}
+		} */
 
 		const record = parseRecord(row.RECORD);
 
@@ -228,8 +225,7 @@ export default async function ({maxResults, sets, queries, connection}) {
 		}
 	}
 
-	function getQuery({query: queryObj, args}) {
-		const query = buildQuery(queryObj);
+	function getQuery({query, args}) {
 		debugQuery(query, args);
 		return {
 			query,

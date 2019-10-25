@@ -16,12 +16,13 @@
 
 import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
-import {DB_TIME_FORMAT} from './constants';
+import {DB_TIME_FORMAT} from '../constants';
 import {parseRecord, toAlephId, fromAlephId} from '../record';
+import { getEarliestTimestamp, getHeadingsIndex, getRecords, getSingleRecord} from './queries';
 // Import IndexingError from '../indexing-error';
 // import buildQuery from '../build-query';
 
-export default async function ({maxResults, sets, queries, connection}) {
+export default async function ({maxResults, sets, connection}) {
 	const {createLogger, isDeletedRecord} = Utils;
 	const logger = createLogger();
 	const {

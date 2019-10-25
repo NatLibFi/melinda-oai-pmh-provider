@@ -25,9 +25,9 @@ import {join as joinPath} from 'path';
 import fixtureFactory, {READERS} from '@natlibfi/fixura';
 import {Parser as XMLParser, Builder as XMLBuilder} from 'xml2js';
 import {MarcRecord} from '@natlibfi/marc-record';
-import {formatRecord} from './record';
-import startApp, {__RewireAPI__ as RewireAPI} from './app'; // eslint-disable-line import/named
-import oracledbMockFactory from './oracledb-mock';
+import {formatRecord} from '../refactor/record';
+import startApp, {__RewireAPI__ as RewireAPI} from '.'; // eslint-disable-line import/named
+import oracledbMockFactory from '../refactor/oracledb-mock';
 
 chai.use(chaiHttp);
 

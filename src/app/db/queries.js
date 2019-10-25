@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-import {DB_TIME_FORMAT} from './constants';
+import {DB_TIME_FORMAT} from '../constants';
 
 export default ({library, limit}) => {
 	return {

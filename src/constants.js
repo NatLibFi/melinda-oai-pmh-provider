@@ -57,9 +57,3 @@ export const METADATA_FORMATS = [
 		namespace: 'https://melinda.kansalliskirjasto.fi/melinda-marc'
 	}
 ];
-
-export const REPOSITORY_NAMES = {
-	bib: 'Melinda OAI-PMH provider for bibliographic records',
-	'aut-names': 'Melinda OAI-PMH provider for authority name records',
-	'aut-subjects': 'Melinda OAI-PMH provider for authority subject records'
-};

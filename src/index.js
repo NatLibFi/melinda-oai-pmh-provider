@@ -14,61 +14,51 @@
 * limitations under the License.
 */
 
+import contextFactory from './context';
 import startApp from './app';
-import {
-	HTTP_PORT as httpPort,
-	ENABLE_PROXY as enableProxy,
-	INSTANCE_URL as instanceUrl,
-	SUPPORT_EMAIL as supportEmail,
-	SECRET_ENCRYPTION_KEY as secretEncryptionKey,
-	RESUMPTION_TOKEN_TIMEOUT as resumptionTokenTimeout,
-	OAI_IDENTIFIER_PREFIX as identifierPrefix,
-	MAX_RESULTS as maxResults,
-	ORACLE_USERNAME as oracleUsername,
-	ORACLE_PASSWORD as oraclePassword,
-	ORACLE_CONNECT_STRING as oracleConnectString,
-	ALEPH_BIB_LIBRARY as alephBibLibrary,
-	ALEPH_AUT_NAMES_LIBRARY as alephAutNamesLibrary,
-	ALEPH_AUT_SUBJECTS_LIBRARY as alephAutSubjectsLibrary
-} from './config';
+import * as config from './config';
 
 run();
 
 async function run() {
 	let server;
 
-	process.on('SIGTERM', handleSignal);
-	process.on('SIGINT', handleSignal);
+	const {setsDirectory, contextName, isPrivileged, ...params} = config;
+	const {route, repoName, sets} = contextFactory({setsDirectory, contextName, isPrivileged});
 
-	process.on('uncaughtException', ({stack}) => {
-		handleTermination({code: 1, message: stack});
-	});
-
-	process.on('unhandledRejection', ({stack}) => {
-		handleTermination({code: 1, message: stack});
-	});
-
+	registerInterruptionHandlers();
+			
 	server = await startApp({
-		enableProxy, supportEmail,
-		httpPort, secretEncryptionKey, instanceUrl,
-		identifierPrefix, resumptionTokenTimeout, maxResults,
-		oracleUsername, oraclePassword, oracleConnectString,
-		alephBibLibrary, alephAutNamesLibrary, alephAutSubjectsLibrary
+		...params,
+		route, repoName, sets
 	});
-
-	function handleTermination({code = 0, message}) {
-		if (server) {
-			server.close();
+	
+	function registerInterruptionHandlers() {
+		process.on('SIGTERM', handleSignal);
+		process.on('SIGINT', handleSignal);
+		
+		process.on('uncaughtException', ({stack}) => {
+			handleTermination({code: 1, message: stack});
+		});
+		
+		process.on('unhandledRejection', ({stack}) => {
+			handleTermination({code: 1, message: stack});
+		});
+		
+		function handleTermination({code = 0, message}) {
+			if (server) {
+				server.close();
+			}
+			
+			if (message) {
+				console.error(message);
+			}
+			
+			process.exit(code);
 		}
-
-		if (message) {
-			console.error(message);
+		
+		function handleSignal(signal) {
+			handleTermination({code: 1, message: `Received ${signal}`});
 		}
-
-		process.exit(code);
-	}
-
-	function handleSignal(signal) {
-		handleTermination({code: 1, message: `Received ${signal}`});
 	}
 }

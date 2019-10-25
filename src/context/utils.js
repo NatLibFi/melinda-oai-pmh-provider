@@ -14,34 +14,16 @@
 * limitations under the License.
 */
 
-import createInterface from './interface';
+import {readFileSync} from 'fs';
+import {join as joinPath} from 'path';
 
-export default params => {
-	return createInterface(params, generateSets());
+export function readSetsFile({setsDirectory, context}) {
+    const str = readFileSync(joinPath(setDirectory, `${context}.json`), 'utf8');
+    return JSON.parse(str);
+}
 
-	function generateSets() {
-		return [
-			{
-				spec: 'personal', name: 'Personal names',
-				description: 'Personal names',
-				indexes: {
-					heading: ['HATYPL100A %']
-				}
-			},
-			{
-				spec: 'corporate', name: 'Corporate names',
-				description: 'Corporate names',
-				indexes: {
-					heading: ['HATYPL110A %']
-				}
-			},
-			{
-				spec: 'meetings', name: 'Meeting names',
-				description: 'Meeting names',
-				indexes: {
-					heading: ['HATYPL111A %']
-				}
-			}
-		];
-	}
-};
+export function stripPrivateFields(record) {
+    const newRecord = record.clone();
+    newRecord.get(/^CAT$/).forEach(newRecord.removeField);
+    return newRecord;
+}

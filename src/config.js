@@ -16,28 +16,30 @@
 
 import {Utils} from '@natlibfi/melinda-commons';
 
-const {readEnvironmentVariable, generateEncryptionKey} = Utils;
+const {readEnvironmentVariable, generateEncryptionKey, parseBoolean} = Utils;
 
-export const HTTP_PORT = readEnvironmentVariable('HTTP_PORT', {defaultValue: '8080'});
-export const ENABLE_PROXY = readEnvironmentVariable('ENABLE_PROXY', {defaultValue: ''});
+export const contextName = readEnvironmentVariable('CONTEXT_NAME');
+export const alephLibrary = readEnvironmentVariable('ALEPH_LIBRARY');
+export const setsDirectory = readEnvironmentVariable('SETS_DIRECTORY');
 
-export const SECRET_ENCRYPTION_KEY = readEnvironmentVariable('SECRET_ENCRYPTION_KEY', {
+export const isPrivileged = readEnvironmentVariable('IS_PRIVILEGED', {defaultValue: false, format: parseBoolean});
+
+export const httpPort = readEnvironmentVariable('HTTP_PORT', {defaultValue: '8080'});
+export const enableProxy = readEnvironmentVariable('ENABLE_PROXY', {defaultValue: ''});
+
+export const secretEncryptionkey = readEnvironmentVariable('SECRET_ENCRYPTION_KEY', {
 	defaultValue: generateEncryptionKey(),
 	hideDefaultValue: true
 });
 
 // 15 min
-export const RESUMPTION_TOKEN_TIMEOUT = readEnvironmentVariable('RESUMPTION_TOKEN_TIMEOUT', {defaultValue: '900000'});
+export const resumptionTokenTimeout = readEnvironmentVariable('RESUMPTION_TOKEN_TIMEOUT', {defaultValue: '900000'});
 
-export const MAX_RESULTS = readEnvironmentVariable('MAX_RESULTS', {defaultValue: 100, format: v => Number(v)});
-export const OAI_IDENTIFIER_PREFIX = readEnvironmentVariable('OAI_IDENTIFIER_PREFIX', {defaultValue: 'oai:melinda.kansalliskirjasto.fi'});
-export const INSTANCE_URL = readEnvironmentVariable('INSTANCE_URL');
-export const SUPPORT_EMAIL = readEnvironmentVariable('SUPPORT_EMAIL');
+export const maxResults = readEnvironmentVariable('MAX_RESULTS', {defaultValue: 100, format: v => Number(v)});
+export const oaiIdentifierPrefix = readEnvironmentVariable('OAI_IDENTIFIER_PREFIX', {defaultValue: 'oai:melinda.kansalliskirjasto.fi'});
+export const instanceUrl = readEnvironmentVariable('INSTANCE_URL');
+export const supportEmail = readEnvironmentVariable('SUPPORT_EMAIL');
 
-export const ALEPH_BIB_LIBRARY = readEnvironmentVariable('ALEPH_BIB_LIBRARY');
-export const ALEPH_AUT_NAMES_LIBRARY = readEnvironmentVariable('ALEPH_AUT_NAMES_LIBRARY');
-export const ALEPH_AUT_SUBJECTS_LIBRARY = readEnvironmentVariable('ALEPH_AUT_SUBJECTS_LIBRARY');
-
-export const ORACLE_USERNAME = readEnvironmentVariable('ORACLE_USERNAME');
-export const ORACLE_PASSWORD = readEnvironmentVariable('ORACLE_PASSWORD');
-export const ORACLE_CONNECT_STRING = readEnvironmentVariable('ORACLE_CONNECT_STRING');
+export const oracleUsername = readEnvironmentVariable('ORACLE_USERNAME');
+export const oraclePassword = readEnvironmentVariable('ORACLE_PASSWORD');
+export const oracleConnectString = readEnvironmentVariable('ORACLE_CONNECT_STRING');

@@ -14,24 +14,13 @@
 * limitations under the License.
 */
 
-import queryInterfaceFactory from './query-interface';
-// Import queryFactory from './query-offset-limit';
-import queryFactory from './query-keyset';
-import requestFactory from './request';
+import {readSetsFile, stripPrivateFields} from './utils';
 
-export default async (params, sets) => {
-	const {maxResults, library, connection} = params;
-	const queries = queryFactory({library, limit: maxResults});
-	const queryInterface = await queryInterfaceFactory({
-		maxResults,
-		queries,
-		sets,
-		connection
-	});
-
-	return requestFactory({...params, ...queryInterface, listSets});
-
-	function listSets() {
-		return sets.map(({spec, name, description}) => ({spec, name, description}));
-	}
+export default ({isPrivileged, setsDirectory}) => {
+    return {
+		route: '/aut-subjects',
+		repoName: 'Melinda OAI-PMH provider for authority subject records',
+        sets: readSetsFile({setsDirectory, context: 'aut-subjects'}),
+        recordFilter: isPrivileged ? r => r : stripPrivateFields        	        
+    };
 };

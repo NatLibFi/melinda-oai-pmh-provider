@@ -14,8 +14,24 @@
 * limitations under the License.
 */
 
-import bibFactory from './bib';
-import autNamesFactory from './aut-names';
-import autSubjectsFactory from './aut-subjects';
+import queryInterfaceFactory from '../db';
+// Import queryFactory from './query-offset-limit';
+import queryFactory from '../db/queries';
+import requestFactory from '../request';
 
-export {bibFactory, autNamesFactory, autSubjectsFactory};
+export default async (params, sets) => {
+	const {maxResults, library, connection} = params;
+	const queries = queryFactory({library, limit: maxResults});
+	const queryInterface = await queryInterfaceFactory({
+		maxResults,
+		queries,
+		sets,
+		connection
+	});
+
+	return requestFactory({...params, ...queryInterface, listSets});
+
+	function listSets() {
+		return sets.map(({spec, name, description}) => ({spec, name, description}));
+	}
+};

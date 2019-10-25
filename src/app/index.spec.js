@@ -20,7 +20,7 @@
 // import chaiHttp from 'chai-http';
 // Import oracledbMockFactory from './oracledb-mock';
 // import startApp, {__RewireAPI__ as RewireAPI} from './app'; // eslint-disable-line import/named
-import testSuiteFactory from './test-utils';
+import testSuiteFactory from '../test-utils';
 
 // Chai.use(chaiHttp);
 

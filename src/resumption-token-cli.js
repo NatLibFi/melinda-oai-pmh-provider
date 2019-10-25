@@ -19,12 +19,12 @@ import {
 	RESUMPTION_TOKEN_TIMEOUT as resumptionTokenTimeout
 } from './config';
 
-import {parseResumptionToken, generateResumptionToken} from './middlewares/utils';
+import {parseResumptionToken, generateResumptionToken} from './utils';
 
 const [op, ...args] = process.argv.slice(2);
 
 if (op === undefined) {
-	console.error('MIssing params!');
+	console.error('Missing params!');
 	process.exit(1);
 }
 

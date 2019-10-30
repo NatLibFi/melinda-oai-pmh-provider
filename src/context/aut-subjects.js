@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-import {readSetsFile, stripPrivateFields} from './utils';
+import {readSetsFile, stripPrivateFields as stripPrivateFieldsDefault} from './utils';
 
 export default ({isPrivileged, setsDirectory}) => {
 	return {
@@ -23,4 +23,10 @@ export default ({isPrivileged, setsDirectory}) => {
 		isSupportedFormat: f => ['marc21', 'melinda_marc'].includes(f),
 		formatRecord: isPrivileged ? r => r : stripPrivateFields
 	};
+
+	function stripPrivateFields(record) {
+		const newRecord = stripPrivateFieldsDefault(record);
+		newRecord.get(/^667$/).forEach(f => newRecord.removeField(f));
+		return newRecord;
+	}
 };

@@ -24,39 +24,39 @@ async function run() {
 	let server;
 
 	const {setsDirectory, contextName, isPrivileged, ...params} = config;
-	const {route, repoName, sets} = contextFactory({setsDirectory, contextName, isPrivileged});
+	const {route, repoName, sets, isSupportedFormat, formatRecord} = contextFactory({setsDirectory, contextName, isPrivileged});
 
 	registerInterruptionHandlers();
-			
+
 	server = await startApp({
 		...params,
-		route, repoName, sets
+		route, repoName, sets, isSupportedFormat, formatRecord
 	});
-	
+
 	function registerInterruptionHandlers() {
 		process.on('SIGTERM', handleSignal);
 		process.on('SIGINT', handleSignal);
-		
+
 		process.on('uncaughtException', ({stack}) => {
 			handleTermination({code: 1, message: stack});
 		});
-		
+
 		process.on('unhandledRejection', ({stack}) => {
 			handleTermination({code: 1, message: stack});
 		});
-		
+
 		function handleTermination({code = 0, message}) {
 			if (server) {
 				server.close();
 			}
-			
+
 			if (message) {
 				console.error(message);
 			}
-			
+
 			process.exit(code);
 		}
-		
+
 		function handleSignal(signal) {
 			handleTermination({code: 1, message: `Received ${signal}`});
 		}

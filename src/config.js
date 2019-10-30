@@ -21,23 +21,20 @@ const {readEnvironmentVariable, generateEncryptionKey, parseBoolean} = Utils;
 export const contextName = readEnvironmentVariable('CONTEXT_NAME');
 export const alephLibrary = readEnvironmentVariable('ALEPH_LIBRARY');
 export const setsDirectory = readEnvironmentVariable('SETS_DIRECTORY');
+export const instanceUrl = readEnvironmentVariable('INSTANCE_URL');
 
 export const isPrivileged = readEnvironmentVariable('IS_PRIVILEGED', {defaultValue: false, format: parseBoolean});
 
 export const httpPort = readEnvironmentVariable('HTTP_PORT', {defaultValue: '8080'});
-export const enableProxy = readEnvironmentVariable('ENABLE_PROXY', {defaultValue: ''});
+export const enableProxy = readEnvironmentVariable('ENABLE_PROXY', {defaultValue: false, format: parseBoolean});
 
-export const secretEncryptionkey = readEnvironmentVariable('SECRET_ENCRYPTION_KEY', {
-	defaultValue: generateEncryptionKey(),
-	hideDefaultValue: true
-});
+export const secretEncryptionKey = readEnvironmentVariable('SECRET_ENCRYPTION_KEY', {defaultValue: generateEncryptionKey(), hideDefaultValue: true});
 
 // 15 min
 export const resumptionTokenTimeout = readEnvironmentVariable('RESUMPTION_TOKEN_TIMEOUT', {defaultValue: '900000'});
 
 export const maxResults = readEnvironmentVariable('MAX_RESULTS', {defaultValue: 100, format: v => Number(v)});
 export const oaiIdentifierPrefix = readEnvironmentVariable('OAI_IDENTIFIER_PREFIX', {defaultValue: 'oai:melinda.kansalliskirjasto.fi'});
-export const instanceUrl = readEnvironmentVariable('INSTANCE_URL');
 export const supportEmail = readEnvironmentVariable('SUPPORT_EMAIL');
 
 export const oracleUsername = readEnvironmentVariable('ORACLE_USERNAME');

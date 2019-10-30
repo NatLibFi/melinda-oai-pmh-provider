@@ -36,18 +36,14 @@ export const ERRORS = {
 	NO_SET_HIERARCHY: 'noSetHierarchy'
 };
 
-export const QUERY_PARAMETERS = [
-	'verb',
-	'set',
-	'metadataPrefix',
-	'from',
-	'until',
-	'resumptionToken'
-];
-
 export const METADATA_FORMATS = [
 	{
-		prefix: 'marc',
+		prefix: 'oai_dc',
+		schema: 'http://www.openarchives.org/OAI/2.0/oai_dc.xsd',
+		namespace: 'http://www.openarchives.org/OAI/2.0/oai_dc/'
+	},
+	{
+		prefix: 'marc21',
 		schema: 'https://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd',
 		namespace: 'http://www.loc.gov/MARC21/slim'
 	},

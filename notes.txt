@@ -1,0 +1,7 @@
+- Authoritative source of records is z00. If any of these records don't have an entry in z106, that's an error
+    - This was a problem previously when near 100k of records were missing entries in z106. Reason: unknown. Fixed by doing a empty update on all of those records.
+    - Should this happen again the problem would manifest itself as OAI-PMH returning less records than it should and flow control would break
+- Results sets are based on keyset retrieval
+- When Aleph's headings indexing is in progress, the service doesn't return correct results (For set queries, which use these indexes) because the even though the record data has been updated, the index has not
+    - The indexing should be made much more faster. The workaround is to have a polling service that check the state of the indexing table (z07) and makes the oai-pmh service respond with 503 (Service unavailable) when there is too much load in the table
+- Sets heading indexe specifications should be checked after full re-index

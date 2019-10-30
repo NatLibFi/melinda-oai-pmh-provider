@@ -16,22 +16,27 @@
 
 import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
-import {DB_TIME_FORMAT} from '../constants';
-import {parseRecord, toAlephId, fromAlephId} from '../record';
-import { getEarliestTimestamp, getHeadingsIndex, getRecords, getSingleRecord} from './queries';
-// Import IndexingError from '../indexing-error';
-// import buildQuery from '../build-query';
+import {MarcRecord} from '@natlibfi/marc-record';
+import {DB_TIME_FORMAT} from '../../../constants';
+import {parseRecord, toAlephId, fromAlephId} from './record';
+import queryFactory from './query';
 
-export default async function ({maxResults, sets, connection}) {
+export default async function ({maxResults, sets, alephLibrary, connection, formatRecord}) {
 	const {createLogger, isDeletedRecord} = Utils;
 	const logger = createLogger();
-	const {
-		getEarliestTimestamp, getHeadingsIndex,
-		getRecords, getSingleRecord
-	} = queries;
+	const {getEarliestTimestamp, getHeadingsIndex, getRecords, getSingleRecord} = queryFactory({
+		library: alephLibrary, limit: maxResults
+	});
 
 	const indexes = await getIndexes();
 	const earliestTimestamp = await retrieveEarliestTimestamp();
+
+	// Disable all validation because invalid records shouldn't crash the app
+	MarcRecord.setValidationOptions({
+		fields: false,
+		subfields: false,
+		subfieldValues: false
+	});
 
 	return {listRecords, listIdentifiers, getRecord, earliestTimestamp};
 
@@ -78,7 +83,7 @@ export default async function ({maxResults, sets, connection}) {
 
 					await resultSet.close();
 
-					cache[value] = `${row.ID}%`; // eslint-disable-line require-atomic-updates
+					cache[value] = `${row.ID}%`;
 					return getHeadingIndexes(values, results.concat(cache[value]));
 				}
 
@@ -97,21 +102,15 @@ export default async function ({maxResults, sets, connection}) {
 		return moment(row.TIME, DB_TIME_FORMAT);
 	}
 
-	async function getRecord({connection, identifier, metadataPrefix}) {
-		const {query, args} = getQuery(getSingleRecord({
-			identifier: toAlephId(identifier)
-		}));
-
+	async function getRecord({connection, identifier}) {
+		const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
 		const {resultSet} = await connection.execute(query, args, {resultSet: true});
 		const row = await resultSet.getRow();
 
 		await resultSet.close();
 
 		if (row) {
-			return recordRowCallback({
-				row,
-				formatRecord: generateFormatter(metadataPrefix)
-			});
+			return recordRowCallback(row);
 		}
 	}
 
@@ -128,7 +127,7 @@ export default async function ({maxResults, sets, connection}) {
 	}
 
 	async function queryRecords({
-		connection, from, until, set, metadataPrefix,
+		connection, from, until, set,
 		includeRecords = true, cursor
 	}) {
 		const params = getParams();
@@ -138,10 +137,7 @@ export default async function ({maxResults, sets, connection}) {
 			const setIndexes = indexes[set];
 			const startTime = from;
 			const endTime = until;
-			const rowCallback = row => recordRowCallback({
-				row, includeRecords,
-				formatRecord: generateFormatter(metadataPrefix)
-			});
+			const rowCallback = row => recordRowCallback(row, includeRecords);
 
 			return {
 				rowCallback, connection, cursor,
@@ -156,12 +152,16 @@ export default async function ({maxResults, sets, connection}) {
 			await resultSet.close();
 
 			if (records.length < maxResults) {
-				return {records};
+				return {
+					records,
+					previousCursor: cursor
+				};
 			}
 
 			return {
 				records,
-				cursor: newCursor
+				cursor: newCursor,
+				previousCursor: cursor
 			};
 
 			async function doQuery(cursor) {
@@ -174,6 +174,8 @@ export default async function ({maxResults, sets, connection}) {
 				const row = await resultSet.getRow();
 
 				if (row) {
+					// Console.log(`GOT ROW: ${records.length}`);
+
 					const result = rowCallback(row);
 
 					if (records.length + 1 === maxResults) {
@@ -186,21 +188,22 @@ export default async function ({maxResults, sets, connection}) {
 					return pump(records.concat(result));
 				}
 
-				return {
-					records,
-					newCursor: toAlephId(records.slice(-1).shift().id)
-				};
+				if (records.length > 0) {
+					return {
+						records,
+						newCursor: toAlephId(records.slice(-1)[0].id)
+					};
+				}
+
+				// Console.log(`NO ROWS: ${records.length}`);
+
+				return {records};
 			}
 		}
 	}
 
-	function recordRowCallback({row, formatRecord, includeRecords = true}) {
-		/*		If (row.INDEXING === 'true') {
-			throw new IndexingError(row.ID);
-		} */
-
+	function recordRowCallback(row, includeRecords = true) {
 		const record = parseRecord(row.RECORD);
-
 		const isDeleted = isDeletedRecord(record);
 
 		if (includeRecords && isDeleted === false) {
@@ -214,20 +217,9 @@ export default async function ({maxResults, sets, connection}) {
 		return {id: fromAlephId(row.ID), time: moment(row.TIME, DB_TIME_FORMAT), isDeleted};
 	}
 
-	function generateFormatter(metadataPrefix) {
-		return metadataPrefix === 'marc' ?
-			formatToStandard :
-			r => r;
-
-		function formatToStandard(record) {
-			// Get all fields with non-numeric tags
-			record.get(/[^0-9]+/).forEach(f => record.removeField(f));
-			return record;
-		}
-	}
-
 	function getQuery({query, args}) {
 		debugQuery(query, args);
+
 		return {
 			query,
 			args: args || {}

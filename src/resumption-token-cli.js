@@ -14,11 +14,7 @@
 * limitations under the License.a
 */
 
-import {
-	SECRET_ENCRYPTION_KEY as secretEncryptionKey,
-	RESUMPTION_TOKEN_TIMEOUT as resumptionTokenTimeout
-} from './config';
-
+import {secretEncryptionKey, resumptionTokenTimeout} from './config';
 import {parseResumptionToken, generateResumptionToken} from './utils';
 
 const [op, ...args] = process.argv.slice(2);

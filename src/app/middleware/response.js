@@ -15,46 +15,48 @@
 */
 
 import moment from 'moment';
+import {MarcRecord} from '@natlibfi/marc-record';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
 import {Utils} from '@natlibfi/melinda-commons';
-import {ERRORS, PROTOCOL_VERSION, RESPONSE_TIMESTAMP_FORMAT} from './constants';
 import {Parser, Builder} from 'xml2js';
+import {ERRORS, PROTOCOL_VERSION, RESPONSE_TIMESTAMP_FORMAT} from '../../constants';
+import {fromMARC21} from './marc-to-dc';
 
-export default ({identifierPrefix, supportEmail}) => {
+export default ({oaiIdentifierPrefix, supportEmail}) => {
 	const {createLogger} = Utils;
 	const logger = createLogger();
 
 	return {
 		generateErrorResponse, generateListMetadataFormatsResponse, generateListSetsResponse,
 		generateIdentifyResponse, generateListRecordsResponse, generateListIdentifiersResponse,
-		generateGetRecordResponse, generateResponse, responseToXML
+		generateGetRecordResponse
 	};
 
-	async function generateErrorResponse({requestURL, query, error}) {
+	async function generateErrorResponse({requestUrl, query, error}) {
 		if (error === ERRORS.BAD_VERB) {
 			delete query.verb;
 		}
 
-		return generate({requestURL, query, payload: {
+		return generateResponse({requestUrl, query, payload: {
 			error: {
 				$: {code: error}
 			}
 		}});
 	}
 
-	async function generateGetRecordResponse({requestURL, query, id, time, record}) {
-		return generate({requestURL, query, payload: {
+	async function generateGetRecordResponse({requestUrl, query, format, ...record}) {
+		return generateResponse({requestUrl, query, payload: {
 			GetRecord: {record: [
-				await generateRecordObject({id, time, record})
+				await generateRecordObject({...record, format})
 			]}
 		}});
 	}
 
-	async function generateIdentifyResponse({requestURL, query, descr, earliestTimestamp}) {
-		return generate({requestURL, query, payload: {
+	async function generateIdentifyResponse({requestUrl, query, repoName, earliestTimestamp}) {
+		return generateResponse({requestUrl, query, payload: {
 			Identify: {
-				repositoryName: [descr],
-				baseURL: [requestURL.split('?').shift()],
+				repositoryName: [repoName],
+				baseURL: [requestUrl.split('?').shift()],
 				procotolVersion: [PROTOCOL_VERSION],
 				earliestTimestamp: [earliestTimestamp.format(RESPONSE_TIMESTAMP_FORMAT)],
 				deletedRecord: ['persistent'],
@@ -64,8 +66,8 @@ export default ({identifierPrefix, supportEmail}) => {
 		}});
 	}
 
-	async function generateListMetadataFormatsResponse({requestURL, query, formats}) {
-		return generate({requestURL, query, payload: {
+	async function generateListMetadataFormatsResponse({requestUrl, query, formats}) {
+		return generateResponse({requestUrl, query, payload: {
 			ListMetadataFormats: {
 				metadataFormat: formats.map(({prefix, schema, namespace}) => ({
 					metadataPrefix: [prefix],
@@ -76,8 +78,8 @@ export default ({identifierPrefix, supportEmail}) => {
 		}});
 	}
 
-	async function generateListSetsResponse({requestURL, query, sets}) {
-		return generate({requestURL, query, payload: {
+	async function generateListSetsResponse({requestUrl, query, sets}) {
+		return generateResponse({requestUrl, query, payload: {
 			ListSets: {
 				set: sets.map(({spec, name, description}) => ({
 					setSpec: [spec],
@@ -88,80 +90,81 @@ export default ({identifierPrefix, supportEmail}) => {
 		}});
 	}
 
-	async function generateListRecordsResponse({requestURL, query, token, tokenExpirationTime, cursor, records}) {
-		return generate({requestURL, query, payload: {
-			ListRecords: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor})
+	async function generateListRecordsResponse({requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
+		return generateResponse({requestUrl, query, payload: {
+			ListRecords: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format})
 		}});
 	}
 
-	async function generateListIdentifiersResponse({requestURL, query, token, tokenExpirationTime, cursor, records}) {
-		return generate({requestURL, query, payload: {
-			ListIdentifiers: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor})
+	async function generateListIdentifiersResponse({requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
+		return generateResponse({requestUrl, query, payload: {
+			ListIdentifiers: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format})
 		}});
 	}
 
-	function generateResponse({requestURL, query, payload}) {
-		return {
-			'OAI-PMH': {
-				$: {
-					xmlns: 'http://www.openarchives.org/OAI/2.0/',
-					'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-					'xsi:schemaLocation': 'http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd'
-				},
-				request: [generateRequestObject()],
-				responseDate: [moment().format(RESPONSE_TIMESTAMP_FORMAT)],
-				...payload
-			}
-		};
+	function generateResponse({requestUrl, query, payload}) {
+		const obj = generate();
+		return toXML();
 
-		function generateRequestObject() {
+		function generate() {
 			return {
-				_: requestURL,
-				$: getAttr()
+				'OAI-PMH': {
+					$: {
+						xmlns: 'http://www.openarchives.org/OAI/2.0/',
+						'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+						'xsi:schemaLocation': 'http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd'
+					},
+					request: [generateRequestObject()],
+					responseDate: [moment().format(RESPONSE_TIMESTAMP_FORMAT)],
+					...payload
+				}
 			};
 
-			function getAttr() {
-				return Object.entries(query)
-					.sort((a, b) => {
-						const {key: aKey} = a;
-						const {key: bKey} = b;
+			function generateRequestObject() {
+				return {
+					_: requestUrl,
+					$: getAttr()
+				};
 
-						if (aKey === 'verb' || bKey === 'verb') {
-							return -1;
-						}
+				function getAttr() {
+					return Object.entries(query)
+						.sort((a, b) => {
+							const {key: aKey} = a;
+							const {key: bKey} = b;
 
-						return 0;
-					})
-					.reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
+							if (aKey === 'verb' || bKey === 'verb') {
+								return -1;
+							}
+
+							return 0;
+						})
+						.reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
+				}
+			}
+		}
+
+		function toXML() {
+			try {
+				return new Builder({
+					xmldec: {
+						version: '1.0',
+						encoding: 'UTF-8',
+						standalone: false
+					},
+					renderOpts: {
+						pretty: true,
+						indent: '\t'
+					}
+				}).buildObject(obj);
+			} catch (err) {
+				throw new Error(`XML conversion failed ${err.message} for request ${requestUrl}, query: ${JSON.stringify(query)}`);
 			}
 		}
 	}
 
-	function responseToXML(obj) {
-		try {
-			return new Builder({
-				xmldec: {
-					version: '1.0',
-					encoding: 'UTF-8',
-					standalone: false
-				},
-				renderOpts: {
-					pretty: true,
-					indent: '\t'
-				}
-			}).buildObject(obj);
-		} catch (err) {
-			throw new Error(`XML conversion failed ${err.message} for data: ${JSON.stringify(obj)}`);
-		}
-	}
-
-	function generate(params) {
-		return responseToXML(generateResponse(params));
-	}
-
-	async function generateListResourcesResponse({records, token, tokenExpirationTime, cursor}) {
+	async function generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format}) {
 		const obj = {
-			record: await Promise.all(records.map(generateRecordObject))
+			record: await Promise.all(records.map(record => generateRecordObject({...record, format})))
 		};
 
 		if (token) {
@@ -182,20 +185,13 @@ export default ({identifierPrefix, supportEmail}) => {
 		}
 	}
 
-	async function generateRecordObject({time, id, record, isDeleted}) {
+	async function generateRecordObject({time, id, record, isDeleted, format}) {
 		const obj = {
 			header: [{
-				identifier: [`${identifierPrefix}/${id}`],
+				identifier: [`${oaiIdentifierPrefix}/${id}`],
 				datestamp: time.toISOString(true)
 			}]
 		};
-
-		if (record) {
-			return {
-				...obj,
-				metadata: [await convertRecord()]
-			};
-		}
 
 		if (isDeleted) {
 			return {
@@ -209,23 +205,17 @@ export default ({identifierPrefix, supportEmail}) => {
 			};
 		}
 
+		if (record) {
+			return {
+				...obj,
+				metadata: [await transformRecord()]
+			};
+		}
+
 		return obj;
 
-		async function convertRecord() {
-			const str = convert();
-
-			function convert() {
-				const PATTERN = /[\x00-\x1F\x7F-\x9F]/g; // eslint-disable-line no-control-regex
-				const str = MARCXML.to(record, {omitDeclaration: true});
-
-				// Remove control characters because they will break XML conversion
-				if (PATTERN.test(str)) {
-					logger.log('warn', `Record ${id} contains control characters`);
-					return str.replace(PATTERN, '');
-				}
-
-				return str;
-			}
+		async function transformRecord() {
+			const str = transform();
 
 			return new Promise((resolve, reject) => {
 				new Parser().parseString(str, (err, obj) => {
@@ -236,6 +226,40 @@ export default ({identifierPrefix, supportEmail}) => {
 					}
 				});
 			});
+
+			function transform() {
+				const PATTERN = /[\x00-\x1F\x7F-\x9F]/g; // eslint-disable-line no-control-regex
+				const str = doTransformation();
+
+				// Remove control characters because they will break XML conversion
+				if (PATTERN.test(str)) {
+					logger.log('warn', `Record ${id} contains control characters`);
+					return str.replace(PATTERN, '');
+				}
+
+				return str;
+
+				function doTransformation() {
+					if (format === 'oai_dc') {
+						return fromMARC21(record);
+					}
+
+					if (format === 'marc21') {
+						const formatted = formatToStandard(record);
+						return MARCXML.to(formatted, {omitDeclaration: true});
+					}
+
+					// Format: melinda_marc
+					return MARCXML.to(record, {omitDeclaration: true});
+
+					function formatToStandard(record) {
+						const newRecord = MarcRecord.clone(record);
+						// Remove all fields with non-numeric tags
+						newRecord.get(/[^0-9]+/).forEach(f => newRecord.removeField(f));
+						return newRecord;
+					}
+				}
+			}
 		}
 	}
 };

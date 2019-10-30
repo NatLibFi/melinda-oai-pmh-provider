@@ -16,7 +16,7 @@
 
 import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
-import {ERRORS, RESUMPTION_TOKEN_TIME_FORMAT} from './app/constants';
+import {ERRORS, RESUMPTION_TOKEN_TIME_FORMAT} from './constants';
 import ApiError from './api-error';
 
 export function generateResumptionToken({
@@ -48,11 +48,11 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
 	const expires = moment(expirationTime, RESUMPTION_TOKEN_TIME_FORMAT, true);
 
 	if (expires.isValid() && moment().isBefore(expires)) {
-		return {cursor, metadataPrefix, set, from, until};
+		return filter({cursor, metadataPrefix, set, from, until});
 	}
 
 	if (ignoreError) {
-		return {cursor, metadataPrefix, set, from, until};
+		return filter({cursor, metadataPrefix, set, from, until});
 	}
 
 	throw new ApiError({verb, code: ERRORS.BAD_RESUMPTION_TOKEN});
@@ -64,5 +64,12 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
 		} catch (_) {
 			throw new ApiError({verb, code: ERRORS.BAD_RESUMPTION_TOKEN});
 		}
+	}
+
+	// Remove params with undefined value
+	function filter(params) {
+		return Object.entries(params)
+			.filter(([_, v]) => v)
+			.reduce((acc, [k, v]) => ({...acc, [k]: v}), {});
 	}
 }

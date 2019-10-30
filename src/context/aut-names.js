@@ -17,16 +17,16 @@
 import {readSetsFile, stripPrivateFields as stripPrivateFieldsDefault} from './utils';
 
 export default ({isPrivileged, setsDirectory}) => {
-    return {
-		route: '/aut-names',
+	return {
 		repoName: 'Melinda OAI-PMH provider for authority name records',
-        sets: readSetsFile({setsDirectory, context: 'aut-names'}),
-        recordFilter: isPrivileged ? r => r : stripPrivateFields        	
-    };
+		sets: readSetsFile({setsDirectory, context: 'aut-names'}),
+		isSupportedFormat: f => ['marc21', 'melinda_marc'].includes(f),
+		formatRecord: isPrivileged ? r => r : stripPrivateFields
+	};
 
-    function stripPrivateFields(record) {
-        const newRecord = stripPrivateFieldsDefault(record);
-        newRecord.get(/^(375|667)$/).forEach(newRecord.removeField);
-        return newRecord;  
-    }
+	function stripPrivateFields(record) {
+		const newRecord = stripPrivateFieldsDefault(record);
+		newRecord.get(/^(375|667)$/).forEach(f => newRecord.removeField(f));
+		return newRecord;
+	}
 };

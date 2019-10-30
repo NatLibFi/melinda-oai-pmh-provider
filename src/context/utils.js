@@ -14,16 +14,17 @@
 * limitations under the License.
 */
 
+import {MarcRecord} from '@natlibfi/marc-record';
 import {readFileSync} from 'fs';
 import {join as joinPath} from 'path';
 
 export function readSetsFile({setsDirectory, context}) {
-    const str = readFileSync(joinPath(setDirectory, `${context}.json`), 'utf8');
-    return JSON.parse(str);
+	const str = readFileSync(joinPath(setsDirectory, `${context}.json`), 'utf8');
+	return JSON.parse(str);
 }
 
 export function stripPrivateFields(record) {
-    const newRecord = record.clone();
-    newRecord.get(/^CAT$/).forEach(newRecord.removeField);
-    return newRecord;
+	const newRecord = MarcRecord.clone(record);
+	newRecord.get(/^CAT$/).forEach(f => newRecord.removeField(f));
+	return newRecord;
 }

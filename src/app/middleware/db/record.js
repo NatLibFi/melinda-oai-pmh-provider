@@ -16,14 +16,17 @@
 
 import {AlephSequential} from '@natlibfi/marc-record-serializers';
 
+// Migrate to Melinda commons
 export function toAlephId(id) {
 	return id.padStart(9, '0');
 }
 
+// Migrate to Melinda commons
 export function fromAlephId(id) {
 	return id.replace(/^0+/, '');
 }
 
+// Migrate to marc-record-serializers
 export function parseRecord(data) {
 	const buffer = Buffer.from(data);
 	return iterate();
@@ -68,6 +71,7 @@ export function parseRecord(data) {
 	}
 }
 
+// Migrate to marc-record-serializers
 export function formatRecord(record) {
 	const seq = AlephSequential.to(record);
 	const buffers = seq.split('\n').slice(0, -1).map(str => {

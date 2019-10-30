@@ -12,26 +12,23 @@
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
-* limitations under the License.a
+* limitations under the License.
 */
 
-import HttpStatus from 'http-status';
 import moment from 'moment';
 import {Utils} from '@natlibfi/melinda-commons';
 import {REQUEST_DATE_STAMP_FORMATS} from '../../constants';
 import ApiError from '../../api-error';
-import responseFactory from '../response';
+import responseFactory from './response';
 import {parseResumptionToken, generateResumptionToken} from '../../utils';
 import databaseFactory from './db';
-
-import {
-	ERRORS, QUERY_PARAMETERS, METADATA_FORMATS,
-} from '../../constants';
+import {ERRORS, METADATA_FORMATS} from '../../constants';
 
 export default async ({
 	pool, secretEncryptionKey, resumptionTokenTimeout,
-	supportEmail, instanceUrl, identifierPrefix, repoName,
-	alephLibrary, sets
+	supportEmail, oaiIdentifierPrefix, repoName,
+	instanceUrl, maxResults, alephLibrary,
+	sets, formatRecord, isSupportedFormat
 }) => {
 	const {createLogger, clone} = Utils;
 	const logger = createLogger();
@@ -39,35 +36,30 @@ export default async ({
 		generateErrorResponse, generateIdentifyResponse,
 		generateListMetadataFormatsResponse, generateListSetsResponse,
 		generateGetRecordResponse, generateListRecordsResponse, generateListIdentifiersResponse
-	} = responseFactory({identifierPrefix, supportEmail});
-	
+	} = responseFactory({oaiIdentifierPrefix, supportEmail});
 
-	// give connection, sets, maxResults, alephLibrary
-	const {
-		getRecord, earliestTimestamp,
-		listIdentifiers, listRecords
-	} = await databaseFactory({});
+	const {getRecord, earliestTimestamp, listIdentifiers, listRecords} = await getMethods();
 
+	return async (req, res, next) => {
+		const {query: {verb}} = req;
 
-	return async (req, res, next) => {		
 		try {
 			await handle();
 		} catch (err) {
 			return err instanceof ApiError ? sendResponse({error: err.code}) : next(err);
 		}
-		
+
 		async function handle() {
-			const {query: {verb}} = req;
-			
 			res.type('application/xml');
 
-			const invalidParamsError = validateParams();
+			const error = validateParams();
 
 			return error ? sendResponse({error}) : call();
-			
+
 			function validateParams() {
 				const numParams = Object.keys(req.query).length;
 				const mapping = {
+					Identify: () => {},
 					GetRecord: validateGetRecord,
 					ListMetadataFormats: validateListMetadataFormats,
 					ListSets: validateListSets,
@@ -78,234 +70,287 @@ export default async ({
 				return verb ? mapping[verb]() : ERRORS.BAD_VERB;
 
 				function validateGetRecord() {
-					return numParams === 2
-					? validateMetadataPrefix(req.query.metadataPrefix)
-					: ERRORS.BAD_ARGUMENT;
+					if (numParams === 3) {
+						const error = validateMetadataPrefix(req.query.metadataPrefix);
+
+						if (error) {
+							return error;
+						}
+
+						if (isSupportedFormat(req.query.metadataPrefix) === false) {
+							return ERRORS.CANNOT_DISSEMINATE_FORMAT;
+						}
+
+						return;
+					}
+
+					return ERRORS.BAD_ARGUMENT;
 				}
 
 				function validateListMetadataFormats() {
-					return numParams === 1 ? undefined
-					: numParams === 2 && 'identifier' in req.query
-					? validateMetadataPrefix(req.query.identifier) : BAD_ARGUMENT;
+					if (numParams === 2) {
+						if ('identifier' in req.query) {
+							return validateMetadataPrefix(req.query.identifier);
+						}
+
+						return ERRORS.BAD_ARGUMENT;
+					}
 				}
 
 				function validateListSets() {
-					return numParams === 1 ? undefined
-					: numParams === 2 && 'resumptionToken' in req.query
-					? undefined : BAD_ARGUMENT;
+					if (numParams === 2 && req.query.resumptionToken === undefined) {
+						return ERRORS.BAD_ARGUMENT;
+					}
 				}
 
 				function validateListRequest() {
-					return numParams === 2 ? check() : ERRORS.BAD_ARGUMENT;
+					if (numParams >= 2) {
+						if (req.query.resumptionToken === undefined) {
+							const match = METADATA_FORMATS.find(({prefix}) => prefix === req.query.metadataPrefix);
 
-					function check() {
-						return 'resumptionToken' in req.query
-						? undefined
-						: METADATA_FORMATS.find(({prefix}) => prefix === req.query.metadataPrefix)
-						? validateOptParams() : ERRORS.CANNOT_DISSEMINATE_FORMAT;
+							if (match) {
+								if (isSupportedFormat(req.query.metadataPrefix) === false) {
+									return ERRORS.NO_RECORDS_MATCH;
+								}
 
-						function validateOptParams() {
-							const optParams = ['set', 'from', 'until'];
+								return validateOptParams();
+							}
 
+							return ERRORS.CANNOT_DISSEMINATE_FORMAT;
+						}
+
+						return;
+					}
+
+					return ERRORS.BAD_ARGUMENT;
+
+					function validateOptParams() {
+						const hasInvalid = validate();
+
+						if (hasInvalid) {
+							return ERRORS.BAD_ARGUMENT;
+						}
+
+						function validate() {
 							return Object.entries(req.query)
-							.filter(([k]) => ['verb', 'metadataPrefix'].includes(k) === false)
-							.some(([key, value]) => {
-								const mapping = {
-									'set': validateSet,
-									'from': validateTime,
-									'until': validateTime
-								};
+								.filter(([k]) => ['verb', 'metadataPrefix'].includes(k) === false)
+								.some(([key, value]) => {
+									const mapping = {
+										set: validateSet,
+										from: validateTime,
+										until: validateTime
+									};
 
-								return key in mapping ? mapping[key]() : true;
+									return key in mapping ? mapping[key]() : true;
 
-								function validateSet() {
-									return sets.find(({spec}) => spec === value) === undefined;
-								}
+									function validateSet() {
+										return sets.find(({spec}) => spec === value) === undefined;
+									}
 
-								function validateTime() {
-									const time = moment.utc(time, REQUEST_DATE_STAMP_FORMATS);
-									return time.isValid() === false;
-								}
-							}) ? ERRORS.BAD_ARGUMENT : undefined;
+									function validateTime() {
+										const time = moment.utc(value, REQUEST_DATE_STAMP_FORMATS);
+										return time.isValid() === false;
+									}
+								});
 						}
 					}
 				}
 
 				function validateMetadataPrefix(target) {
-					return METADATA_FORMATS.find(({prefix}) => prefix === target)
-					? undefined : ERRORS.CANNOT_DISSEMINATE_FORMAT;
+					const match = METADATA_FORMATS.find(({prefix}) => prefix === target);
+
+					if (match === undefined) {
+						return ERRORS.CANNOT_DISSEMINATE_FORMAT;
+					}
 				}
 			}
-						
+
 			async function call() {
 				const method = getMethod();
-				const params = getParams();
-				const results = await wrap();
-				
-				return sendResponse({results, params});					
-				
+				const params = await getParams();
+				const result = await wrap();
+
+				return sendResponse({result, params});
+
 				function getMethod() {
 					const mapping = {
-						Identify: identify,
+						Identify: () => {},
 						ListSets: listSets,
 						ListMetadataFormats: listMetadataFormats,
 						GetRecord: getRecord,
 						ListIdentifiers: listIdentifiers,
 						ListRecords: listRecords
 					};
-					
+
 					return mapping[verb];
 				}
-				
-				function getParams() {
+
+				async function getParams() {
 					const params = 'resumptionToken' in req.query ? parseToken() : parse(req.query);
 					return needsDb() ? addConnection() : params;
-					
+
 					function parseToken() {
 						const params = parseResumptionToken({
 							secretEncryptionKey, verb,
-							token: req.query.resumptionToken								
+							token: req.query.resumptionToken
 						});
-						
+
 						return parse(params);
 					}
-					
+
 					function parse(params) {
-						return Object.entries(params)						
-						.reduce((acc, [key, value]) => {
-							const mapping = {
-								'from': parseTime,
-								'until': parseTime,
-								'identifier': parseIdentifier,
-							};
-							
-							return key in mapping ? mapping[key]() : {...acc, [key]: value};
-							
-							function parseTime() {
-								return moment.utc(stamp, REQUEST_DATE_STAMP_FORMATS);
-							}
-							
-							function parseIdentifier() {
-								// Strip prefix (Slice takes offset and the length of the prefix doesn't include the separator)
-								return value.slice(identifierPrefix.length + 1);
-							}
-						}, {});
+						return Object.entries(params)
+							.reduce((acc, [key, value]) => {
+								const mapping = {
+									from: parseTime,
+									until: parseTime,
+									identifier: parseIdentifier
+								};
+
+								if (key in mapping) {
+									return {...acc, [key]: mapping[key](value)};
+								}
+
+								return {...acc, [key]: value};
+
+								function parseTime(stamp) {
+									return moment.utc(stamp, REQUEST_DATE_STAMP_FORMATS);
+								}
+
+								function parseIdentifier() {
+								// Strip prefix (Slice takes offset and the length of the prefix which doesn't include the separator)
+									return value.slice(oaiIdentifierPrefix.length + 1);
+								}
+							}, {});
 					}
-					
+
 					function needsDb() {
 						return ['GetRecord', 'ListIdentifiers', 'ListRecords'].includes(verb);
 					}
-					
+
 					async function addConnection() {
 						logger.log('debug', 'Requesting a new connection from the pool...');
-						
+
 						const connection = await pool.getConnection();
-						
+
 						logger.log('debug', 'Connection acquired!');
-						
+
 						return {...params, connection};
 					}
-					
-				}						
-				
+				}
+
 				async function wrap() {
 					return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
 						req.on('close', async () => {
 							logger.log('info', 'Request cancelled');
-							
+
 							if (params.connection) {
-								await params.connection.close();
+								await params.connection.break();
+								await params.connection.close({drop: true});
 							}
-							
+
 							resolve();
 						});
-						
+
 						try {
-							resolve(method(params));
+							const result = await method(params);
+							resolve(result);
 						} catch (err) {
 							reject(err);
 						} finally {
-							params.connection ? await params.connection.close() : undefined;
+							if (req.aborted === false && params.connection) {
+								await params.connection.break();
+								await params.connection.close({drop: true});
+							}
 						}
 					});
 				}
-			}
-				
-			function listMetadataFormats({identifier}) {
-				if (identifier) {
-					return METADATA_FORMATS.filter(({prefix}) => prefix === identifier);
+
+				function listMetadataFormats({identifier}) {
+					if (identifier) {
+						return METADATA_FORMATS.filter(({prefix}) => isSupportedFormat(prefix));
+					}
+
+					return METADATA_FORMATS;
 				}
-				
-				return METADATA_FORMATS;
-			}
-			
-			function listSets() {
-				return sets.map(({spec, name, description}) => ({spec, name, description}));
+
+				function listSets() {
+					return sets.map(({spec, name, description}) => ({spec, name, description}));
+				}
 			}
 		}
 
-}
+		async function sendResponse({error, result, params}) {
+			const requestUrl = instanceUrl;
+			const query = clone(req.query);
 
-async function sendResponse({error, result, params}) {
-	const query = clone(req.query);
-	const requestURL = `${instanceUrl}${req.path}`;
-	
-	if (error) {
-		return res.send(await generateErrorResponse({query, requestURL, error}));
-	}
-	
-	return res.send(await generatePayload(verb));
-	
-	async function generatePayload(method) {
-		const generators = {
-			ListSets: async () => generateListSetsResponse({requestURL, query, sets: result}),
-			ListRecords: async () => listResources(generateListRecordsResponse),
-			ListIdentifiers: async () => listResources(generateListIdentifiersResponse),
-			GetRecord: async () => {
-				if (result) {
-					return generateGetRecordResponse({requestURL, query, ...result});
+			if (error) {
+				return res.send(await generateErrorResponse({query, requestUrl, error}));
+			}
+
+			return res.send(await generatePayload(verb));
+
+			async function generatePayload(method) {
+				const generators = {
+					ListSets: async () => generateListSetsResponse({requestUrl, query, sets: result}),
+					ListRecords: async () => listResources(generateListRecordsResponse),
+					ListIdentifiers: async () => listResources(generateListIdentifiersResponse),
+					GetRecord: async () => {
+						if (result) {
+							return generateGetRecordResponse({
+								requestUrl, query,
+								format: params.metadataPrefix,
+								...result
+							});
+						}
+
+						return generateErrorResponse({requestUrl, query, error: ERRORS.ID_DOES_NOT_EXIST});
+					},
+					ListMetadataFormats: async () => {
+						if (result.length === 0) {
+							return generateErrorResponse({query, requestUrl, error: ERRORS.ID_DOES_NOT_EXIST});
+						}
+
+						return generateListMetadataFormatsResponse({requestUrl, query, formats: result});
+					},
+					Identify: async () => {
+						return generateIdentifyResponse({requestUrl, query, repoName, earliestTimestamp});
+					}
+				};
+
+				return generators[method]();
+
+				async function listResources(callback) {
+					const {records, cursor, previousCursor} = result;
+
+					if (records.length === 0) {
+						return generateErrorResponse({query, requestUrl, error: ERRORS.NO_RECORDS_MATCH});
+					}
+
+					if (cursor) {
+						const {token, tokenExpirationTime} = generateResumptionToken({
+							...params,
+							secretEncryptionKey, resumptionTokenTimeout, cursor
+						});
+
+						return callback({
+							requestUrl, query, records, token, tokenExpirationTime,
+							format: params.metadataPrefix,
+							cursor: previousCursor === undefined ? 0 : previousCursor
+						});
+					}
+
+					return callback({requestUrl, query, records, format: params.metadataPrefix});
 				}
-				
-				return generateErrorResponse({requestURL, query, error: ERRORS.ID_DOES_NOT_EXIST});
-			},
-			ListMetadataFormats: async () => {
-				if (result.length === 0) {
-					return generateErrorResponse({query, requestURL, error: ERRORS.ID_DOES_NOT_EXIST});
-				}
-				
-				return generateListMetadataFormatsResponse({requestURL, query, formats: result});
-			},
-			Identify: async () => {
-				// Remove the preceding slash
-				const descr = REPOSITORY_NAMES[req.path.slice(1)];
-				return generateIdentifyResponse({requestURL, query, descr, earliestTimestamp});
 			}
-		};
-		
-		return generators[method]();
-		
-		async function listResources(callback) {
-			const {records, cursor, previousCursor} = result;
-			
-			if (records.length === 0) {
-				return generateErrorResponse({query, requestURL, error: ERRORS.NO_RECORDS_MATCH});
-			}
-			
-			if (cursor) {
-				const {token, tokenExpirationTime} = generateResumptionToken({
-					...params,
-					secretEncryptionKey, resumptionTokenTimeout, cursor
-				});
-				
-				return callback({
-					requestURL, query, records, token, tokenExpirationTime,
-					cursor: previousCursor === undefined ? 0 : previousCursor
-				});
-			}
-			
-			return callback({requestURL, query, records});
 		}
+	};
+
+	async function getMethods() {
+		const connection = await pool.getConnection();
+		const methods = await databaseFactory({connection, sets, maxResults, alephLibrary, formatRecord});
+
+		await connection.close();
+		return methods;
 	}
-}
-};
 };

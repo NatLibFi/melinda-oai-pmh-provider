@@ -17,10 +17,10 @@
 import {readSetsFile, stripPrivateFields} from './utils';
 
 export default ({isPrivileged, setsDirectory}) => {
-    return {
-		route: '/bib',
+	return {
 		repoName: 'Melinda OAI-PMH provider for bibliographic records',
-        sets: readSetsFile({setDirectory, context: 'bib'}),
-        recordFilter: isPrivileged ? r => r : stripPrivateFields
-    };
+		sets: readSetsFile({setsDirectory, context: 'bib'}),
+		isSupportedFormat: f => ['oai_dc', 'marc21', 'melinda_marc'].includes(f),
+		formatRecord: isPrivileged ? r => r : stripPrivateFields
+	};
 };

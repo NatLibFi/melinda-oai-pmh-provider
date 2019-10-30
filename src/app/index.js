@@ -17,7 +17,6 @@
 import express from 'express';
 import oracledb from 'oracledb';
 import HttpStatus from 'http-status';
-import {MarcRecord} from '@natlibfi/marc-record';
 import {Utils} from '@natlibfi/melinda-commons';
 import createMiddleware from './middleware';
 
@@ -28,39 +27,30 @@ export default async function ({
 }) {
 	const {createLogger, createExpressLogger} = Utils;
 	const logger = createLogger();
-	
-	// Disable all validation because invalid records shouldn't crash the app
-	MarcRecord.setValidationOptions({
-		fields: false,
-		subfields: false,
-		subfieldValues: false
-	});
-	
+
 	const pool = await initOracle();
 	const server = await initExpress();
-	
+
 	server.on('close', async () => {
-		console.log('CLOSE CALLBACK');
 		await pool.close(0);
 	});
-	
+
 	return server;
-	
+
 	async function initOracle() {
 		setOracleOptions();
-		
+
 		logger.log('debug', 'Establishing connection to database...');
-		
+
 		const pool = await oracledb.createPool({
 			user: oracleUsername, password: oraclePassword,
 			connectString: oracleConnectString
 		});
-		
-		logger.log('debug', 'Connected to database!');	
-		
+
+		logger.log('debug', 'Connected to database!');
+
 		return pool;
-		
-		
+
 		function setOracleOptions() {
 			oracledb.outFormat = oracledb.OBJECT;
 			oracledb.poolTimeout = 20;
@@ -68,37 +58,40 @@ export default async function ({
 			oracledb.poolPingInterval = 10;
 		}
 	}
-	
+
 	async function initExpress() {
 		const app = express();
-		
+
 		if (enableProxy) {
 			app.enable('trust proxy', true);
 		}
-		
+
 		app.use(createExpressLogger({
 			msg: '{{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
 		}));
-		
-		app.get(route, await createMiddleware({...middlewareParams, pool}));
-		
+
+		app.get('/', await createMiddleware({...middlewareParams, pool}));
+
 		app.use(handleError);
-		
+
 		return app.listen(httpPort, () => logger.log('info', 'Started Melinda OAI-PMH provider'));
 
 		async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
-			const {
-				INTERNAL_SERVER_ERROR,
-				REQUEST_TIMEOUT
-			} = HttpStatus;
-			
-			// Certain Oracle errors don't matter if the request was closed by the client
-			if (err.message && err.message.startsWith('NJS-018:') && req.aborted) {
-				res.sendStatus(REQUEST_TIMEOUT);
+			// The correct way would be to throw if the error is unexpected...There is a race condition between the request aborted event handler and running async function.
+			if (req.aborted) {
+				res.sendStatus(HttpStatus.REQUEST_TIMEOUT);
 				return;
 			}
-			
-			res.sendStatus(INTERNAL_SERVER_ERROR);
+			/*
+			Const ORACLE_ERR_IGNORE_PATTERN = /^(NJS-018|NJS-003|ORA-01013):/;
+
+			// Certain Oracle errors don't matter if the request was closed by the client
+			if (err.message && ORACLE_ERR_IGNORE_PATTERN.test(err.message) && req.aborted) {
+				res.sendStatus(HttpStatus.REQUEST_TIMEOUT);
+				return;
+			} */
+
+			res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 			throw err;
 		}
 	}

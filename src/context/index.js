@@ -14,12 +14,11 @@
 * limitations under the License.
 */
 
-
 import bib from './bib';
 import autNames from './aut-names';
 import autSubjects from './aut-subjects';
 
 export default ({setsDirectory, contextName}) => {
-    const map = {bib, autNames, autSubjects};
-    return map[contextName]({setsDirectory, contextName});
-}
+	const map = {bib, autNames, autSubjects};
+	return map[contextName]({setsDirectory, contextName});
+};

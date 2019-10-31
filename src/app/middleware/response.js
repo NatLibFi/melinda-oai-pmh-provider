@@ -157,7 +157,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
 					}
 				}).buildObject(obj);
 			} catch (err) {
-				throw new Error(`XML conversion failed ${err.message} for request ${requestUrl}, query: ${JSON.stringify(query)}`);
+				throw new Error(`XML conversion failed ${err.message} for query: ${JSON.stringify(query)}`);
 			}
 		}
 	}

@@ -3,7 +3,7 @@ node_modules
 coverage
 dist
 .nyc_output
-.env
+.env*
 tnsnames.ora
 sqlnet.ora
 wallet

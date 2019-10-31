@@ -16,10 +16,9 @@
 
 import {MarcRecord} from '@natlibfi/marc-record';
 import {readFileSync} from 'fs';
-import {join as joinPath} from 'path';
 
-export function readSetsFile({setsDirectory, context}) {
-	const str = readFileSync(joinPath(setsDirectory, `${context}.json`), 'utf8');
+export function readSetsFile(setsFile) {
+	const str = readFileSync(setsFile, 'utf8');
 	return JSON.parse(str);
 }
 

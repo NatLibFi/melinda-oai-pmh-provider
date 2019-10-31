@@ -16,10 +16,10 @@
 
 import {readSetsFile, stripPrivateFields as stripPrivateFieldsDefault} from './utils';
 
-export default ({isPrivileged, setsDirectory}) => {
+export default ({isPrivileged, setsFile}) => {
 	return {
 		repoName: 'Melinda OAI-PMH provider for authority subject records',
-		sets: readSetsFile({setsDirectory, context: 'aut-subjects'}),
+		sets: readSetsFile(setsFile),
 		isSupportedFormat: f => ['marc21', 'melinda_marc'].includes(f),
 		formatRecord: isPrivileged ? r => r : stripPrivateFields
 	};

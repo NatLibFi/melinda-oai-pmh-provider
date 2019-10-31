@@ -20,7 +20,7 @@ const {readEnvironmentVariable, generateEncryptionKey, parseBoolean} = Utils;
 
 export const contextName = readEnvironmentVariable('CONTEXT_NAME');
 export const alephLibrary = readEnvironmentVariable('ALEPH_LIBRARY');
-export const setsDirectory = readEnvironmentVariable('SETS_DIRECTORY');
+export const setsFile = readEnvironmentVariable('SETS_FILE');
 export const instanceUrl = readEnvironmentVariable('INSTANCE_URL');
 
 export const isPrivileged = readEnvironmentVariable('IS_PRIVILEGED', {defaultValue: false, format: parseBoolean});

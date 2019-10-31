@@ -23,8 +23,8 @@ run();
 async function run() {
 	let server;
 
-	const {setsDirectory, contextName, isPrivileged, ...params} = config;
-	const {route, repoName, sets, isSupportedFormat, formatRecord} = contextFactory({setsDirectory, contextName, isPrivileged});
+	const {setsFile, contextName, isPrivileged, ...params} = config;
+	const {route, repoName, sets, isSupportedFormat, formatRecord} = contextFactory({setsFile, contextName, isPrivileged});
 
 	registerInterruptionHandlers();
 

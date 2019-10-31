@@ -16,10 +16,10 @@
 
 import {readSetsFile, stripPrivateFields} from './utils';
 
-export default ({isPrivileged, setsDirectory}) => {
+export default ({isPrivileged, setsFile}) => {
 	return {
 		repoName: 'Melinda OAI-PMH provider for bibliographic records',
-		sets: readSetsFile({setsDirectory, context: 'bib'}),
+		sets: readSetsFile(setsFile),
 		isSupportedFormat: f => ['oai_dc', 'marc21', 'melinda_marc'].includes(f),
 		formatRecord: isPrivileged ? r => r : stripPrivateFields
 	};

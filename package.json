@@ -35,7 +35,7 @@
 	"dependencies": {
 		"@natlibfi/marc-record": "^4.0.4",
 		"@natlibfi/marc-record-serializers": "git+https://github.com/natlibfi/marc-record-serializers.git#feature-better-marcxml",
-		"@natlibfi/melinda-commons": "https://github.com/NatLibFi/melinda-commons-js",
+		"@natlibfi/melinda-commons": "^7.0.2",
 		"deep-eql": "^4.0.0",
 		"express": "^4.16.4",
 		"http-status": "^1.3.1",

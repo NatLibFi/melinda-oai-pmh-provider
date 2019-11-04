@@ -117,7 +117,7 @@ export default ({library, limit}) => {
 						)
 						SELECT id, time, z00_data record FROM ids
 						${indexStatements}
-						JOIN fin01.z00 ON id = z00_doc_number
+						JOIN ${library}.z00 ON id = z00_doc_number
 						FETCH NEXT 1000 ROWS ONLY`;
 					}
 				}
@@ -144,7 +144,7 @@ export default ({library, limit}) => {
 						JOIN ${library}.z106 ON id = z106_rec_key
 						GROUP BY id
 					)
-					JOIN fin01.z00 ON id = z00_doc_number`;
+					JOIN ${library}.z00 ON id = z00_doc_number`;
 				}
 
 				function all() {

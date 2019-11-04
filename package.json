@@ -41,7 +41,7 @@
 		"http-status": "^1.3.1",
 		"langs": "^2.0.0",
 		"moment": "^2.24.0",
-		"oracledb": "^4.0.0",
+		"oracledb": "git+https://github.com/natlibfi-arlehiko/node-oracledb#fix-charset",
 		"xml2js": ">=0.4.22 <1.0.0"
 	},
 	"devDependencies": {

@@ -67,7 +67,7 @@ export default async ({
 					ListRecords: validateListRequest
 				};
 
-				return verb ? mapping[verb]() : ERRORS.BAD_VERB;
+				return verb && verb in mapping ? mapping[verb]() : ERRORS.BAD_VERB;
 
 				function validateGetRecord() {
 					if (numParams === 3) {

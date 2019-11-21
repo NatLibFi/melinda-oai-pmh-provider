@@ -175,7 +175,6 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
 				if (row) {
 					// Console.log(`GOT ROW: ${records.length}`);
-
 					const result = rowCallback(row);
 
 					if (records.length + 1 === maxResults) {
@@ -199,9 +198,11 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 						return Number(a) - Number(b);
 					});
 
+					const lastId = sortedRecords.slice(-1)[0].id;
+
 					return {
 						records: sortedRecords,
-						newCursor: sortedRecords.slice(-1)[0].id
+						newCursor: toAlephId(lastId)
 					};
 				}
 			}

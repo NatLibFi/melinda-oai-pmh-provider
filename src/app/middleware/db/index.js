@@ -179,25 +179,29 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 					const result = rowCallback(row);
 
 					if (records.length + 1 === maxResults) {
-						return {
-							records: records.concat(result),
-							newCursor: toAlephId(result.id)
-						};
+						return genResults(records.concat(result));
 					}
 
 					return pump(records.concat(result));
 				}
 
 				if (records.length > 0) {
-					return {
-						records,
-						newCursor: toAlephId(records.slice(-1)[0].id)
-					};
+					return genResults(records);
 				}
 
 				// Console.log(`NO ROWS: ${records.length}`);
 
 				return {records};
+
+				function genResults(records) {
+					// Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
+					const sortedRecords = [records].sort();
+
+					return {
+						records: sortedRecords,
+						newCursor: sortedRecords.slice(-1)[0].id
+					};
+				}
 			}
 		}
 	}

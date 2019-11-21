@@ -195,7 +195,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
 				function genResults(records) {
 					// Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
-					const sortedRecords = [records].sort(({id: a}, {id: b}) => {
+					const sortedRecords = [...records].sort(({id: a}, {id: b}) => {
 						return Number(a) - Number(b);
 					});
 

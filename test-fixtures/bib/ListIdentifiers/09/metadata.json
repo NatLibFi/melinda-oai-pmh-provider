@@ -1,0 +1,4 @@
+{
+  "descr": "Should work with resumptionToken parameter",
+  "requestUrl": "/bib?verb=ListIdentifiers&resumptionToken=pOr1miRkDdZkOz%2FvEdkyhOjxbhGAuK0Zsc3sc%2FPjNGmvGDLr4X6iMxz3ZQ7IeUMK"
+}

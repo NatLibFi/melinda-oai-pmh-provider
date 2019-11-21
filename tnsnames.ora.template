@@ -1,0 +1,7 @@
+ALEPH =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = %PROTOCOL%)(HOST = %HOST%)(PORT = %PORT%))
+    (CONNECT_DATA =
+      (SID = %SID%)
+    )    
+  )

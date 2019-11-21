@@ -1,0 +1,10 @@
+npm-debug.log
+node_modules
+coverage
+dist
+.nyc_output
+.env*
+tnsnames.ora
+sqlnet.ora
+wallet
+instantclient

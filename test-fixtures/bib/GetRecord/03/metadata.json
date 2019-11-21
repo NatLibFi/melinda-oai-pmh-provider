@@ -1,0 +1,4 @@
+{
+    "descr": "Should respond with a record",
+    "requestUrl": "/bib?verb=GetRecord&metadataPrefix=marc&identifier=oai:foo.bar/12345"
+}

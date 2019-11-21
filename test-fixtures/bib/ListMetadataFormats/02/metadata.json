@@ -1,0 +1,4 @@
+{
+    "descr": "Should respond with the requested metadata format",
+    "requestUrl": "/bib?verb=ListMetadataFormats&identifier=marc"
+}

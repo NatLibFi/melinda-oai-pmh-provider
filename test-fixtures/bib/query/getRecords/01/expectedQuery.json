@@ -1,0 +1,16 @@
+[
+	{
+		"stmt": "SELECT id, time, z00_data record FROM (",
+		"sub": [
+			{
+				"stmt": "SELECT /*+ ORDERED */ z106_rec_key id, MAX(RPAD(CONCAT(z106_update_date, LPAD(z106_time, 4, '0')), 12, '0')) time FROM foo01.z106",
+				"sub": [
+					"GROUP BY z106_rec_key",
+					"OFFSET 5000 ROWS FETCH NEXT 1000 ROWS ONLY"
+				]
+			}
+		]
+	},
+	")",
+	"JOIN foo01.z00 ON id = z00_doc_number"
+]

@@ -1,0 +1,6 @@
+{
+    "descr": "Should return the expected query",
+    "params": {
+        "identifier": "12345"
+    }
+}

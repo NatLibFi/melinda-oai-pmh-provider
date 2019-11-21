@@ -1,0 +1,4 @@
+{
+    "descr": "Should respond with all metadata formats",
+    "requestUrl": "/bib?verb=ListMetadataFormats"
+}

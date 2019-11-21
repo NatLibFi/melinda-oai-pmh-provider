@@ -1,0 +1,4 @@
+{
+    "descr": "Should respond with an error because of an invalid metadata format specifier",
+    "requestUrl": "/bib?verb=GetRecord&metadataPrefix=foo&identifier=oai:foo.bar/12345"
+}

@@ -1,0 +1,4 @@
+{
+  "descr": "Should respond with an error because of an invalid resumption token",
+  "requestUrl": "/bib?verb=ListIdentifiers&resumptionToken=moMzARibyZcXQixlldQN1g=="
+}

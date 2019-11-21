@@ -28,9 +28,8 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_password
-  when:
-    branch: [fix-cursor]
-    #branch: [dev]  
+  when:    
+    branch: [dev]  
     #branch: [master, test]
 trigger:  
   event: [push, tag]

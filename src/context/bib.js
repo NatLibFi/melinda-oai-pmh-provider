@@ -14,13 +14,21 @@
 * limitations under the License.
 */
 
-import {readSetsFile, stripPrivateFields} from './utils';
+import {readSetsFile, formatBib, stripPrivateFields} from './utils';
 
-export default ({isPrivileged, setsFile}) => {
+export default ({isPrivileged, setsFile, alephLibrary, melindaPrefix}) => {
 	return {
 		repoName: 'Melinda OAI-PMH provider for bibliographic records',
 		sets: readSetsFile(setsFile),
 		isSupportedFormat: f => ['oai_dc', 'marc21', 'melinda_marc'].includes(f),
-		formatRecord: isPrivileged ? r => r : stripPrivateFields
+		formatRecord: (record, metadataPrefix) => {
+			const newRecord = formatBib({
+				record, metadataPrefix,
+				oldPrefix: alephLibrary.toUpperCase(),
+				newPrefix: melindaPrefix
+			});
+
+			return isPrivileged ? newRecord : stripPrivateFields(newRecord);
+		}
 	};
 };

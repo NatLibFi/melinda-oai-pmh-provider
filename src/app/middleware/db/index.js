@@ -102,7 +102,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 		return moment(row.TIME, DB_TIME_FORMAT);
 	}
 
-	async function getRecord({connection, identifier}) {
+	async function getRecord({connection, identifier, metadataPrefix}) {
 		const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
 		const {resultSet} = await connection.execute(query, args, {resultSet: true});
 		const row = await resultSet.getRow();
@@ -110,7 +110,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 		await resultSet.close();
 
 		if (row) {
-			return recordRowCallback(row);
+			return recordRowCallback({row, metadataPrefix});
 		}
 	}
 
@@ -137,7 +137,11 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 			const setIndexes = indexes[set];
 			const startTime = from;
 			const endTime = until;
-			const rowCallback = row => recordRowCallback(row, includeRecords);
+
+			const rowCallback = row => recordRowCallback({
+				row, includeRecords,
+				metadataPrefix: params.metadataPrefix
+			});
 
 			return {
 				rowCallback, connection, cursor,
@@ -202,7 +206,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 		}
 	}
 
-	function recordRowCallback(row, includeRecords = true) {
+	function recordRowCallback({row, metadataPrefix, includeRecords = true}) {
 		const record = parseRecord(row.RECORD);
 		const isDeleted = isDeletedRecord(record);
 
@@ -210,7 +214,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 			return {
 				id: fromAlephId(row.ID),
 				time: moment(row.TIME, DB_TIME_FORMAT),
-				record: formatRecord(record)
+				record: formatRecord(record, metadataPrefix)
 			};
 		}
 

@@ -15,7 +15,6 @@
 */
 
 import moment from 'moment';
-import {MarcRecord} from '@natlibfi/marc-record';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
 import {Utils} from '@natlibfi/melinda-commons';
 import {Parser, Builder} from 'xml2js';
@@ -245,19 +244,11 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
 					}
 
 					if (format === 'marc21') {
-						const formatted = formatToStandard(record);
-						return MARCXML.to(formatted, {omitDeclaration: true});
+						return MARCXML.to(record, {omitDeclaration: true});
 					}
 
 					// Format: melinda_marc
 					return MARCXML.to(record, {omitDeclaration: true});
-
-					function formatToStandard(record) {
-						const newRecord = MarcRecord.clone(record);
-						// Remove all fields with non-numeric tags
-						newRecord.get(/[^0-9]+/).forEach(f => newRecord.removeField(f));
-						return newRecord;
-					}
 				}
 			}
 		}

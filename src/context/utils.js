@@ -42,7 +42,7 @@ export function formatBib(params) {
 }
 
 export function formatAut(params) {
-	const prefixReplaceCodes = ['0', 1];
+	const prefixReplaceCodes = ['0', '1'];
 	const nonStandardSubfields = [
 		{tagPattern: /.*/, codes: ['9']},
 		{tagPattern: /^1../, codes: ['0', '2']},
@@ -86,7 +86,7 @@ export function formatRecord({
 
 			removeExisting();
 
-			record.insertField({
+			newRecord.insertField({
 				tag: '035',
 				ind1: ' ',
 				ind2: ' ',
@@ -128,7 +128,7 @@ export function formatRecord({
 					.forEach(field => {
 						field.subfields
 							.filter(({code}) => codes.includes(code))
-							.forEach(sf => record.removeSubfield(sf, field));
+							.forEach(sf => newRecord.removeSubfield(sf, field));
 					});
 			});
 		}
@@ -138,11 +138,11 @@ export function formatRecord({
 	function replacePrefixes() {
 		newRecord.getDatafields()
 			.forEach(field => {
-				field.subfields
-					.filter(({code}) => prefixReplaceCodes.includes(code))
-					.forEach(subfield => {
+				field.subfields					
+					.filter(({code}) => prefixReplaceCodes.includes(code))					
+					.forEach(subfield => {												
 						const pattern = `(${oldPrefix})`;
-						const replacement = `(${newPrefix})`;
+						const replacement = `(${newPrefix})`;						
 						subfield.value = subfield.value.replace(pattern, replacement);
 					});
 			});

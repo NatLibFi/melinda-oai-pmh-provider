@@ -111,8 +111,10 @@ export function formatRecord({
 	}
 
 	function formatStandard() {
-		removeFields();
+		removeFields();		
 		removeSubfields();
+		
+		return newRecord;
 
 		function removeFields() {
 			// Remove all fields with non-numeric tags
@@ -121,12 +123,12 @@ export function formatRecord({
 
 		function removeSubfields() {
 			nonStandardSubfields.forEach(({tagPattern, codes}) => {
-				return newRecord.getDataFields()
+				return newRecord.getDatafields()
 					.filter(({tag}) => tagPattern.test(tag))
 					.forEach(field => {
 						field.subfields
 							.filter(({code}) => codes.includes(code))
-							.forEach(sf => record.removeSubfield(field, sf));
+							.forEach(sf => record.removeSubfield(sf, field));
 					});
 			});
 		}
@@ -134,10 +136,10 @@ export function formatRecord({
 
 	// Replace prefix in all specified subfields
 	function replacePrefixes() {
-		newRecord.getDataFields()
+		newRecord.getDatafields()
 			.forEach(field => {
-				return field.subfields
-					.filter(({code}) => prefixReplaceCodes.include(code))
+				field.subfields
+					.filter(({code}) => prefixReplaceCodes.includes(code))
 					.forEach(subfield => {
 						const pattern = `(${oldPrefix})`;
 						const replacement = `(${newPrefix})`;

@@ -127,7 +127,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 	}
 
 	async function queryRecords({
-		connection, from, until, set,
+		connection, from, until, set, metadataPrefix,
 		includeRecords = true, cursor
 	}) {
 		const params = getParams();
@@ -139,8 +139,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 			const endTime = until;
 
 			const rowCallback = row => recordRowCallback({
-				row, includeRecords,
-				metadataPrefix: params.metadataPrefix
+				row, includeRecords, metadataPrefix
 			});
 
 			return {

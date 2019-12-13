@@ -243,11 +243,6 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
 						return fromMARC21(record);
 					}
 
-					if (format === 'marc21') {
-						return MARCXML.to(record, {omitDeclaration: true});
-					}
-
-					// Format: melinda_marc
 					return MARCXML.to(record, {omitDeclaration: true});
 				}
 			}

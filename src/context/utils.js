@@ -138,11 +138,11 @@ export function formatRecord({
 	function replacePrefixes() {
 		newRecord.getDatafields()
 			.forEach(field => {
-				field.subfields					
-					.filter(({code}) => prefixReplaceCodes.includes(code))					
-					.forEach(subfield => {												
+				field.subfields
+					.filter(({code}) => prefixReplaceCodes.includes(code))
+					.forEach(subfield => {
 						const pattern = `(${oldPrefix})`;
-						const replacement = `(${newPrefix})`;						
+						const replacement = `(${newPrefix})`;
 						subfield.value = subfield.value.replace(pattern, replacement);
 					});
 			});

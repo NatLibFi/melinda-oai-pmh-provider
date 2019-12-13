@@ -27,3 +27,124 @@ export function stripPrivateFields(record) {
 	newRecord.get(/^CAT$/).forEach(f => newRecord.removeField(f));
 	return newRecord;
 }
+
+export function formatBib(params) {
+	const prefixReplaceCodes = ['w'];
+	const nonStandardSubfields = [
+		{tagPattern: /.*/, codes: ['9']}
+	];
+
+	return formatRecord({
+		...params,
+		prefixReplaceCodes,
+		nonStandardSubfields
+	});
+}
+
+export function formatAut(params) {
+	const prefixReplaceCodes = ['0', 1];
+	const nonStandardSubfields = [
+		{tagPattern: /.*/, codes: ['9']},
+		{tagPattern: /^1../, codes: ['0', '2']},
+		{tagPattern: /^4../, codes: ['0', '2', '7']},
+		{tagPattern: /^5../, codes: ['2']}
+	];
+
+	return formatRecord({
+		...params,
+		prefixReplaceCodes,
+		nonStandardSubfields
+	});
+}
+
+export function formatRecord({
+	record, metadataPrefix,
+	oldPrefix, newPrefix,
+	prefixReplaceCodes,
+	nonStandardSubfields
+}) {
+	const newRecord = MarcRecord.clone(record);
+
+	formatAleph();
+	replacePrefixes();
+
+	return metadataPrefix === 'melinda_marc' ? newRecord : formatStandard();
+
+	function formatAleph() {
+		handle003();
+		handle035();
+
+		function handle003() {
+			newRecord.insertField({
+				tag: '003',
+				value: newPrefix
+			});
+		}
+
+		function handle035() {
+			const {value: id} = newRecord.get(/^001$/)[0];
+
+			removeExisting();
+
+			record.insertField({
+				tag: '035',
+				ind1: ' ',
+				ind2: ' ',
+				subfields: [{
+					code: 'a',
+					value: `(${newPrefix})${id}`
+				}]
+			});
+
+			function removeExisting() {
+				newRecord.get(/^035$/)
+					.filter(prefixFilter)
+					.forEach(f => newRecord.removeField(f));
+
+				function prefixFilter(field) {
+					return field.subfields.some(({code, value}) => {
+						return code === 'a' && new RegExp(`^\(${newPrefix}\)`).test(value); // eslint-disable-line no-useless-escape
+					});
+				}
+			}
+		}
+	}
+
+	function formatStandard() {
+		removeFields();
+		removeSubfields();
+
+		return newRecord;
+
+		function removeFields() {
+			// Remove all fields with non-numeric tags
+			newRecord.get(/[^0-9]+/).forEach(f => newRecord.removeField(f));
+		}
+
+		function removeSubfields() {
+			nonStandardSubfields.forEach(({tagPattern, codes}) => {
+				return newRecord.getDatafields()
+					.filter(({tag}) => tagPattern.test(tag))
+					.forEach(field => {
+						field.subfields
+							.filter(({code}) => codes.includes(code))
+							.forEach(sf => record.removeSubfield(sf, field));
+					});
+			});
+		}
+	}
+
+	// Replace prefix in all specified subfields
+	function replacePrefixes() {
+		newRecord.getDatafields()
+			.forEach(field => {
+				field.subfields
+					.filter(({code}) => prefixReplaceCodes.includes(code))
+					.forEach(subfield => {
+						const pattern = `(${oldPrefix})`;
+						const replacement = `(${newPrefix})`;
+						subfield.value = subfield.value.replace(pattern, replacement);
+					});
+			});
+	}
+}

@@ -1,6 +1,4 @@
-FROM node:10.16
-# node:10 points to 10.15 which don't work with latest oracledb (130919)
-#FROM node:10
+FROM node:12
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node

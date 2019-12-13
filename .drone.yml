@@ -10,7 +10,7 @@ steps:
   commands:
   - chmod -R o+w /drone/src  
 - name: test
-  image: node:10
+  image: node:12
   user: node
   commands:
     - export OCI_LIB_DIR=$PWD/instantclient

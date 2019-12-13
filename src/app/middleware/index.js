@@ -245,11 +245,21 @@ export default async ({
 							logger.log('info', 'Request cancelled');
 
 							if (params.connection) {
-								await params.connection.break();
-								await params.connection.close({drop: true});
+								try {
+									await params.connection.break();
+									await params.connection.close({drop: true});
+								} catch (err) {
+									if (isExpectedOracleError(err) === false) {
+										throw err;
+									}
+								}
 							}
 
 							resolve();
+
+							function isExpectedOracleError(err) {
+								return 'message' in err && /^NJS-003: invalid connection/.test(err.message);
+							}
 						});
 
 						try {

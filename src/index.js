@@ -23,14 +23,23 @@ run();
 async function run() {
 	let server;
 
-	const {setsFile, contextName, isPrivileged, ...params} = config;
-	const {route, repoName, sets, isSupportedFormat, formatRecord} = contextFactory({setsFile, contextName, isPrivileged});
+	const {
+		setsFile, contextName, isPrivileged,
+		alephLibrary, melindaPrefix,
+		...params
+	} = config;
+
+	const {route, repoName, sets, isSupportedFormat, formatRecord} = contextFactory({
+		setsFile, contextName, isPrivileged,
+		alephLibrary, melindaPrefix
+	});
 
 	registerInterruptionHandlers();
 
 	server = await startApp({
 		...params,
-		route, repoName, sets, isSupportedFormat, formatRecord
+		route, repoName, sets,
+		isSupportedFormat, formatRecord, alephLibrary
 	});
 
 	function registerInterruptionHandlers() {

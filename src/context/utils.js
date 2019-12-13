@@ -111,9 +111,9 @@ export function formatRecord({
 	}
 
 	function formatStandard() {
-		removeFields();		
+		removeFields();
 		removeSubfields();
-		
+
 		return newRecord;
 
 		function removeFields() {

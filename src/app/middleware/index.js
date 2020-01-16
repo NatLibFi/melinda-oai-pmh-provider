@@ -28,7 +28,8 @@ export default async ({
 	pool, secretEncryptionKey, resumptionTokenTimeout,
 	supportEmail, oaiIdentifierPrefix, repoName,
 	instanceUrl, maxResults, alephLibrary,
-	sets, formatRecord, isSupportedFormat
+	sets, formatRecord, isSupportedFormat,
+	socketTimeout
 }) => {
 	const {createLogger, clone} = Utils;
 	const logger = createLogger();
@@ -42,6 +43,11 @@ export default async ({
 
 	return async (req, res, next) => {
 		const {query: {verb}} = req;
+
+		// https://github.com/nodejs/node/issues/31378
+		if (typeof socketTimeout === 'number') {
+			req.socket.setTimeout(socketTimeout);
+		}
 
 		try {
 			await handle();

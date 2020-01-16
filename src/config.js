@@ -29,7 +29,7 @@ export const isPrivileged = readEnvironmentVariable('IS_PRIVILEGED', {defaultVal
 
 export const httpPort = readEnvironmentVariable('HTTP_PORT', {defaultValue: '8080'});
 export const enableProxy = readEnvironmentVariable('ENABLE_PROXY', {defaultValue: false, format: parseBoolean});
-export const disableKeepAliveTimeout = readEnvironmentVariable('DISABLE_KEEP_ALIVE_TIMEOUT', {defaultValue: false, format: parseBoolean});
+export const socketTimeout = readEnvironmentVariable('SOCKET_TIMEOUT', {defaultValue: 0, format: v => Number(v)});
 
 export const secretEncryptionKey = readEnvironmentVariable('SECRET_ENCRYPTION_KEY', {defaultValue: generateEncryptionKey(), hideDefaultValue: true});
 

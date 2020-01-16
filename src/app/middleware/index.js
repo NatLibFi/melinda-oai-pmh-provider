@@ -28,7 +28,8 @@ export default async ({
 	pool, secretEncryptionKey, resumptionTokenTimeout,
 	supportEmail, oaiIdentifierPrefix, repoName,
 	instanceUrl, maxResults, alephLibrary,
-	sets, formatRecord, isSupportedFormat
+	sets, formatRecord, isSupportedFormat,
+	socketTimeout
 }) => {
 	const {createLogger, clone} = Utils;
 	const logger = createLogger();
@@ -42,6 +43,9 @@ export default async ({
 
 	return async (req, res, next) => {
 		const {query: {verb}} = req;
+
+		// Will be fixed in Node.js 13 (https://github.com/nodejs/node/issues/31378)
+		req.socket.setTimeout(socketTimeout);
 
 		try {
 			await handle();

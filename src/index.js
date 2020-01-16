@@ -26,6 +26,7 @@ async function run() {
 	const {
 		setsFile, contextName, isPrivileged,
 		alephLibrary, melindaPrefix,
+		disableKeepAliveTimeout,
 		...params
 	} = config;
 
@@ -41,6 +42,10 @@ async function run() {
 		route, repoName, sets,
 		isSupportedFormat, formatRecord, alephLibrary
 	});
+
+	if (disableKeepAliveTimeout) {
+		server.keepAliveTimeout = 0;
+	}
 
 	function registerInterruptionHandlers() {
 		process.on('SIGTERM', handleSignal);

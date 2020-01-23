@@ -101,7 +101,7 @@ export function formatRecord({
 
 				function prefixFilter(field) {
 					return field.subfields.some(({code, value}) => {
-						return code === 'a' && new RegExp(`^\(${newPrefix}\)`).test(value); // eslint-disable-line no-useless-escape
+						return code === 'a' && new RegExp(`^\\((${newPrefix}|${oldPrefix}\\)\)`).test(value); // eslint-disable-line no-useless-escape
 					});
 				}
 			}

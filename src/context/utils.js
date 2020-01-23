@@ -58,7 +58,7 @@ export function formatAut(params) {
 }
 
 export function formatRecord({
-	record, metadataPrefix,
+	record, id, metadataPrefix,
 	oldPrefix, newPrefix,
 	prefixReplaceCodes,
 	nonStandardSubfields
@@ -82,8 +82,6 @@ export function formatRecord({
 		}
 
 		function handle035() {
-			const {value: id} = newRecord.get(/^001$/)[0];
-
 			removeExisting();
 
 			newRecord.insertField({

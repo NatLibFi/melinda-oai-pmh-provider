@@ -8,4 +8,4 @@ tnsnames.ora
 sqlnet.ora
 wallet
 instantclient
-sets*.json
+sets*

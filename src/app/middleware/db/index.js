@@ -220,7 +220,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 			return {
 				id: fromAlephId(row.ID),
 				time: moment(row.TIME, DB_TIME_FORMAT),
-				record: formatRecord(record, metadataPrefix)
+				record: formatRecord(record, row.ID, metadataPrefix)
 			};
 		}
 

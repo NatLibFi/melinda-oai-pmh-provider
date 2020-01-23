@@ -21,9 +21,9 @@ export default ({isPrivileged, setsFile, alephLibrary, melindaPrefix}) => {
 		repoName: 'Melinda OAI-PMH provider for bibliographic records',
 		sets: readSetsFile(setsFile),
 		isSupportedFormat: f => ['oai_dc', 'marc21', 'melinda_marc'].includes(f),
-		formatRecord: (record, metadataPrefix) => {
+		formatRecord: (record, id, metadataPrefix) => {
 			const newRecord = formatBib({
-				record, metadataPrefix,
+				record, id, metadataPrefix,
 				oldPrefix: alephLibrary.toUpperCase(),
 				newPrefix: melindaPrefix
 			});

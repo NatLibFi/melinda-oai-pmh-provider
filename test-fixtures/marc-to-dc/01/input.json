@@ -1,0 +1,571 @@
+{
+  "leader": "08207cam a22005534i 4500",
+  "fields": [
+    {
+      "tag": "001",
+      "value": "016712806"
+    },
+    {
+      "tag": "003",
+      "value": "FI-MELINDA"
+    },
+    {
+      "tag": "005",
+      "value": "20200522130418.0"
+    },
+    {
+      "tag": "006",
+      "value": "m|||||o||d||||||||"
+    },
+    {
+      "tag": "007",
+      "value": "cr|||||||||a||"
+    },
+    {
+      "tag": "008",
+      "value": "200122s2020    fi |||||om   |||||||eng||"
+    },
+    {
+      "tag": "020",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "978-952-62-2477-0"
+        },
+        {
+          "code": "q",
+          "value": "PDF"
+        }
+      ]
+    },
+    {
+      "tag": "035",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "(FI-MELINDA)016712806"
+        }
+      ]
+    },
+    {
+      "tag": "040",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "FI-O"
+        },
+        {
+          "code": "b",
+          "value": "fin"
+        },
+        {
+          "code": "e",
+          "value": "rda"
+        }
+      ]
+    },
+    {
+      "tag": "041",
+      "ind1": "0",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "eng"
+        },
+        {
+          "code": "b",
+          "value": "eng"
+        },
+        {
+          "code": "b",
+          "value": "fin"
+        }
+      ]
+    },
+    {
+      "tag": "100",
+      "ind1": "1",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Haghighatkhah, Alireza,"
+        },
+        {
+          "code": "e",
+          "value": "kirjoittaja."
+        }
+      ]
+    },
+    {
+      "tag": "245",
+      "ind1": "1",
+      "ind2": "0",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Test case prioritization using build history and test distances :"
+        },
+        {
+          "code": "b",
+          "value": "an approach for improving automotive regression testing in continuous integration environments /"
+        },
+        {
+          "code": "c",
+          "value": "Alireza Haghighatkhah."
+        }
+      ]
+    },
+    {
+      "tag": "264",
+      "ind1": " ",
+      "ind2": "1",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Oulu :"
+        },
+        {
+          "code": "b",
+          "value": "Oulun yliopisto,"
+        },
+        {
+          "code": "c",
+          "value": "2020."
+        }
+      ]
+    },
+    {
+      "tag": "300",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "1 verkkoaineisto (86 sivua)"
+        }
+      ]
+    },
+    {
+      "tag": "336",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "teksti"
+        },
+        {
+          "code": "b",
+          "value": "txt"
+        },
+        {
+          "code": "2",
+          "value": "rdacontent"
+        }
+      ]
+    },
+    {
+      "tag": "337",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "tietokonekäyttöinen"
+        },
+        {
+          "code": "b",
+          "value": "c"
+        },
+        {
+          "code": "2",
+          "value": "rdamedia"
+        }
+      ]
+    },
+    {
+      "tag": "338",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "verkkoaineisto"
+        },
+        {
+          "code": "b",
+          "value": "cr"
+        },
+        {
+          "code": "2",
+          "value": "rdacarrier"
+        }
+      ]
+    },
+    {
+      "tag": "490",
+      "ind1": "1",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Acta Universitatis Ouluensis. A, Scientiae rerum naturalium,"
+        },
+        {
+          "code": "x",
+          "value": "1796-220X;"
+        },
+        {
+          "code": "v",
+          "value": "739"
+        }
+      ]
+    },
+    {
+      "tag": "500",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Artikkeliväitöskirjan yhteenveto-osa."
+        }
+      ]
+    },
+    {
+      "tag": "502",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Väitöskirja :"
+        },
+        {
+          "code": "c",
+          "value": "Oulun yliopisto, Oulun yliopiston tutkijakoulu, tieto- ja sähkötekniikan tiedekunta, Empiirinen ohjelmistotuotanto ohjelmistoissa, järjestelmissä ja palveluissa (M3S), tetojenkäsittelytiede,"
+        },
+        {
+          "code": "d",
+          "value": "2020."
+        }
+      ]
+    },
+    {
+      "tag": "520",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Agile software development has become a source of competitive advantage in many industrial sectors, including the automotive domain. Continuous integration (CI) is an agile practice and involves integrating software changes as often and as early as possible. CI in combination with regression testing is considered a good software development practice, because it ensures that recent changes have not negatively impacted the software’s functionality. The execution of a large test suite at each integration (also known as the build) cycle is not realistic. To detect regression faults earlier, one alternative is to permute the test cases within the regression test suite. This is known as test case prioritization (TCP).This dissertation aims to shorten the build cycle in CI environments by detecting regression faults earlier, allowing software developers to integrate and verify their changes more frequently and continuously. The research was performed in three phases. In the 1st phase, the relevant literature was systematically surveyed to analyze the existing body of knowledge and identify research opportunities. In the 2nd phase, the TCP technique of history-based diversity was developed and subjected to several rounds of improvements and evaluations. In the 3rd phase, results from the previous two phases were synthesized in order to draw conclusions and outline implications.Our results bring to mind the well-known adage “don’t put all your eggs in one basket”. For the initial stages, when no information about the system under test is available, one should spread the limited testing budget evenly across different parts of the system by running the most dissimilar test cases early in the process (i.e., maximizing diversity as early as possible). For the later stages, when historical build data are available, one should give higher priority to the test cases that have higher "
+        }
+      ]
+    },
+    {
+      "tag": "520",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "historical value (i.e., those that revealed the most failure in the most recent revisions) and that are most distant from those previously prioritized (i.e., cover different areas of the system).One of the major contributions of this dissertation is the design, implementation, and experimental evaluation of a TCP technique using 12 open-source Java programs. Findings from the experiments provide empirical evidence in support of two previously proposed TCP heuristics — failure recurrence and test diversity — and their combination in CI development environments. Furthermore, results from the systematic mapping studies contribute to the literature by providing a synthesized and structured body of knowledge and a basis for future studies. We conclude that TCP can be performed in CI environments with negligible investment using build history and test distances."
+        }
+      ]
+    },
+    {
+      "tag": "520",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Testitapausten priorisointi käyttäen ohjelmiston koonnin historiaa ja testietäisyyttä : Menetelmä regressiotestauksen parantamiseen jatkuvan integroinnin ohjelmistokehitysympäristössä autoteollisuudessa."
+        }
+      ]
+    },
+    {
+      "tag": "520",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Ketterä ohjelmistokehitys tarjoaa kilpailuetua monella teollisen tuotannon alalla mukaan lukien autoteollisuus. Jatkuva integrointi on ketterän ohjelmistokehityksen käytäntö, jossa muutoksia integroidaan mahdollisimman varhain ja tiheään. Jatkuvan integroinnin ja regressiotestauksen yhdistäminen on hyväksi havaittu käytäntö, koska näin voidaan varmistaa, että viimeisimmät muutokset eivät vaikuta ohjelmiston toiminnallisuuteen haitallisesti. Suuren testisarjan suorittaminen jokaisen integraation (eli koonnin) jälkeen ei ole realistista. Jotta virheitä havaittaisiin aiemmin, testisarjan testitapaukset voidaan permutoida. Tätä kutsutaan testitapausten priorisoinniksi.Tämä väitöstutkimus pyrkii lyhentämään jatkuvan integroinnin koontisykliä nopeamman virheiden löytämisen avulla, jotta muutokset voidaan integroida ja varmistaa entistä tiheämmin ja jatkuvasti. Tutkimus tehtiin kolmessa vaiheessa. Ensimmäisessä vaiheessa kartoitettiin olemassa oleva tutkimus ja tunnistettiin tarve uudelle tutkimukselle systemaattisella kirjallisuuskatsauksella. Toisessa vaiheessa historia- ja etäisyysperustaista testitapausten priorisointitekniikkaa kehitettiin useamman parannus- ja evaluointi-iteraation kautta. Kolmannessa vaiheessa syntetisoitiin kahden edellisen vaiheen tulokset ja hahmoteltiin johtopäätökset.Tulokset osoittavat, että ei kannata ”laittaa kaikkia munia samaan koriin”. Testaamisen alkuvaiheessa, kun tieota on vain vähän, tulisi testauksen rajallinen budjetti jakaa mahdollisimman erilaisten testitapausten kesken siten, että testaus kohdistuu järjestelmän eri osa-alueisiin (ts. maksimoidaan testauksen monimuotoisuus mahdollisimman aikaisin). Myöhemmissä vaiheissa, kun koontihistoriaa on saatavilla, tulisi priorisoida niitä testitapauksia, joilla on suurempi arvo historiassa (eli ne testitapaukset, joilla löydettiin eniten virheitä viimeisimmässä versiossa) ja jotka ovat mahd "
+        }
+      ]
+    },
+    {
+      "tag": "520",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "ollisimman etäisiä verrattuna niihin testitapauksiin, joita priorisoitiin viimeksi (ts. kattaa ohjelmiston eri osa-alueita).Tämän väitöksen yksi keskeisimmistä kontribuutioista on testitapauspriorisointitekniikan suunnittelu, toteutus ja kokeellinen evaluointi käyttäen kahdentoista avoimen lähdekoodin Java-ohjelman viallisia koonteja. Kokeellisen tutkimuksen tulokset tukevat kahta aiemmin ehdotettua testitapauspriorisointiheuristiikkaa — virheiden toistuminen ja testien monimuotoisuus — sekä näiden yhdistämistä jatkuvan integroinnin ohjelmistokehityksessä. Lisäksi, systemaattisen kirjallisuuskatsauksen tulos tarjoaa ajantasaisen tietämyksen esitys strukturoidusti ja perustan tulevalle tutkimukselle. Tulimme siihen johtopäätökseen, että testitapausten priorisointi voidaan tehdä pienillä investoinneilla jatkuvan integroinnin ympäristössä hyödyntäen testihistoriaa ja testietäisyyttä."
+        }
+      ]
+    },
+    {
+      "tag": "530",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Yhteenveto-osa ja 5 eripainosta julkaistu myös painettuna."
+        }
+      ]
+    },
+    {
+      "tag": "650",
+      "ind1": " ",
+      "ind2": "7",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "ohjelmistotuotanto"
+        },
+        {
+          "code": "2",
+          "value": "yso/fin"
+        },
+        {
+          "code": "0",
+          "value": "http://www.yso.fi/onto/yso/p17097"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "software-intensive systems"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "test case prioritization"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "regression testing"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "continuous deployment"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "continuous integration"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "agile software development"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "software engineering"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "ohjelmistovaltaiset järjestelmät"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "testitapausten priorisointi"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "regressiotestaus"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "jatkuva ohjelmistokehitys"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "jatkuva integrointi"
+        }
+      ]
+    },
+    {
+      "tag": "653",
+      "ind1": " ",
+      "ind2": " ",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "ketterä ohjelmistokehitys"
+        }
+      ]
+    },
+    {
+      "tag": "655",
+      "ind1": " ",
+      "ind2": "7",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "väitöskirjat"
+        },
+        {
+          "code": "2",
+          "value": "slm/fin"
+        },
+        {
+          "code": "0",
+          "value": "http://urn.fi/URN:NBN:fi:au:slm:s1227"
+        }
+      ]
+    },
+    {
+      "tag": "776",
+      "ind1": "0",
+      "ind2": "8",
+      "subfields": [
+        {
+          "code": "i",
+          "value": "Painettu (yhteenveto-osa ja 5 eripainosta):"
+        },
+        {
+          "code": "z",
+          "value": "978-952-62-2476-3"
+        }
+      ]
+    },
+    {
+      "tag": "830",
+      "ind1": " ",
+      "ind2": "0",
+      "subfields": [
+        {
+          "code": "a",
+          "value": "Acta Universitatis Ouluensis."
+        },
+        {
+          "code": "n",
+          "value": "A,"
+        },
+        {
+          "code": "n",
+          "value": "Scientiae rerum naturalium,"
+        },
+        {
+          "code": "x",
+          "value": "1796-220X;"
+        },
+        {
+          "code": "v",
+          "value": "739."
+        }
+      ]
+    },
+    {
+      "tag": "856",
+      "ind1": "4",
+      "ind2": "0",
+      "subfields": [
+        {
+          "code": "u",
+          "value": "http://urn.fi/urn:isbn:9789526224770"
+        },
+        {
+          "code": "q",
+          "value": "PDF ja HTML"
+        },
+        {
+          "code": "y",
+          "value": "Linkki verkkoaineistoon"
+        }
+      ]
+    }
+  ]
+}

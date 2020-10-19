@@ -1,0 +1,22 @@
+{
+  "description": "Should respond with all metadata formats",
+  "requestUrl": "?verb=ListMetadataFormats",
+  "requests": [
+    {
+      "method": "GET",
+      "status": 200,
+      "requestParams": {
+        "verb": "ListMetadataFormats"
+      }
+    }
+  ],
+  "contextName": "bib",
+  "isPrivileged": false,
+  "dbResults": [
+    [
+      {
+        "TIME": "20000102050000"
+      }
+    ]
+  ]
+}

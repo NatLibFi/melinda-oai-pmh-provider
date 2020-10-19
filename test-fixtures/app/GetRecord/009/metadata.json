@@ -1,0 +1,375 @@
+{
+    "description": "Should respond with a authority name record",
+    "contextName": "autNames",  
+    "isPrivileged": false,
+    "requests": [
+        { "method": "GET", "status": 200,
+            "requestParams": {
+                "verb": "GetRecord", 
+                "metadataPrefix": "marc21",
+                "identifier": "oai:foo.bar/12345"
+            }
+        }        
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ],
+        [
+            {
+                "TIME": "20000102050000",
+                "ID": "12345",
+                "RECORD": {
+                    "leader": "01956cz  a2200517n  4500",
+                    "fields": [
+                        {
+                            "tag": "001",
+                            "value": "12345"
+                        },
+                        {
+                            "tag": "005",
+                            "value": "20200312200039.0"
+                        },
+                        {
+                            "tag": "008",
+                            "value": "941113|n|az|||aabn           | aaa      "
+                        },
+                        {
+                            "tag": "024",
+                            "ind1": "7",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "0000000121021001"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "isni"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "035",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "(FOO00)12345"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "040",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "FI-NL"
+                                },
+                                {
+                                    "code": "b",
+                                    "value": "fin"
+                                },
+                                {
+                                    "code": "e",
+                                    "value": "rda"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "FI-NLD"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "043",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "c",
+                                    "value": "FI"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "046",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "f",
+                                    "value": "1834-10-10"
+                                },
+                                {
+                                    "code": "g",
+                                    "value": "1872-12-31"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "edtf"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "100",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Kivi, Aleksis,"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "1834-1872"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FOO00)12345"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "370",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Nurmijärvi, Suomi"
+                                },
+                                {
+                                    "code": "b",
+                                    "value": "Tuusula, Suomi"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "374",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "kirjailija"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "mts"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://urn.fi/URN:NBN:fi:au:mts:m3004"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "375",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "foobar"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "377",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "fin"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "400",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Kivi, A.,"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "1834-1872"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "400",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Stemu, Allu,"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "1834-1872"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "400",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Stenvall, Aleksis,"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "1834-1872"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "400",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "w",
+                                    "value": "r"
+                                },
+                                {
+                                    "code": "4",
+                                    "value": "syni"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": "Stenvall, Alexis,"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "1834-1872"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "400",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Киви, Алексис,"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "1834-1872"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "667",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "foobar"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "670",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Kansallisbiografia"
+                                },
+                                {
+                                    "code": "u",
+                                    "value": "https://kansallisbiografia.fi/kansallisbiografia/henkilo/2826"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "680",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "i",
+                                    "value": "Syntymänimi: Alexis Stenvall"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "SID",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "c",
+                                    "value": "38442"
+                                },
+                                {
+                                    "code": "b",
+                                    "value": "fenau"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "SID",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "c",
+                                    "value": "19875"
+                                },
+                                {
+                                    "code": "b",
+                                    "value": "vioau"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "CAT",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "FENNI-FIX"
+                                },
+                                {
+                                    "code": "b",
+                                    "value": "30"
+                                },
+                                {
+                                    "code": "c",
+                                    "value": "20200312"
+                                },
+                                {
+                                    "code": "l",
+                                    "value": "FIN11"
+                                },
+                                {
+                                    "code": "h",
+                                    "value": "2000"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    ]
+}

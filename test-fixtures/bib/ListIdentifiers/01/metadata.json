@@ -1,4 +1,0 @@
-{
-    "descr": "Should respond with records",
-    "requestUrl": "/bib?verb=ListIdentifiers&metadataPrefix=marc"
-}

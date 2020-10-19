@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:title>Test case prioritization using build history and test distances :an approach for improving automotive regression testing in continuous integration environments /Alireza Haghighatkhah.</dc:title>
+  <dc:language>en</dc:language>
+  <dc:date>2000-01-01T00:00:00.000Z</dc:date>
+</oai_dc:dc>

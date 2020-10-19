@@ -1,4 +1,0 @@
-{
-  "descr": "Should respond with an incomplete list with a resumption token",
-  "requestUrl": "/bib?verb=ListRecords&metadataPrefix=marc"
-}

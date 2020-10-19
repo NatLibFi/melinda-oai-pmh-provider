@@ -1,5 +1,5 @@
 /**
-* Copyright 2019 University Of Helsinki (The National Library Of Finland)
+* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,84 +15,79 @@
 */
 
 import express from 'express';
-import oracledb from 'oracledb';
+import oracledbOrig from '@natlibfi/oracledb-aleph';
 import HttpStatus from 'http-status';
-import {Utils} from '@natlibfi/melinda-commons';
+import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commons';
 import createMiddleware from './middleware';
 
-export default async function ({
-	httpPort, enableProxy,
-	oracleUsername, oraclePassword, oracleConnectString,
-	...middlewareParams
-}) {
-	const {createLogger, createExpressLogger} = Utils;
-	const logger = createLogger();
+export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, /* istanbul ignore next: Default value not used in tests */ oracledb = oracledbOrig) {
+  const logger = createLogger();
 
-	const pool = await initOracle();
-	const server = await initExpress();
+  const pool = await initOracle();
+  const server = await initExpress();
 
-	server.on('close', async () => {
-		await pool.close(0);
-	});
+  server.on('close', () => pool.close(0));
 
-	return server;
+  return server;
 
-	async function initOracle() {
-		setOracleOptions();
+  async function initOracle() {
+    setOracleOptions();
 
-		logger.log('debug', 'Establishing connection to database...');
+    logger.log('debug', 'Establishing connection to database...');
 
-		const pool = await oracledb.createPool({
-			user: oracleUsername, password: oraclePassword,
-			connectString: oracleConnectString
-		});
+    const pool = await oracledb.createPool({
+      user: oracleUsername, password: oraclePassword,
+      connectString: oracleConnectString
+    });
 
-		logger.log('debug', 'Connected to database!');
+    logger.log('debug', 'Connected to database!');
 
-		return pool;
+    return pool;
 
-		function setOracleOptions() {
-			oracledb.outFormat = oracledb.OBJECT;
-			oracledb.poolTimeout = 20;
-			oracledb.events = false;
-			oracledb.poolPingInterval = 10;
-		}
-	}
+    function setOracleOptions() {
+      oracledb.outFormat = oracledb.OBJECT; // eslint-disable-line functional/immutable-data
+      oracledb.poolTimeout = 20; // eslint-disable-line functional/immutable-data
+      oracledb.events = false; // eslint-disable-line functional/immutable-data
+      oracledb.poolPingInterval = 10; // eslint-disable-line functional/immutable-data
+    }
+  }
 
-	async function initExpress() {
-		const app = express();
+  async function initExpress() {
+    const app = express();
 
-		if (enableProxy) {
-			app.enable('trust proxy', true);
-		}
+    app.enable('trust proxy', Boolean(enableProxy));
 
-		app.use(createExpressLogger({
-			msg: '{{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
-		}));
+    app.use(createExpressLogger({
+      msg: '{{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
+    }));
 
-		app.get('/', await createMiddleware({...middlewareParams, pool}));
 
-		app.use(handleError);
+    app.get('/', await createMiddleware({...middlewareOptions, pool}));
 
-		return app.listen(httpPort, () => logger.log('info', 'Started Melinda OAI-PMH provider'));
+    app.use(handleError);
 
-		async function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
-			// The correct way would be to throw if the error is unexpected...There is a race condition between the request aborted event handler and running async function.
-			if (req.aborted) {
-				res.sendStatus(HttpStatus.REQUEST_TIMEOUT);
-				return;
-			}
-			/*
-			Const ORACLE_ERR_IGNORE_PATTERN = /^(NJS-018|NJS-003|ORA-01013):/;
+    return app.listen(httpPort, () => logger.log('info', 'Started Melinda OAI-PMH provider'));
 
-			// Certain Oracle errors don't matter if the request was closed by the client
-			if (err.message && ORACLE_ERR_IGNORE_PATTERN.test(err.message) && req.aborted) {
-				res.sendStatus(HttpStatus.REQUEST_TIMEOUT);
-				return;
-			} */
+    // Express requires next to be present for the error handler to work, even if that argument is not used
+    function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
+      // The correct way would be to throw if the error is unexpected...There is a race condition between the request aborted event handler and running async function.
+      /* istanbul ignore if: Not easily tested */
+      if (req.aborted) {
+        res.sendStatus(HttpStatus.REQUEST_TIMEOUT);
+        return;
+      }
 
-			res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-			throw err;
-		}
-	}
+      /*
+      Const ORACLE_ERR_IGNORE_PATTERN = /^(NJS-018|NJS-003|ORA-01013):/;
+
+      // Certain Oracle errors don't matter if the request was closed by the client
+      if (err.message && ORACLE_ERR_IGNORE_PATTERN.test(err.message) && req.aborted) {
+        res.sendStatus(HttpStatus.REQUEST_TIMEOUT);
+        return;
+      } */
+
+      res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+      throw err;
+    }
+  }
 }

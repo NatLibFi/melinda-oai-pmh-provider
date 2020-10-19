@@ -1,6 +1,0 @@
-{
-    "descr": "Should return the expected query with end parameter",
-    "params": {
-        "end": "2000-01-01T00:00:00"
-    }
-}

@@ -1,0 +1,22 @@
+{
+  "description": "Should respond with an error because of an expired resumption token",
+  "requests": [
+    {
+      "method": "GET",
+      "status": 200,
+      "requestParams": {
+        "verb": "ListIdentifiers",
+        "resumptionToken": "VOq7OKc3mXwthg7UDbWnJdF4NfKp8wPx1QuAOmLAZYUa3lykaZxlUn0fxpmtpBkiF27ii+34"
+      }
+    }
+  ],
+  "contextName": "bib",
+  "isPrivileged": false,
+  "dbResults": [
+    [
+      {
+        "TIME": "20000102050000"
+      }
+    ]
+  ]
+}

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="GetRecord" metadataPrefix="marc21" identifier="oai:foo.bar/12345">http://localhost:1337</request>
+	<responseDate>2000-01-01T00:00:00.000Z</responseDate>
+	<GetRecord>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/12345</identifier>
+				<datestamp>2000-01-02T05:00:00.000Z</datestamp>
+			</header>
+			<metadata>
+				<record xmlns="http://www.loc.gov/MARC21/slim">
+					<leader>01956cz  a2200517n  4500</leader>
+					<controlfield tag="001">12345</controlfield>
+					<controlfield tag="003">FI-MELINDA</controlfield>
+					<controlfield tag="005">20200312200039.0</controlfield>
+					<controlfield tag="008">941113|n|az|||aabn           | aaa      </controlfield>
+					<datafield tag="024" ind1="7" ind2=" ">
+						<subfield code="a">0000000121021001</subfield>
+						<subfield code="2">isni</subfield>
+					</datafield>
+					<datafield tag="035" ind1=" " ind2=" ">
+						<subfield code="a">(FI-MELINDA)12345</subfield>
+					</datafield>
+					<datafield tag="040" ind1=" " ind2=" ">
+						<subfield code="a">FI-NL</subfield>
+						<subfield code="b">fin</subfield>
+						<subfield code="e">rda</subfield>
+						<subfield code="d">FI-NLD</subfield>
+					</datafield>
+					<datafield tag="043" ind1=" " ind2=" ">
+						<subfield code="c">FI</subfield>
+					</datafield>
+					<datafield tag="046" ind1=" " ind2=" ">
+						<subfield code="f">1834-10-10</subfield>
+						<subfield code="g">1872-12-31</subfield>
+						<subfield code="2">edtf</subfield>
+					</datafield>
+					<datafield tag="100" ind1="1" ind2=" ">
+						<subfield code="a">Kivi, Aleksis,</subfield>
+						<subfield code="d">1834-1872</subfield>
+					</datafield>
+					<datafield tag="370" ind1=" " ind2=" ">
+						<subfield code="a">Nurmijärvi, Suomi</subfield>
+						<subfield code="b">Tuusula, Suomi</subfield>
+					</datafield>
+					<datafield tag="374" ind1=" " ind2=" ">
+						<subfield code="a">kirjailija</subfield>
+						<subfield code="2">mts</subfield>
+						<subfield code="0">http://urn.fi/URN:NBN:fi:au:mts:m3004</subfield>
+					</datafield>
+					<datafield tag="377" ind1=" " ind2=" ">
+						<subfield code="a">fin</subfield>
+					</datafield>
+					<datafield tag="400" ind1="1" ind2=" ">
+						<subfield code="a">Kivi, A.,</subfield>
+						<subfield code="d">1834-1872</subfield>
+					</datafield>
+					<datafield tag="400" ind1="1" ind2=" ">
+						<subfield code="a">Stemu, Allu,</subfield>
+						<subfield code="d">1834-1872</subfield>
+					</datafield>
+					<datafield tag="400" ind1="1" ind2=" ">
+						<subfield code="a">Stenvall, Aleksis,</subfield>
+						<subfield code="d">1834-1872</subfield>
+					</datafield>
+					<datafield tag="400" ind1="1" ind2=" ">
+						<subfield code="w">r</subfield>
+						<subfield code="4">syni</subfield>
+						<subfield code="a">Stenvall, Alexis,</subfield>
+						<subfield code="d">1834-1872</subfield>
+					</datafield>
+					<datafield tag="400" ind1="1" ind2=" ">
+						<subfield code="a">Киви, Алексис,</subfield>
+						<subfield code="d">1834-1872</subfield>
+					</datafield>
+					<datafield tag="670" ind1=" " ind2=" ">
+						<subfield code="a">Kansallisbiografia</subfield>
+						<subfield code="u">https://kansallisbiografia.fi/kansallisbiografia/henkilo/2826</subfield>
+					</datafield>
+					<datafield tag="680" ind1=" " ind2=" ">
+						<subfield code="i">Syntymänimi: Alexis Stenvall</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+	</GetRecord>
+</OAI-PMH>

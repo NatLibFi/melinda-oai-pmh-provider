@@ -1,4 +1,0 @@
-{
-    "descr": "Should respond with an error because of an illegal argument",
-    "requestUrl": "/bib?verb=Identify&foo=bar"
-}

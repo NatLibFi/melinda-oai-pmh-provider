@@ -1,0 +1,21 @@
+{
+    "description": "Should respond with an error because the record cannot be found",
+    "contextName": "bib",  
+    "isPrivileged": false,
+    "requests": [
+        { "method": "GET", "status": 200,
+            "requestParams": {
+                "verb": "GetRecord", 
+                "metadataPrefix": "marc21",
+                "identifier": "oai:foo.bar/12345"
+            }
+        }        
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ]
+    ]
+}

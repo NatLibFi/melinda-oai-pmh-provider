@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="ListRecords" resumptionToken="VOq7OKc3mXwthg7UDbWnJdF4NfKp8wPx1QuAOmLAZYUa3lykaZxlUn0fxpmtpBkiF27ii+34">http://localhost:1337</request>
+	<responseDate>2000-01-01T00:00:00.000Z</responseDate>
+	<error code="badResumptionToken"/>
+</OAI-PMH>

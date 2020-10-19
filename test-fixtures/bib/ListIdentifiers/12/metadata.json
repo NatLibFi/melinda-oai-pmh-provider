@@ -1,4 +1,0 @@
-{
-  "descr": "Should respond with an error because of an expired resumption token",
-  "requestUrl": "/bib?verb=ListIdentifiers&resumptionToken=OmUXiNtQ1aWSv9jTtBv7edWCg6JP%2BnHMPlLQC62BKtWZ47M9hw6qOrFBc%2BdwVztJ"
-}

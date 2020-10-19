@@ -1,5 +1,5 @@
 /**
-* Copyright 2019 University Of Helsinki (The National Library Of Finland)
+* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -14,51 +14,51 @@
 * limitations under the License.
 */
 
-import contextFactory from './context';
+
 import startApp from './app';
 import * as config from './config';
 
 run();
 
 async function run() {
-	let server;
+  let server; // eslint-disable-line functional/no-let
 
-	const {setsFile, contextName, isPrivileged, ...params} = config;
-	const {route, repoName, sets, isSupportedFormat, formatRecord} = contextFactory({setsFile, contextName, isPrivileged});
+  registerInterruptionHandlers();
 
-	registerInterruptionHandlers();
+  server = await startApp(config); // eslint-disable-line prefer-const
 
-	server = await startApp({
-		...params,
-		route, repoName, sets, isSupportedFormat, formatRecord
-	});
+  function registerInterruptionHandlers() {
+    process.on('SIGTERM', handleSignal);
+    process.on('SIGINT', handleSignal);
 
-	function registerInterruptionHandlers() {
-		process.on('SIGTERM', handleSignal);
-		process.on('SIGINT', handleSignal);
+    process.on('uncaughtException', ({stack}) => {
+      handleTermination({code: 1, message: stack});
+    });
 
-		process.on('uncaughtException', ({stack}) => {
-			handleTermination({code: 1, message: stack});
-		});
+    process.on('unhandledRejection', ({stack}) => {
+      handleTermination({code: 1, message: stack});
+    });
 
-		process.on('unhandledRejection', ({stack}) => {
-			handleTermination({code: 1, message: stack});
-		});
+    function handleTermination({code = 0, message}) {
+      if (server) {
+        server.close();
 
-		function handleTermination({code = 0, message}) {
-			if (server) {
-				server.close();
-			}
+        if (message) {
+          console.error(message); // eslint-disable-line no-console
+          return process.exit(code); // eslint-disable-line no-process-exit
+        }
+      }
 
-			if (message) {
-				console.error(message);
-			}
+      if (message) {
+        console.error(message); // eslint-disable-line no-console
+        return process.exit(code); // eslint-disable-line no-process-exit
+      }
 
-			process.exit(code);
-		}
+      process.exit(code); // eslint-disable-line no-process-exit
+    }
 
-		function handleSignal(signal) {
-			handleTermination({code: 1, message: `Received ${signal}`});
-		}
-	}
+    function handleSignal(signal) {
+      handleTermination({code: 1, message: `Received ${signal}`});
+    }
+  }
 }

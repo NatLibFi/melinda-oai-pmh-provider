@@ -1,0 +1,21 @@
+{
+    "description": "Should respond with an error because of an invalid metadata format specifier",
+    "contextName": "bib",  
+    "isPrivileged": false,
+    "requests": [
+        { "method": "GET", "status": 200,
+            "requestParams": {
+                "verb": "GetRecord", 
+                "metadataPrefix": "foo",
+                "identifier": "oai:foo.bar/12345"
+            }
+        }        
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ]
+    ]
+}

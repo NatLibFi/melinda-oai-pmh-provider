@@ -1,0 +1,15 @@
+{
+    "description": "Should return an error because of an invalid metadata format specifier",
+    "contextName": "bib",  
+    "isPrivileged": false,
+    "requests": [
+        { "method": "GET", "status": 200, "requestParams": { "verb": "ListRecords", "metadataPrefix": "foo" } }
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ]
+    ]
+}

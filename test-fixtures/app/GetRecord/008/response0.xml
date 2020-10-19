@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="GetRecord" metadataPrefix="melinda_marc" identifier="oai:foo.bar/12345">http://localhost:1337</request>
+	<responseDate>2000-01-01T00:00:00.000Z</responseDate>
+	<GetRecord>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/12345</identifier>
+				<datestamp>2000-01-02T05:00:00.000Z</datestamp>
+			</header>
+			<metadata>
+				<record xmlns="http://www.loc.gov/MARC21/slim">
+					<leader>03106cam a2200721 i 4500</leader>
+					<controlfield tag="001">1234567</controlfield>
+					<controlfield tag="003">FI-MELINDA</controlfield>
+					<datafield tag="035" ind1=" " ind2=" ">
+						<subfield code="a">(FI-MELINDA)12345</subfield>
+					</datafield>
+					<datafield tag="245" ind1=" " ind2=" ">
+						<subfield code="a">Foo Bar</subfield>
+					</datafield>
+					<datafield tag="CAT" ind1=" " ind2=" ">
+						<subfield code="a">O1003</subfield>
+						<subfield code="b">30</subfield>
+						<subfield code="c">20200122</subfield>
+						<subfield code="l">FOO</subfield>
+						<subfield code="h">0920</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+	</GetRecord>
+</OAI-PMH>

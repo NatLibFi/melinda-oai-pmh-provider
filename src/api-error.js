@@ -1,5 +1,5 @@
 /**
-* Copyright 2019 University Of Helsinki (The National Library Of Finland)
+* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 */
 
 export default class extends Error {
-	constructor({code, verb}, ...params) {
-		super(...params);
-		this.code = code;
-		this.verb = verb;
-	}
+  constructor({code, verb}, ...params) {
+    super(...params);
+    this.code = code; // eslint-disable-line functional/no-this-expression
+    this.verb = verb; // eslint-disable-line functional/no-this-expression
+  }
 }

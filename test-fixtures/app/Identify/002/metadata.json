@@ -1,0 +1,15 @@
+{
+  "description": "Should respond with information about the repository",
+  "contextName": "bib",  
+  "isPrivileged": false,
+  "requests": [
+    { "method": "GET", "status": 200, "requestParams": { "verb": "Identify" } }
+  ],
+  "dbResults": [
+    [
+      {
+        "TIME": "20000102050000"
+      }
+    ]
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "description": "Should respond with all sets",
+  "requests": [
+    {
+      "method": "GET",
+      "status": 200,
+      "requestParams": {
+        "verb": "ListSets"
+      }
+    }
+  ],
+  "contextName": "bib",
+  "isPrivileged": false,
+  "sets": [
+    {
+      "spec": "fennica", "name": "Fennica",
+      "description": "The Finnish national bibliography",
+      "indexes": {
+        "heading": ["HLOW LFIKKA%", "H042 LFINB %"]
+      }
+    },
+    {
+      "spec": "viola", "name": "Viola",
+      "description": "The Finnish national discography",
+      "indexes": {
+        "heading": ["HLOW LFIKKA%", "H042 LFINBD %"]
+      }
+    }
+  ],  
+  "dbResults": [
+    [
+      {
+        "ID": "1234"
+      }
+    ],
+    [
+      {
+        "ID": "5678"
+      }
+    ],
+    [
+      {
+        "ID": "1213"
+      }
+    ],                
+    [
+      {
+        "TIME": "20000102050000"
+      }
+    ]
+  ]
+}

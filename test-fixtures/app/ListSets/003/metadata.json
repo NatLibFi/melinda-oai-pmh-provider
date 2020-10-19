@@ -1,0 +1,22 @@
+{
+  "description": "Should respond an errors because of an invalid resumption token",
+  "requests": [
+    {
+      "method": "GET",
+      "status": 200,
+      "requestParams": {
+        "verb": "ListSets",
+        "resumptionToken": "foo"
+      }
+    }
+  ],
+  "contextName": "bib",
+  "isPrivileged": false,
+  "dbResults": [
+    [
+      {
+        "TIME": "20000102050000"
+      }
+    ]
+  ]
+}

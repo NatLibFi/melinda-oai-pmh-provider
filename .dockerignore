@@ -1,10 +1,12 @@
 .env*
 dist
 node_modules
-.travis.yml
 .drone.yml
 .git
 tnsnames.ora
 sqlnet.ora
 npm-debug.log
 wallet
+sets*
+.gitignore
+Dockerfile

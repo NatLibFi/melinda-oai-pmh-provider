@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="GetRecord" metadataPrefix="marc21" identifier="oai:foo.bar/12345">http://localhost:1337</request>
+	<responseDate>2000-01-01T00:00:00.000Z</responseDate>
+	<GetRecord>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/12345</identifier>
+				<datestamp>2000-01-02T05:00:00.000Z</datestamp>
+			</header>
+			<metadata>
+				<record xmlns="http://www.loc.gov/MARC21/slim">
+					<leader>01427cz  a2200349n  4500</leader>
+					<controlfield tag="001">12345</controlfield>
+					<controlfield tag="003">FI-MELINDA</controlfield>
+					<controlfield tag="005">20200212152142.0</controlfield>
+					<controlfield tag="008">850101|n|anznnbabn           | ana      </controlfield>
+					<datafield tag="024" ind1="7" ind2=" ">
+						<subfield code="a">http://www.yso.fi/onto/yso/p10187</subfield>
+						<subfield code="2">uri</subfield>
+					</datafield>
+					<datafield tag="035" ind1=" " ind2=" ">
+						<subfield code="a">(FI-MELINDA)12345</subfield>
+					</datafield>
+					<datafield tag="040" ind1=" " ind2=" ">
+						<subfield code="a">FI-NL</subfield>
+						<subfield code="b">fin</subfield>
+						<subfield code="f">yso/fin</subfield>
+					</datafield>
+					<datafield tag="065" ind1=" " ind2=" ">
+						<subfield code="a">39</subfield>
+						<subfield code="c">Liikenne. Kuljetus. Posti. Pakkausteollisuus</subfield>
+						<subfield code="0">http://www.yso.fi/onto/yso/p26577</subfield>
+						<subfield code="2">yso</subfield>
+					</datafield>
+					<datafield tag="150" ind1=" " ind2=" ">
+						<subfield code="a">osoitteet</subfield>
+					</datafield>
+					<datafield tag="450" ind1=" " ind2=" ">
+						<subfield code="a">osoite</subfield>
+					</datafield>
+					<datafield tag="450" ind1=" " ind2=" ">
+						<subfield code="a">osoitteisto</subfield>
+					</datafield>
+					<datafield tag="450" ind1=" " ind2=" ">
+						<subfield code="a">osoitteistot</subfield>
+					</datafield>
+					<datafield tag="450" ind1=" " ind2=" ">
+						<subfield code="a">postiosoite</subfield>
+					</datafield>
+					<datafield tag="450" ind1=" " ind2=" ">
+						<subfield code="a">postiosoitteet</subfield>
+					</datafield>
+					<datafield tag="550" ind1=" " ind2=" ">
+						<subfield code="w">g</subfield>
+						<subfield code="a">tieto</subfield>
+						<subfield code="0">http://www.yso.fi/onto/yso/p261</subfield>
+					</datafield>
+					<datafield tag="550" ind1=" " ind2=" ">
+						<subfield code="w">h</subfield>
+						<subfield code="a">Internet-osoitteet</subfield>
+						<subfield code="0">http://www.yso.fi/onto/yso/p10185</subfield>
+					</datafield>
+					<datafield tag="550" ind1=" " ind2=" ">
+						<subfield code="w">h</subfield>
+						<subfield code="a"/>
+						<subfield code="0">http://www.yso.fi/onto/yso/p15904</subfield>
+					</datafield>
+					<datafield tag="550" ind1=" " ind2=" ">
+						<subfield code="w">n</subfield>
+						<subfield code="a">yhteystiedot</subfield>
+						<subfield code="0">http://www.yso.fi/onto/yso/p11141</subfield>
+					</datafield>
+					<datafield tag="688" ind1=" " ind2=" ">
+						<subfield code="a">Luotu: 1985-01-01</subfield>
+					</datafield>
+					<datafield tag="688" ind1=" " ind2=" ">
+						<subfield code="a">Viimeksi muokattu: 2020-01-25</subfield>
+					</datafield>
+					<datafield tag="750" ind1=" " ind2="7">
+						<subfield code="a">addresses</subfield>
+						<subfield code="4">EQ</subfield>
+						<subfield code="2">yso/eng</subfield>
+						<subfield code="0">http://www.yso.fi/onto/yso/p10187</subfield>
+					</datafield>
+					<datafield tag="750" ind1=" " ind2="7">
+						<subfield code="a">adresser (kommunikation)</subfield>
+						<subfield code="4">EQ</subfield>
+						<subfield code="2">yso/swe</subfield>
+						<subfield code="0">http://www.yso.fi/onto/yso/p10187</subfield>
+					</datafield>
+					<datafield tag="750" ind1=" " ind2="0">
+						<subfield code="a">Street addresses</subfield>
+						<subfield code="4">~EQ</subfield>
+						<subfield code="0">http://id.loc.gov/authorities/subjects/sh85128579</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+	</GetRecord>
+</OAI-PMH>

@@ -1,0 +1,27 @@
+{
+  "description": "Should respond with internal server error because of malformed database results",
+  "contextName": "bib",  
+  "isPrivileged": false,
+  "requests": [
+    { "method": "GET", "status": 500,
+      "requestParams": {
+        "verb": "GetRecord", 
+        "metadataPrefix": "marc21",
+        "identifier": "oai:foo.bar/12345"
+      }
+    }        
+  ],
+  "dbResults": [
+    [
+      {
+        "TIME": "20000102050000"
+      }
+    ],
+    [
+      {
+        "TIME": "20000102050000",
+        "ID": "12345"
+        }
+      ]
+    ]
+  }

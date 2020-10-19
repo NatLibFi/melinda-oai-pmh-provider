@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="ListMetadataFormats">http://localhost:1337</request>
+	<responseDate>2000-01-01T00:00:00.000Z</responseDate>
+	<ListMetadataFormats>
+		<metadataFormat>
+			<metadataPrefix>oai_dc</metadataPrefix>
+			<schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
+			<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
+		</metadataFormat>
+		<metadataFormat>
+			<metadataPrefix>marc21</metadataPrefix>
+			<schema>https://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd</schema>
+			<metadataNamespace>http://www.loc.gov/MARC21/slim</metadataNamespace>
+		</metadataFormat>
+		<metadataFormat>
+			<metadataPrefix>melinda_marc</metadataPrefix>
+			<schema>https://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd</schema>
+			<metadataNamespace>https://melinda.kansalliskirjasto.fi/melinda-marc</metadataNamespace>
+		</metadataFormat>
+	</ListMetadataFormats>
+</OAI-PMH>

@@ -1,6 +1,28 @@
-FROM node:10.16
-# node:10 points to 10.15 which don't work with latest oracledb (130919)
-#FROM node:10
+FROM node:12 as builder
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["/usr/local/bin/node", "index.js"]
+WORKDIR /home/node
+
+ARG BUILD_SCRIPT=build
+
+ENV LD_LIBRARY_PATH /home/node/instantclient
+
+COPY --chown=node:node . build
+
+RUN apt-get update && apt-get install -y build-essential git sudo \
+  && cd build \
+  && sudo -u node \
+    OCI_LIB_DIR=/home/node/build/instantclient \
+    OCI_INC_DIR=/home/node/build/instantclient/sdk/include \
+    sh -c "npm ci && npm run ${BUILD_SCRIPT}" \
+  && sudo -u node \
+    OCI_LIB_DIR=/home/node/instantclient \
+    OCI_INC_DIR=/home/node/instantclient/sdk/include \
+    npm ci --production
+
+FROM node:12
+WORKDIR /home/node
+
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node
@@ -10,24 +32,13 @@ ENV LD_LIBRARY_PATH /home/node/instantclient
 ENV ORACLE_WALLET_DIRECTORY /home/node/wallet
 ENV ORACLE_CONNECT_TIMEOUT 10
 
-COPY --chown=node:node . build
+COPY --chown=node:node instantclient /home/node/instantclient
+COPY --chown=node:node *.template entrypoint.sh /home/node/
 
-RUN node -v
-RUN apt-get update && apt-get install -y build-essential git sudo libaio1 tzdata \
-  && mkdir /data && chown node:node /data \  
-  && sudo -u node \
-    OCI_LIB_DIR=/home/node/build/instantclient \
-    OCI_INC_DIR=/home/node/build/instantclient/sdk/include \
-    sh -c 'cd build && npm install && npm run build' \
-  && sudo -u node cp -r build/*.template build/entrypoint.sh build/instantclient build/package.json build/dist/* . \
-  && sudo -u node rm -rf build \
-  && sudo -u node \
-    OCI_LIB_DIR=/home/node/instantclient \
-    OCI_INC_DIR=/home/node/instantclient/sdk/include \
-    npm install --prod \
-  && sudo -u node npm cache clean -f \
-  && apt-get purge -y build-essential git && apt-get clean \
-  && rm -rf tmp/* /var/cache/*
+COPY --from=builder --chown=node:node /home/node/build/node_modules/ /home/node/node_modules
+COPY --from=builder --chown=node:node /home/node/build/dist/ /home/node/
 
-WORKDIR /home/node
+RUN apt-get update && apt-get install -y tzdata libaio1 \
+  && apt-get clean all
+
 USER node

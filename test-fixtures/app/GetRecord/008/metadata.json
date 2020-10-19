@@ -1,0 +1,70 @@
+{
+    "description": "Should respond with a record with privileged mode on",
+    "contextName": "bib",  
+    "isPrivileged": true,
+    "requests": [
+        { "method": "GET", "status": 200,
+            "requestParams": {
+                "verb": "GetRecord", 
+                "metadataPrefix": "melinda_marc",
+                "identifier": "oai:foo.bar/12345"
+            }
+        }        
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ],
+        [
+            {
+                "TIME": "20000102050000",
+                "ID": "12345",
+                "RECORD": {
+                    "leader": "03106cam a2200721 i 4500",
+                    "fields": [
+                        {
+                            "tag": "001",
+                            "value": "1234567"
+                        },
+                        {
+                            "tag": "245",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foo Bar"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "CAT",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "O1003"
+                                },                                
+                                {
+                                    "code": "b",
+                                    "value": "30"
+                                },
+                                {
+                                    "code": "c",
+                                    "value": "20200122"
+                                },
+                                {
+                                    "code": "l",
+                                    "value": "FOO"
+                                },
+                                {
+                                    "code": "h",
+                                    "value": "0920"
+                                }
+                            ]
+                        }                                            
+                    ]
+                }
+            }
+        ]
+    ]
+}

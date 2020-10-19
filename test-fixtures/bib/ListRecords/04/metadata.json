@@ -1,4 +1,0 @@
-{
-  "descr": "Should work with from and until parameters",  
-  "requestUrl": "/bib?verb=ListRecords&metadataPrefix=marc&from=2009-01-01&until=2010-01-01T00:00:00"
-}

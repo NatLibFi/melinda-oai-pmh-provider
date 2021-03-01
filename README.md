@@ -10,6 +10,7 @@
 - Sets heading indexing specifications should be checked when new indexes are added
 - A forked node-oracledb is used because setting charset is not supported and this breaks conversion for characters (Oracle does the unicode conversion for LONG datatypes). Issue is here: https://github.com/oracle/node-oracledb/issues/1172
 - Deleted records are not included when harvesting with sets. This is because Aleph's removes deleted records from search indexes.
+    - This could be fixed by OAI-PMH checking actual record contents from record history table for deleted records. This would require mapping set configurations to MARC 21 record contents in addition of current index contents.
 - Resumption token can be created/decrypted with src/resumption-token-cli (Useful for debugging and creating unit tests)
 
 ## License and copyright

@@ -1,0 +1,105 @@
+# Melinda node tests
+
+name: Melinda-node-tests
+
+on: push
+
+jobs:
+  build-node-versions:
+    name: Node version matrix
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 19.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+      env:
+        NPM_CONFIG_IGNORE_SCRIPTS: true
+    - run: npm audit --package-lock-only --production --audit-level=moderate
+    - run: npm ci
+    - run: npm test
+    - run: npm run build --if-present
+
+  njsscan:
+    name: Njsscan-check
+    runs-on: ubuntu-latest
+    container: docker://node:18
+
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v3
+    - name: nodejsscan scan
+      id: njsscan
+      uses: ajinabraham/njsscan-action@master
+      with:
+        args: '.'
+
+  license-scan:
+    name: License compliance check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: mikaelvesavuori/license-compliance-action@v1.0.2
+        with:
+          exclude_pattern: /^@natlibfi/
+
+  openshift-webhook:
+    name: OpenShift webhook for image builder
+    needs: [build-node-versions, njsscan]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Test webhook
+        uses: joelwmale/webhook-action@master
+        if: github.ref == 'refs/heads/test'
+        with:
+          url: ${{ secrets.WEBHOOK_URL_TEST }}
+          body: '{}'
+      - name: Prod webhook
+        uses: joelwmale/webhook-action@master
+        if: github.ref == 'refs/heads/master'
+        with:
+          url: ${{ secrets.WEBHOOK_URL_PROD }}
+          body: '{}'
+
+  quayio:
+    name: Quay.io image builder & publisher
+    needs: [build-node-versions, njsscan]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: quay.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+      - name: Login to Quay.io
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.MELINDA_QUAY_IO_USERNAME }}
+          password: ${{ secrets.MELINDA_QUAY_IO_PASSWORD }}
+      - name: Build and publish image to Quay.io
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}

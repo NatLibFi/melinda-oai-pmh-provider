@@ -17,8 +17,10 @@
 import bib from './bib';
 import autNames from './aut-names';
 import autSubjects from './aut-subjects';
+import autWorks from './aut-works';
+
 
 export default ({contextName, ...params}) => {
-  const map = {bib, autNames, autSubjects};
+  const map = {bib, autNames, autSubjects, autWorks};
   return map[contextName](params);
 };

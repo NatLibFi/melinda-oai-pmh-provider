@@ -24,6 +24,7 @@ import {parseResumptionToken, generateResumptionToken, errors} from '../../commo
 import contextFactory from './context';
 import databaseFactory from './db';
 import {metadataFormats, requestDateStampFormats} from './constants';
+import {sanitizeQueryParams} from './util';
 
 export default async ({
   contextOptions,
@@ -331,7 +332,7 @@ export default async ({
 
     async function sendResponse({error, result, params}) {
       const requestUrl = instanceUrl;
-      const query = clone(req.query);
+      const query = sanitizeQueryParams(clone(req.query));
 
       if (error) {
         return res.send(await generateErrorResponse({query, requestUrl, error}));

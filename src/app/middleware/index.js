@@ -332,7 +332,7 @@ export default async ({
 
     async function sendResponse({error, result, params}) {
       const requestUrl = instanceUrl;
-      const query = sanitizeQueryParams(clone(req.query));
+      const query = sanitizeQueryParams(clone(req.query)); // njsscan-ignore: express_xss
 
       if (error) {
         return res.send(await generateErrorResponse({query, requestUrl, error}));

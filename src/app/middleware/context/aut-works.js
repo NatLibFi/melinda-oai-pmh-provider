@@ -24,7 +24,6 @@ export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
       record, id, metadataPrefix,
       oldPrefix: alephLibrary.toUpperCase(),
       newPrefix: melindaPrefix
-
     });
 
     return isPrivileged ? newRecord : stripPrivateFields(newRecord);

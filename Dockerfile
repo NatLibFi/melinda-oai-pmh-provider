@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y build-essential git sudo \
   && sudo -u node \
     OCI_LIB_DIR=/home/node/instantclient \
     OCI_INC_DIR=/home/node/instantclient/sdk/include \
-    npm ci --production
+    npm i --production
 
 FROM node:16
 WORKDIR /home/node

@@ -31,7 +31,7 @@ export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
 
     function stripPrivateFields(record) {
       const newRecord = stripPrivateFieldsDefault(record);
-      newRecord.get(/^667$/u).forEach(f => newRecord.removeField(f));
+      newRecord.get(/^375|^667$/u).forEach(f => newRecord.removeField(f));
       return newRecord;
     }
   }

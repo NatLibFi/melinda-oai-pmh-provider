@@ -1,5 +1,5 @@
 /**
-* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
+* Copyright 2023 University Of Helsinki (The National Library Of Finland)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 import {formatAut, stripPrivateFields as stripPrivateFieldsDefault} from './common';
 
 export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
-  repoName: 'Melinda OAI-PMH provider for authority aux records',
+  repoName: 'Melinda OAI-PMH provider for authority work records',
   isSupportedFormat: f => ['marc21', 'melinda_marc'].includes(f),
   formatRecord: (record, id, metadataPrefix) => {
     const newRecord = formatAut({
       record, id, metadataPrefix,
       oldPrefix: alephLibrary.toUpperCase(),
       newPrefix: melindaPrefix
-
     });
 
     return isPrivileged ? newRecord : stripPrivateFields(newRecord);

@@ -1,5 +1,5 @@
 /**
-* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
+* Copyright 2023 University Of Helsinki (The National Library Of Finland)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
 
     function stripPrivateFields(record) {
       const newRecord = stripPrivateFieldsDefault(record);
-      newRecord.get(/^375$|^667$/u).forEach(f => newRecord.removeField(f));
+      newRecord.get(/^667$/u).forEach(f => newRecord.removeField(f));
       return newRecord;
     }
   }

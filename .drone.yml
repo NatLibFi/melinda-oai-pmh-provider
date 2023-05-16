@@ -32,7 +32,7 @@ steps:
       OCI_LIB_DIR: instantclient
       OCI_INC_DIR: instantclient/sdk/include
     commands:
-      - npm ci
+      - npm i
 
   #- name: test
   #  image: node:12

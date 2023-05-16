@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+	<request verb="GetRecord" metadataPrefix="marc21" identifier="oai:foo.bar/12345">http://localhost:1337</request>
+	<responseDate>2000-01-01T00:00:00.000Z</responseDate>
+	<GetRecord>
+		<record>
+			<header>
+				<identifier>oai:foo.bar/12345</identifier>
+				<datestamp>2000-01-02T05:00:00.000Z</datestamp>
+			</header>
+			<metadata>
+				<record xmlns="http://www.loc.gov/MARC21/slim">
+					<leader>01956cz  a2200517n  4500</leader>
+					<controlfield tag="001">12345</controlfield>
+					<controlfield tag="003">FI-ASTERI-N</controlfield>
+					<controlfield tag="005">20200312200039.0</controlfield>
+					<controlfield tag="008">941113|n|az|||aabn           | aaa      </controlfield>
+					<datafield tag="024" ind1="7" ind2=" ">
+						<subfield code="a">0000000121021001</subfield>
+						<subfield code="2">isni</subfield>
+					</datafield>
+					<datafield tag="035" ind1=" " ind2=" ">
+						<subfield code="a">(FI-ASTERI-N)12345</subfield>
+					</datafield>
+					<datafield tag="040" ind1=" " ind2=" ">
+						<subfield code="a">FI-NL</subfield>
+						<subfield code="b">fin</subfield>
+						<subfield code="e">rda</subfield>
+						<subfield code="d">FI-NLD</subfield>
+					</datafield>
+					<datafield tag="100" ind1="1" ind2=" ">
+						<subfield code="a">Kivi, Aleksis,</subfield>
+						<subfield code="d">1834-1872</subfield>
+					</datafield>
+					<datafield tag="500" ind1="1" ind2=" ">
+						<subfield code="a">Foobar agent name $0 (FIN11) - (FI-ASTERI-N)</subfield>
+						<subfield code="0">(FI-ASTERI-N)555666</subfield>
+					</datafield>
+					<datafield tag="530" ind1="1" ind2=" ">
+						<subfield code="a">Foobar teos $0 (FIN13) - (FI-ASTERI-W)</subfield>
+						<subfield code="0">(FI-ASTERI-W)000222444</subfield>
+					</datafield>
+					<datafield tag="550" ind1="1" ind2=" ">
+						<subfield code="a">Foobar subject $0 (FIN10) - (FI-ASTERI-S)</subfield>
+						<subfield code="0">(FI-ASTERI-S)000111444</subfield>
+					</datafield>
+					<datafield tag="599" ind1="1" ind2=" ">
+						<subfield code="a">Foobar aux $0 (FIN12) - (FI-ASTERI-A)</subfield>
+						<subfield code="0">(FI-ASTERI-A)000222444</subfield>
+					</datafield>
+					<datafield tag="670" ind1=" " ind2=" ">
+						<subfield code="a">Foobar bib $w (FIN01) - (FI-MELINDA)</subfield>
+						<subfield code="w">(FI-MELINDA)000333666</subfield>
+					</datafield>
+				</record>
+			</metadata>
+		</record>
+	</GetRecord>
+</OAI-PMH>

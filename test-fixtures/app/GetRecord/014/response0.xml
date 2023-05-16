@@ -12,7 +12,7 @@
 				<record xmlns="http://www.loc.gov/MARC21/slim">
 					<leader>01427cz  a2200349n  4500</leader>
 					<controlfield tag="001">12345</controlfield>
-					<controlfield tag="003">FI-ASTERI-S</controlfield>
+					<controlfield tag="003">FI-ASTERI-W</controlfield>
 					<controlfield tag="005">20200212152142.0</controlfield>
 					<controlfield tag="008">850101|n|anznnbabn           | ana      </controlfield>
 					<datafield tag="024" ind1="7" ind2=" ">
@@ -20,7 +20,7 @@
 						<subfield code="2">uri</subfield>
 					</datafield>
 					<datafield tag="035" ind1=" " ind2=" ">
-						<subfield code="a">(FI-ASTERI-S)12345</subfield>
+						<subfield code="a">(FI-ASTERI-W)12345</subfield>
 					</datafield>
 					<datafield tag="040" ind1=" " ind2=" ">
 						<subfield code="a">FI-NL</subfield>

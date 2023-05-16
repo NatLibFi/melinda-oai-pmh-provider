@@ -1,9 +1,9 @@
 {
-    "description": "Should respond with a authority name record",
-    "contextName": "autNames",
+    "description": "Should respond with a authority work record",
+    "contextName": "autWorks",  
     "isPrivileged": false,
     "alephLibrary": "foo00",
-    "melindaPrefix": "FI-ASTERI-N",
+    "melindaPrefix": "FI-ASTERI-W",
     "requests": [
         { "method": "GET", "status": 200,
             "requestParams": {
@@ -24,7 +24,7 @@
                 "TIME": "20000102050000",
                 "ID": "12345",
                 "RECORD": {
-                    "leader": "01956cz  a2200517n  4500",
+                    "leader": "01427cz  a2200349n  4500",
                     "fields": [
                         {
                             "tag": "001",
@@ -32,11 +32,11 @@
                         },
                         {
                             "tag": "005",
-                            "value": "20200312200039.0"
+                            "value": "20200212152142.0"
                         },
                         {
                             "tag": "008",
-                            "value": "941113|n|az|||aabn           | aaa      "
+                            "value": "850101|n|anznnbabn           | ana      "
                         },
                         {
                             "tag": "024",
@@ -45,11 +45,11 @@
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "0000000121021001"
+                                    "value": "http://www.yso.fi/onto/yso/p10187"
                                 },
                                 {
                                     "code": "2",
-                                    "value": "isni"
+                                    "value": "uri"
                                 }
                             ]
                         },
@@ -60,7 +60,7 @@
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "(FOO00)12345"
+                                    "value": "(FI-ASTERI-W)12345"
                                 }
                             ]
                         },
@@ -78,267 +78,264 @@
                                     "value": "fin"
                                 },
                                 {
-                                    "code": "e",
-                                    "value": "rda"
-                                },
-                                {
-                                    "code": "d",
-                                    "value": "FI-NLD"
+                                    "code": "f",
+                                    "value": "yso/fin"
                                 }
                             ]
                         },
                         {
-                            "tag": "043",
+                            "tag": "065",
                             "ind1": " ",
                             "ind2": " ",
                             "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "39"
+                                },
                                 {
                                     "code": "c",
-                                    "value": "FI"
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "046",
-                            "ind1": " ",
-                            "ind2": " ",
-                            "subfields": [
-                                {
-                                    "code": "f",
-                                    "value": "1834-10-10"
-                                },
-                                {
-                                    "code": "g",
-                                    "value": "1872-12-31"
-                                },
-                                {
-                                    "code": "2",
-                                    "value": "edtf"
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "100",
-                            "ind1": "1",
-                            "ind2": " ",
-                            "subfields": [
-                                {
-                                    "code": "a",
-                                    "value": "Kivi, Aleksis,"
-                                },
-                                {
-                                    "code": "d",
-                                    "value": "1834-1872"
+                                    "value": "Liikenne. Kuljetus. Posti. Pakkausteollisuus"
                                 },
                                 {
                                     "code": "0",
-                                    "value": "(FOO00)12345"
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "370",
-                            "ind1": " ",
-                            "ind2": " ",
-                            "subfields": [
-                                {
-                                    "code": "a",
-                                    "value": "Nurmijärvi, Suomi"
-                                },
-                                {
-                                    "code": "b",
-                                    "value": "Tuusula, Suomi"
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "374",
-                            "ind1": " ",
-                            "ind2": " ",
-                            "subfields": [
-                                {
-                                    "code": "a",
-                                    "value": "kirjailija"
+                                    "value": "http://www.yso.fi/onto/yso/p26577"
                                 },
                                 {
                                     "code": "2",
-                                    "value": "mts"
+                                    "value": "yso"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "150",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "osoitteet"
                                 },
                                 {
                                     "code": "0",
-                                    "value": "http://urn.fi/URN:NBN:fi:au:mts:m3004"
+                                    "value": "http://www.yso.fi/onto/yso/p10187"
                                 }
                             ]
                         },
                         {
-                            "tag": "375",
+                            "tag": "450",
                             "ind1": " ",
                             "ind2": " ",
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "foobar"
+                                    "value": "osoite"
                                 }
                             ]
                         },
                         {
-                            "tag": "377",
+                            "tag": "450",
                             "ind1": " ",
                             "ind2": " ",
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "fin"
+                                    "value": "osoitteisto"
                                 }
                             ]
                         },
                         {
-                            "tag": "400",
-                            "ind1": "1",
+                            "tag": "450",
+                            "ind1": " ",
                             "ind2": " ",
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "Kivi, A.,"
-                                },
-                                {
-                                    "code": "d",
-                                    "value": "1834-1872"
+                                    "value": "osoitteistot"
                                 }
                             ]
                         },
                         {
-                            "tag": "400",
-                            "ind1": "1",
+                            "tag": "450",
+                            "ind1": " ",
                             "ind2": " ",
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "Stemu, Allu,"
-                                },
-                                {
-                                    "code": "d",
-                                    "value": "1834-1872"
+                                    "value": "postiosoite"
                                 }
                             ]
                         },
                         {
-                            "tag": "400",
-                            "ind1": "1",
+                            "tag": "450",
+                            "ind1": " ",
                             "ind2": " ",
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "Stenvall, Aleksis,"
-                                },
-                                {
-                                    "code": "d",
-                                    "value": "1834-1872"
+                                    "value": "postiosoitteet"
                                 }
                             ]
                         },
                         {
-                            "tag": "400",
-                            "ind1": "1",
+                            "tag": "550",
+                            "ind1": " ",
                             "ind2": " ",
                             "subfields": [
                                 {
                                     "code": "w",
-                                    "value": "r"
+                                    "value": "g"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": "tieto"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p261"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "550",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "w",
+                                    "value": "h"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": "Internet-osoitteet"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p10185"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "550",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "w",
+                                    "value": "h"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": ""
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p15904"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "550",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "w",
+                                    "value": "n"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": "yhteystiedot"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p11141"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "688",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Luotu: 1985-01-01"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "688",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Viimeksi muokattu: 2020-01-25"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "750",
+                            "ind1": " ",
+                            "ind2": "7",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "addresses"
                                 },
                                 {
                                     "code": "4",
-                                    "value": "syni"
+                                    "value": "EQ"
                                 },
                                 {
-                                    "code": "a",
-                                    "value": "Stenvall, Alexis,"
+                                    "code": "2",
+                                    "value": "yso/eng"
                                 },
                                 {
-                                    "code": "d",
-                                    "value": "1834-1872"
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p10187"
                                 }
                             ]
                         },
                         {
-                            "tag": "400",
-                            "ind1": "1",
-                            "ind2": " ",
-                            "subfields": [
-                                {
-                                    "code": "a",
-                                    "value": "Киви, Алексис,"
-                                },
-                                {
-                                    "code": "d",
-                                    "value": "1834-1872"
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "667",
+                            "tag": "750",
                             "ind1": " ",
-                            "ind2": " ",
+                            "ind2": "7",
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "foobar"
+                                    "value": "adresser (kommunikation)"
+                                },
+                                {
+                                    "code": "4",
+                                    "value": "EQ"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "yso/swe"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p10187"
                                 }
                             ]
                         },
                         {
-                            "tag": "670",
+                            "tag": "750",
                             "ind1": " ",
-                            "ind2": " ",
+                            "ind2": "0",
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "Kansallisbiografia"
+                                    "value": "Street addresses"
                                 },
                                 {
-                                    "code": "u",
-                                    "value": "https://kansallisbiografia.fi/kansallisbiografia/henkilo/2826"
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "680",
-                            "ind1": " ",
-                            "ind2": " ",
-                            "subfields": [
-                                {
-                                    "code": "i",
-                                    "value": "Syntymänimi: Alexis Stenvall"
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "SID",
-                            "ind1": " ",
-                            "ind2": " ",
-                            "subfields": [
-                                {
-                                    "code": "c",
-                                    "value": "38442"
+                                    "code": "4",
+                                    "value": "~EQ"
                                 },
                                 {
-                                    "code": "b",
-                                    "value": "fenau"
-                                }
-                            ]
-                        },
-                        {
-                            "tag": "SID",
-                            "ind1": " ",
-                            "ind2": " ",
-                            "subfields": [
-                                {
-                                    "code": "c",
-                                    "value": "19875"
-                                },
-                                {
-                                    "code": "b",
-                                    "value": "vioau"
+                                    "code": "0",
+                                    "value": "http://id.loc.gov/authorities/subjects/sh85128579"
                                 }
                             ]
                         },
@@ -349,23 +346,23 @@
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "FENNI-FIX"
+                                    "value": "LOAD-YSO"
                                 },
                                 {
                                     "code": "b",
-                                    "value": "30"
+                                    "value": ""
                                 },
                                 {
                                     "code": "c",
-                                    "value": "20200312"
+                                    "value": "20200212"
                                 },
                                 {
                                     "code": "l",
-                                    "value": "FIN11"
+                                    "value": "FIN10"
                                 },
                                 {
                                     "code": "h",
-                                    "value": "2000"
+                                    "value": "1521"
                                 }
                             ]
                         }

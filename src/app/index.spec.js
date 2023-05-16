@@ -28,7 +28,7 @@ generateTests({
   path: [__dirname, '..', '..', 'test-fixtures', 'app']
 });
 
-function callback({contextName, isPrivileged, dbResults, sets = []}) {
+function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbResults, sets = []}) {
   oracleMock._clear();
   oracleMock._execute(formatDbResults());
 
@@ -42,7 +42,8 @@ function callback({contextName, isPrivileged, dbResults, sets = []}) {
       // Tests will break in the 4th millennium because resumption tokens will expire
       resumptionTokenTimeout: 31536000000000,
       maxResults: 3,
-      alephLibrary: 'foo00',
+      alephLibrary,
+      //alephLibrary: 'foo00',
       instanceUrl: `http://localhost:1337`,
       oaiIdentifierPrefix: 'oai:foo.bar',
       supportEmail: 'foo@foo.bar',
@@ -50,8 +51,10 @@ function callback({contextName, isPrivileged, dbResults, sets = []}) {
       socketTimeout: 0,
       contextOptions: {
         contextName, isPrivileged,
-        alephLibrary: 'foo00',
-        melindaPrefix: 'FI-MELINDA'
+        alephLibrary,
+        melindaPrefix
+        //alephLibrary: 'foo00',
+        //melindaPrefix: 'FI-MELINDA'
       }
     }
   }, oracleMock);

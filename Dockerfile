@@ -1,4 +1,4 @@
-FROM node:12 as builder
+FROM node:16 as builder
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node
@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y build-essential git sudo \
     OCI_INC_DIR=/home/node/instantclient/sdk/include \
     npm ci --production
 
-FROM node:12
+FROM node:16
 WORKDIR /home/node
 
 ENTRYPOINT ["./entrypoint.sh"]

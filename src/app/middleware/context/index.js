@@ -1,5 +1,5 @@
 /**
-* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
+* Copyright 2019-2020, 2023 University Of Helsinki (The National Library Of Finland)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.

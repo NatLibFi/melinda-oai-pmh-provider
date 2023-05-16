@@ -129,7 +129,7 @@ export function formatRecord({
     }
   }
 
-  function formatStandard(newRecord) {
+  function formatStandard() {
     removeFields();
     removeSubfields();
 

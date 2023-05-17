@@ -77,7 +77,7 @@ function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbRes
 }
 
 async function formatResponse(headers, originalPayload) {
-  if (originalPayload) { // eslint-disable-line functional/no-conditional-statement
+  if (originalPayload) { // eslint-disable-line functional/no-conditional-statements
     try {
       const obj = await parse(originalPayload);
       const modified = format(obj);

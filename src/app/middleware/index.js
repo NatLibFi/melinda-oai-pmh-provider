@@ -297,7 +297,7 @@ export default async ({
             async function handleClose() {
               logger.log('info', 'Request cancelled');
 
-              if (params.connection) { // eslint-disable-line functional/no-conditional-statement
+              if (params.connection) { // eslint-disable-line functional/no-conditional-statements
                 try {
                   await params.connection.break();
                   await params.connection.close({drop: true});

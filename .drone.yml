@@ -45,7 +45,7 @@ steps:
   #    - npm run coverage
 
   - name: build
-    image: node:12
+    image: node:16
     commands:
       - npm run build
     environment:
@@ -79,7 +79,7 @@ trigger:
 steps:
 
   - name: update-deps
-    image: node:12
+    image: node:16
     commands:
       - npm install --package-lock-only
 

@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-oai-pmh-provider.git"
 	},
 	"license": "Apache-2.0",
-	"version": "2.0.0-alpha.2",
+	"version": "2.0.0-alpha.3",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -34,17 +34,17 @@
 		"watch:dev": "cross-env DEBUG=1 nodemon -w src --exec 'babel-node src/index.js'"
 	},
 	"dependencies": {
-		"@babel/runtime": "^7.21.5",
+		"@babel/runtime": "^7.22.6",
 		"@natlibfi/marc-record": "^7.2.2",
-		"@natlibfi/marc-record-serializers": "^10.0.4",
-		"@natlibfi/melinda-backend-commons": "^2.2.0",
-		"@natlibfi/melinda-commons": "^13.0.4",
+		"@natlibfi/marc-record-serializers": "^10.0.6",
+		"@natlibfi/melinda-backend-commons": "^2.2.1",
+		"@natlibfi/melinda-commons": "^13.0.5",
 		"@natlibfi/oracledb-aleph": "^6.0.0-dev",
 		"express": "^4.18.2",
 		"http-status": "^1.6.2",
 		"langs": "^2.0.0",
 		"moment": "^2.29.4",
-		"xml2js": ">=0.5.0 <1.0.0"
+		"xml2js": ">=0.6.2 <1.0.0"
 	},
 	"devDependencies": {
 		"@babel/cli": "latest",
@@ -54,17 +54,17 @@
 		"@babel/preset-env": "latest",
 		"@babel/register": "latest",
 		"@natlibfi/eslint-config-melinda-backend": "^3.0.0",
-		"@natlibfi/fixugen": "^2.0.0",
-		"@natlibfi/fixugen-http-server": "^1.1.2",
-		"@natlibfi/fixura": "^3.0.0",
-		"@natlibfi/oracledb-mock": "^1.0.0",
+		"@natlibfi/fixugen": "^2.0.1",
+		"@natlibfi/fixugen-http-server": "^1.1.6",
+		"@natlibfi/fixura": "^3.0.1",
+		"@natlibfi/oracledb-mock": "^1.0.2-alpha.1",
 		"babel-plugin-istanbul": "^6.1.1",
 		"babel-plugin-rewire": "^1.2.0",
 		"chai": "^4.3.7",
 		"cross-env": "^7.0.3",
-		"eslint": "^8.40.0",
+		"eslint": "^8.45.0",
 		"mocha": "^10.2.0",
-		"nodemon": "^2.0.22",
+		"nodemon": "^3.0.1",
 		"nyc": "^15.1.0"
 	},
 	"eslintConfig": {

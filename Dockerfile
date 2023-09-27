@@ -18,3 +18,4 @@ RUN yum install sudo git
 #RUN npm i --production
 
 #RUN apt-get install -y tzdata libaio1 && apt-get clean all
+RUN rm -rf /var/cache/dnf

@@ -1,4 +1,4 @@
-FROM oraclelinux8-instantclient:12.2 as builder
+FROM oraclelinux8-nodejs:18 as builder
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node
@@ -13,8 +13,6 @@ WORKDIR /home/node
 # oraclelinux uses yam not apt-get
 #RUN apt-get update && apt-get install -y build-essential git sudo
 RUN yum install sudo git
-RUN sudo dnf module enable nodejs:18
-RUN sudo dnf module install nodejs
 #RUN export NODE_PATH=$(npm root -g)
 #tzdata is already installed libaio1 does not exsist in yum 
 #RUN yum install tzdata libaio1 

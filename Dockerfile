@@ -1,6 +1,4 @@
 FROM ghcr.io/oracle/oraclelinux8-nodejs:18 as builder
-ENTRYPOINT ["./entrypoint.sh"]
-CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node
 
 #ARG BUILD_SCRIPT=build

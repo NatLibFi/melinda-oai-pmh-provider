@@ -1,4 +1,4 @@
-FROM oraclelinux:8 as builder
+FROM oraclelinux8-instantclient:12.2 as builder
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node
@@ -15,8 +15,7 @@ WORKDIR /home/node
 RUN yum install sudo git
 RUN sudo dnf module enable nodejs:18
 RUN sudo dnf module install nodejs
-RUN sudo dnf install oracle-instantclient-release-el8 oraclelinux-developer-release-el8
-RUN export NODE_PATH=$(npm root -g)
+#RUN export NODE_PATH=$(npm root -g)
 #tzdata is already installed libaio1 does not exsist in yum 
 #RUN yum install tzdata libaio1 
 # does not find package.json

@@ -12,7 +12,7 @@ ENV ORACLE_CONNECT_TIMEOUT 10
 
 # oraclelinux uses yam not apt-get
 #RUN apt-get update && apt-get install -y build-essential git sudo
-RUN yum install sudo git
+RUN apt-get install sudo git
 RUN sudo dnf module enable nodejs:18
 RUN sudo dnf module install nodejs
 RUN sudo dnf install oracle-instantclient-release-el8 oraclelinux-developer-release-el8

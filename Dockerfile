@@ -15,6 +15,8 @@ ENV ORACLE_CONNECT_TIMEOUT 10
 RUN yum install sudo
 RUN sudo dnf module enable nodejs:18
 RUN sudo dnf module install nodejs
+RUN sudo dnf install oracle-instantclient-release-el8 oraclelinux-developer-release-el8
+RUN export NODE_PATH=$(npm root -g)
 #tzdata is already installed libaio1 does not exsist in yum 
 #RUN yum install tzdata libaio1 
 # does not find package.json

@@ -3,16 +3,16 @@ ENTRYPOINT ["./entrypoint.sh"]
 CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node
 
-ARG BUILD_SCRIPT=build
+#ARG BUILD_SCRIPT=build
 
-ENV TNS_ADMIN /home/node
-ENV LD_LIBRARY_PATH /home/node/instantclient
-ENV ORACLE_WALLET_DIRECTORY /home/node/wallet
-ENV ORACLE_CONNECT_TIMEOUT 10
+#ENV TNS_ADMIN /home/node
+#ENV LD_LIBRARY_PATH /home/node/instantclient
+#ENV ORACLE_WALLET_DIRECTORY /home/node/wallet
+#ENV ORACLE_CONNECT_TIMEOUT 10
 
 # oraclelinux uses yam not apt-get
 #RUN apt-get update && apt-get install -y build-essential git sudo
-RUN apt-get install sudo git
+RUN yum install sudo git
 RUN sudo dnf module enable nodejs:18
 RUN sudo dnf module install nodejs
 RUN sudo dnf install oracle-instantclient-release-el8 oraclelinux-developer-release-el8

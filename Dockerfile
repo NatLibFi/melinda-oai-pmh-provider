@@ -14,6 +14,6 @@ ENV ORACLE_CONNECT_TIMEOUT 10
 RUN yum install sudo
 RUN sudo dnf module enable nodejs:18
 RUN sudo dnf module install nodejs
-RUN npm i --production
+
 
 #RUN apt-get install -y tzdata libaio1 && apt-get clean all

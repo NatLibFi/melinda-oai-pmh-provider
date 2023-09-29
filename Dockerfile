@@ -1,9 +1,11 @@
 FROM ghcr.io/oracle/oraclelinux8-instantclient:21 as builder
 WORKDIR /home/node
+COPY . .
 ENTRYPOINT ["./entrypoint.sh"]
+
 #ARG BUILD_SCRIPT=build
 
-#ENV TNS_ADMIN /home/node
+#ENV TNS_ADMIN /home/node # set in deployment env
 #ENV LD_LIBRARY_PATH /home/node/instantclient
 #ENV ORACLE_WALLET_DIRECTORY /home/node/wallet
 #ENV ORACLE_CONNECT_TIMEOUT 10

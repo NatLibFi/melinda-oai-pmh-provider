@@ -1,7 +1,7 @@
-FROM ghcr.io/oracle/oraclelinux8-instantclient:21 as builder
+FROM ghcr.io/oracle/oraclelinux8-instantclient:21
+ENTRYPOINT ["./entrypoint.sh"]
 WORKDIR /home/node
 COPY . .
-ENTRYPOINT ["./entrypoint.sh"]
 
 #ARG BUILD_SCRIPT=build
 
@@ -23,3 +23,4 @@ RUN dnf module install nodejs
 
 #RUN apt-get install -y tzdata libaio1 && apt-get clean all
 RUN rm -rf /var/cache/dnf
+CMD ["sqlplus", "-v"]

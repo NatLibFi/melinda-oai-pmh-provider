@@ -1,6 +1,6 @@
 FROM ghcr.io/oracle/oraclelinux8-instantclient:21 as builder
 WORKDIR /home/node
-
+ENTRYPOINT ["./entrypoint.sh"]
 #ARG BUILD_SCRIPT=build
 
 #ENV TNS_ADMIN /home/node
@@ -10,7 +10,7 @@ WORKDIR /home/node
 
 # oraclelinux uses yam not apt-get
 #RUN apt-get update && apt-get install -y build-essential git sudo
-RUN yum install sudo
+#RUN yum install sudo
 RUN dnf module enable nodejs:18
 RUN dnf module install nodejs
 #RUN export NODE_PATH=$(npm root -g)

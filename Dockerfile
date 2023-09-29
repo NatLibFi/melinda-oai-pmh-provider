@@ -1,4 +1,4 @@
-FROM ghcr.io/oracle/oraclelinux8-nodejs:18 as builder
+FROM ghcr.io/oracle/oraclelinux8-instantclient:21 as builder
 WORKDIR /home/node
 
 #ARG BUILD_SCRIPT=build
@@ -10,7 +10,9 @@ WORKDIR /home/node
 
 # oraclelinux uses yam not apt-get
 #RUN apt-get update && apt-get install -y build-essential git sudo
-RUN yum install sudo git
+RUN yum install sudo
+RUN dnf module enable nodejs:18
+RUN dnf module install nodejs
 #RUN export NODE_PATH=$(npm root -g)
 #tzdata is already installed libaio1 does not exsist in yum 
 #RUN yum install tzdata libaio1 

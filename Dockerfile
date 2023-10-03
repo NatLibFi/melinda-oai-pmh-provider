@@ -21,11 +21,11 @@ RUN dnf module install nodejs
 #RUN export NODE_PATH=$(npm root -g)
 #tzdata is already installed libaio1 does not exsist in yum 
 #RUN yum install tzdata libaio1 
-RUN yum install libaio
+#libaio is already installed, is it same as libaio1? 
+#RUN yum install libaio
 # does not find package.json
 RUN npm i --omit=dev
 
 #RUN apt-get install -y tzdata libaio1 && apt-get clean all
 #Cleaning
 RUN rm -rf /var/cache/dnf
-CMD ["sqlplus", "-v"]

@@ -13,7 +13,8 @@ COPY . .
 # oraclelinux uses yam not apt-get
 #RUN apt-get update && apt-get install -y build-essential git sudo
 #RUN yum install sudo
-RUN dnf install make gcc
+RUN yum install gcc-c++ libstdc++
+RUN dnf install make
 RUN dnf module install python39
 RUN dnf module enable nodejs:18
 RUN dnf module install nodejs

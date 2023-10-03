@@ -21,7 +21,7 @@ RUN dnf module install nodejs
 #RUN yum install tzdata libaio1 
 RUN yum install libaio
 # does not find package.json
-RUN npm i --production
+RUN npm i --omit=dev
 
 #RUN apt-get install -y tzdata libaio1 && apt-get clean all
 #Cleaning

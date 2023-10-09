@@ -1,5 +1,6 @@
 FROM node:18-alpine as builder
 WORKDIR /home/node
+COPY . .
 
 RUN sh -c 'npm i --ignore-scripts && npm run build && rm -rf node_modules'
 RUN sh -c 'npm i --ignore-scripts --production'

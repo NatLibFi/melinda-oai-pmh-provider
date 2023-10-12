@@ -20,4 +20,4 @@ COPY --from=builder /home/node/node_modules node_modules
 COPY --from=builder /home/node/package.json .
 COPY --from=builder /home/node/package-lock.json .
 
-RUN apk add libaio
+RUN apk add libaio gcompat

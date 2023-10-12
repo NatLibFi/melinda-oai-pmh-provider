@@ -8,9 +8,16 @@ RUN sh -c 'npm i --ignore-scripts --production'
 FROM node:18-alpine
 WORKDIR /home/node
 
+#Update
+RUN apk update && apk upgrade
+
+# Timezone setting
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Helsinki
+
 COPY --from=builder /home/node/dist/ .
 COPY --from=builder /home/node/node_modules node_modules
 COPY --from=builder /home/node/package.json .
 COPY --from=builder /home/node/package-lock.json .
 
-RUN apt-get update && apt-get install -y tzdata libaio1 && apt-get clean all
+RUN apk add libaio

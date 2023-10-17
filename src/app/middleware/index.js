@@ -40,7 +40,7 @@ export default async ({
     generateGetRecordResponse, generateListRecordsResponse, generateListIdentifiersResponse
   } = responseFactory({oaiIdentifierPrefix, supportEmail});
 
-
+  logger.debug(`middleware`);
   const {repoName, isSupportedFormat, formatRecord} = contextFactory(contextOptions);
   const {getRecord, earliestTimestamp, listIdentifiers, listRecords} = await getMethods();
 
@@ -416,6 +416,7 @@ export default async ({
   };
 
   async function getMethods() {
+    logger.debug(`getMethods - next getting connection`);
     const connection = await pool.getConnection();
     const methods = await databaseFactory({connection, sets, maxResults, alephLibrary, formatRecord});
 

@@ -22,7 +22,6 @@ import createMiddleware from './middleware';
 
 export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, /* istanbul ignore next: Default value not used in tests */ oracledb = oracledbOrig) {
   const logger = createLogger();
-
   const pool = await initOracle();
   const server = await initExpress();
 
@@ -34,7 +33,6 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
     setOracleOptions();
 
     logger.log('debug', 'Establishing connection to database...');
-
     const pool = await oracledb.createPool({
       user: oracleUsername, password: oraclePassword,
       connectString: oracleConnectString
@@ -53,6 +51,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
   }
 
   async function initExpress() {
+    logger.debug(`initExpress`);
     const app = express();
 
     app.enable('trust proxy', Boolean(enableProxy));

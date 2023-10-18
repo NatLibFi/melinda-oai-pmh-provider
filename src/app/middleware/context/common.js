@@ -1,5 +1,5 @@
 /**
-* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
+* Copyright 2019-2020, 2023 University Of Helsinki (The National Library Of Finland)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,6 +15,36 @@
 */
 
 import {MarcRecord} from '@natlibfi/marc-record';
+//import createDebugLogger from 'debug';
+
+const replacePrefixesOptionsOut = [
+  {
+    oldPrefix: 'FIN01',
+    newPrefix: 'FI-MELINDA',
+    prefixReplaceCodes: ['w']
+  },
+  {
+    oldPrefix: 'FIN10',
+    newPrefix: 'FI-ASTERI-S',
+    prefixReplaceCodes: ['0']
+  },
+  {
+    oldPrefix: 'FIN11',
+    newPrefix: 'FI-ASTERI-N',
+    prefixReplaceCodes: ['0']
+  },
+  {
+    oldPrefix: 'FIN12',
+    newPrefix: 'FI-ASTERI-A',
+    prefixReplaceCodes: ['0']
+  },
+  {
+    oldPrefix: 'FIN13',
+    newPrefix: 'FI-ASTERI-W',
+    prefixReplaceCodes: ['0']
+  }
+];
+
 
 export function stripPrivateFields(record) {
   const newRecord = MarcRecord.clone(record);
@@ -23,18 +53,15 @@ export function stripPrivateFields(record) {
 }
 
 export function formatBib(params) {
-  const prefixReplaceCodes = ['w'];
   const nonStandardSubfields = [{tagPattern: /.*/u, codes: ['9']}];
 
   return formatRecord({
     ...params,
-    prefixReplaceCodes,
     nonStandardSubfields
   });
 }
 
 export function formatAut(params) {
-  const prefixReplaceCodes = ['0', '1'];
   const nonStandardSubfields = [
     {tagPattern: /.*/u, codes: ['9']},
     {tagPattern: /^1../u, codes: ['0', '2']},
@@ -44,7 +71,6 @@ export function formatAut(params) {
 
   return formatRecord({
     ...params,
-    prefixReplaceCodes,
     nonStandardSubfields
   });
 }
@@ -52,13 +78,13 @@ export function formatAut(params) {
 export function formatRecord({
   record, id, metadataPrefix,
   oldPrefix, newPrefix,
-  prefixReplaceCodes,
   nonStandardSubfields
 }) {
   const newRecord = MarcRecord.clone(record);
 
   formatAleph();
-  replacePrefixes();
+  // Replace all aleph-internal prefixes with standard ISIL prefixes
+  replaceAllPrefixes(replacePrefixesOptionsOut);
 
   return metadataPrefix === 'melinda_marc' ? newRecord : formatStandard();
 
@@ -67,6 +93,9 @@ export function formatRecord({
     handle035();
 
     function handle003() {
+      newRecord.get(/^003$/u)
+        .forEach(f => newRecord.removeField(f));
+
       newRecord.insertField({
         tag: '003',
         value: newPrefix
@@ -127,15 +156,31 @@ export function formatRecord({
     }
   }
 
+  function replaceAllPrefixes(replacePrefixesOptions) {
+    if (replacePrefixesOptions.length < 1) {
+      //debug(`NOT running replacePrefixes, no options`);
+      return;
+    }
+
+    //debug(`Running replacePrefixes fixer`);
+    //debugData(`replacePrefixesOptions: ${JSON.stringify(replacePrefixesOptions)}`);
+
+    replacePrefixesOptions.forEach(options => {
+      replacePrefixes(options);
+    });
+  }
+
   // Replace prefix in all specified subfields
-  function replacePrefixes() {
+  function replacePrefixes(options) {
+    const {oldPrefix, newPrefix, prefixReplaceCodes} = options;
+    //debug(`Replacing ${oldPrefix} with ${newPrefix} in subfields ${prefixReplaceCodes}`);
+    const pattern = `(${oldPrefix})`;
+    const replacement = `(${newPrefix})`;
     newRecord.getDatafields()
       .forEach(field => {
         field.subfields
           .filter(({code}) => prefixReplaceCodes.includes(code))
           .forEach(subfield => {
-            const pattern = `(${oldPrefix})`;
-            const replacement = `(${newPrefix})`;
             subfield.value = subfield.value.replace(pattern, replacement); // eslint-disable-line functional/immutable-data
           });
       });

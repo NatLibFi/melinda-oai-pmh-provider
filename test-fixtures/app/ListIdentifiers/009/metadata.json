@@ -14,7 +14,9 @@
     }
   ],
   "contextName": "bib",
-  "isPrivileged": false,
+     "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
   "sets": [
     {
       "spec": "fennica", "name": "Fennica",

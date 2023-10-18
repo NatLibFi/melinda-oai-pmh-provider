@@ -1,7 +1,9 @@
 {
     "description": "Should respond with an error because of an invalid metadata format specifier",
     "contextName": "bib",  
-    "isPrivileged": false,
+       "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
     "requests": [
         { "method": "GET", "status": 200,
             "requestParams": {

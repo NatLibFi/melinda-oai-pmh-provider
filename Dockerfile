@@ -1,44 +1,23 @@
-FROM node:12 as builder
-ENTRYPOINT ["./entrypoint.sh"]
-CMD ["/usr/local/bin/node", "index.js"]
+FROM node:18-alpine as builder
+WORKDIR /home/node
+COPY . .
+
+RUN sh -c 'npm i --ignore-scripts && npm run build && rm -rf node_modules'
+RUN sh -c 'npm i --ignore-scripts --production'
+
+FROM node:18-alpine
 WORKDIR /home/node
 
-ARG BUILD_SCRIPT=build
+#Update
+RUN apk update && apk upgrade
 
-ENV LD_LIBRARY_PATH /home/node/instantclient
+# Timezone setting
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Helsinki
 
-COPY --chown=node:node . build
+COPY --from=builder /home/node/dist/ .
+COPY --from=builder /home/node/node_modules node_modules
+COPY --from=builder /home/node/package.json .
+COPY --from=builder /home/node/package-lock.json .
 
-RUN apt-get update && apt-get install -y build-essential git sudo \
-  && cd build \
-  && sudo -u node \
-    OCI_LIB_DIR=/home/node/build/instantclient \
-    OCI_INC_DIR=/home/node/build/instantclient/sdk/include \
-    sh -c "npm ci && npm run ${BUILD_SCRIPT}" \
-  && sudo -u node \
-    OCI_LIB_DIR=/home/node/instantclient \
-    OCI_INC_DIR=/home/node/instantclient/sdk/include \
-    npm ci --production
-
-FROM node:12
-WORKDIR /home/node
-
-ENTRYPOINT ["./entrypoint.sh"]
-CMD ["/usr/local/bin/node", "index.js"]
-WORKDIR /home/node
-
-ENV TNS_ADMIN /home/node
-ENV LD_LIBRARY_PATH /home/node/instantclient
-ENV ORACLE_WALLET_DIRECTORY /home/node/wallet
-ENV ORACLE_CONNECT_TIMEOUT 10
-
-COPY --chown=node:node instantclient /home/node/instantclient
-COPY --chown=node:node *.template entrypoint.sh /home/node/
-
-COPY --from=builder --chown=node:node /home/node/build/node_modules/ /home/node/node_modules
-COPY --from=builder --chown=node:node /home/node/build/dist/ /home/node/
-
-RUN apt-get update && apt-get install -y tzdata libaio1 \
-  && apt-get clean all
-
-USER node
+RUN apk add libaio gcompat

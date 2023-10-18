@@ -1,7 +1,9 @@
 {
     "description": "Should respond with a authority name record",
-    "contextName": "autNames",  
+    "contextName": "autNames",
     "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-ASTERI-N",
     "requests": [
         { "method": "GET", "status": 200,
             "requestParams": {

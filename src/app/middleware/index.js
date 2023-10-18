@@ -24,6 +24,7 @@ import {parseResumptionToken, generateResumptionToken, errors} from '../../commo
 import contextFactory from './context';
 import databaseFactory from './db';
 import {metadataFormats, requestDateStampFormats} from './constants';
+import {sanitizeQueryParams} from './util';
 
 export default async ({
   contextOptions,
@@ -39,7 +40,7 @@ export default async ({
     generateGetRecordResponse, generateListRecordsResponse, generateListIdentifiersResponse
   } = responseFactory({oaiIdentifierPrefix, supportEmail});
 
-
+  logger.debug(`middleware`);
   const {repoName, isSupportedFormat, formatRecord} = contextFactory(contextOptions);
   const {getRecord, earliestTimestamp, listIdentifiers, listRecords} = await getMethods();
 
@@ -296,7 +297,7 @@ export default async ({
             async function handleClose() {
               logger.log('info', 'Request cancelled');
 
-              if (params.connection) { // eslint-disable-line functional/no-conditional-statement
+              if (params.connection) { // eslint-disable-line functional/no-conditional-statements
                 try {
                   await params.connection.break();
                   await params.connection.close({drop: true});
@@ -331,7 +332,7 @@ export default async ({
 
     async function sendResponse({error, result, params}) {
       const requestUrl = instanceUrl;
-      const query = clone(req.query);
+      const query = sanitizeQueryParams(clone(req.query)); // njsscan-ignore: express_xss
 
       if (error) {
         return res.send(await generateErrorResponse({query, requestUrl, error}));
@@ -415,6 +416,7 @@ export default async ({
   };
 
   async function getMethods() {
+    logger.debug(`getMethods - next getting connection`);
     const connection = await pool.getConnection();
     const methods = await databaseFactory({connection, sets, maxResults, alephLibrary, formatRecord});
 

@@ -1,7 +1,9 @@
 {
   "description": "Should respond with internal server error because of malformed database results",
   "contextName": "bib",  
-  "isPrivileged": false,
+     "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
   "requests": [
     { "method": "GET", "status": 500,
       "requestParams": {

@@ -1,7 +1,9 @@
 {
     "description": "Should respond with a record",
     "contextName": "bib",
-    "isPrivileged": false,
+       "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
     "requests": [
         { "method": "GET", "status": 200,
             "requestParams": {

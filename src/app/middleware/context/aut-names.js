@@ -17,7 +17,7 @@
 import {formatAut, stripPrivateFields as stripPrivateFieldsDefault} from './common';
 
 export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
-  repoName: 'Melinda OAI-PMH provider for authority name records',
+  repoName: 'Melinda OAI-PMH provider for authority aux records',
   isSupportedFormat: f => ['marc21', 'melinda_marc'].includes(f),
   formatRecord: (record, id, metadataPrefix) => {
     const newRecord = formatAut({
@@ -31,7 +31,7 @@ export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
 
     function stripPrivateFields(record) {
       const newRecord = stripPrivateFieldsDefault(record);
-      newRecord.get(/^375$|^667$/u).forEach(f => newRecord.removeField(f));
+      newRecord.get(/^375|^667$/u).forEach(f => newRecord.removeField(f));
       return newRecord;
     }
   }

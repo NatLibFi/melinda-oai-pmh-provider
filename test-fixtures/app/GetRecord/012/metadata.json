@@ -1,7 +1,9 @@
 {
     "description": "Should respond with a authority subject record",
     "contextName": "autSubjects",  
-    "isPrivileged": false,
+       "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
     "requests": [
         { "method": "GET", "status": 200,
             "requestParams": {

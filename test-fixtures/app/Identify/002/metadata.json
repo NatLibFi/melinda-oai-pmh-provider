@@ -1,7 +1,9 @@
 {
   "description": "Should respond with information about the repository",
   "contextName": "bib",  
-  "isPrivileged": false,
+     "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
   "requests": [
     { "method": "GET", "status": 200, "requestParams": { "verb": "Identify" } }
   ],

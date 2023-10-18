@@ -2,6 +2,8 @@
     "description": "Should respond with a authority subject record with privileged mode on",
     "contextName": "autSubjects",  
     "isPrivileged": true,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-ASTERI-S",
     "requests": [
         { "method": "GET", "status": 200,
             "requestParams": {
@@ -58,7 +60,7 @@
                             "subfields": [
                                 {
                                     "code": "a",
-                                    "value": "(FI-MELINDA)12345"
+                                    "value": "(FI-ASTERI-S)12345"
                                 }
                             ]
                         },

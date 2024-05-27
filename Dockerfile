@@ -6,7 +6,7 @@ RUN sh -c 'npm i --ignore-scripts && npm run build && rm -rf node_modules'
 RUN sh -c 'npm i --ignore-scripts --production'
 
 FROM node:18-alpine
-# CMD ["/usr/local/bin/node", "index.js"]
+CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node
 USER node
 

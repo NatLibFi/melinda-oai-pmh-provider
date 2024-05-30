@@ -8,7 +8,7 @@ RUN sh -c 'npm i --ignore-scripts --production'
 FROM node:18-alpine
 CMD ["/usr/local/bin/node", "index.js"]
 WORKDIR /home/node
-USER node
+#USER node
 
 #Update
 RUN apk update && apk upgrade

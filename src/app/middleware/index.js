@@ -46,7 +46,7 @@ export default async ({
 
   return async (req, res, next) => {
     const {query: {verb}} = req;
-
+    logger.debug(`Handling request: ${JSON.stringify(req)}`);
     // Will be fixed in Node.js 13 (https://github.com/nodejs/node/issues/31378)
     req.socket.setTimeout(socketTimeout);
 
@@ -263,12 +263,14 @@ export default async ({
         }
 
         function wrap() {
+          logger.debug(`wrap`);
           return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
             req.on('close', handleClose);
             const method = getMethod();
 
             try {
               const result = await method(params);
+              logger.debug(`We got result.`);
               await closeConnection();
               return resolve(result);
             } catch (err) {
@@ -288,6 +290,7 @@ export default async ({
             }
 
             async function closeConnection() {
+              logger.debug(`Closing connection: closeConnection`);
               if (req.aborted === false && params.connection) {
                 await params.connection.break();
                 return params.connection.close({drop: true});
@@ -295,7 +298,7 @@ export default async ({
             }
 
             async function handleClose() {
-              logger.log('info', 'Request cancelled');
+              logger.log('info', 'Request cancelled (handleClose)');
 
               if (params.connection) { // eslint-disable-line functional/no-conditional-statements
                 try {
@@ -306,7 +309,7 @@ export default async ({
                   if (isExpectedOracleError(err) === false) {
                     return reject(err);
                   }
-
+                  logger.debug(`Connection already closed`);
                   return resolve();
                 }
               }
@@ -314,6 +317,10 @@ export default async ({
               return resolve();
 
               function isExpectedOracleError(err) {
+                // Does new oracle dep use different error messages?
+                if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
+                  return err.message;
+                }
                 return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
               }
             }

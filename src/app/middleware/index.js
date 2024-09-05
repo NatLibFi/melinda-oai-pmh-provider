@@ -270,7 +270,10 @@ export default async ({
 
             try {
               const result = await method(params);
-              logger.debug(`We got result.`);
+              if (!result || result.length === 0) {
+                throw error('Empty result!');
+              }
+              logger.debug(`We got result ${result.length}`);
               await closeConnection();
               return resolve(result);
             } catch (err) {

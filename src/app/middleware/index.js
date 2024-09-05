@@ -46,7 +46,7 @@ export default async ({
 
   return async (req, res, next) => {
     const {query: {verb}} = req;
-    logger.debug(`Handling request: ${JSON.stringify(req)}`);
+    logger.debug(`Handling request`);
     // Will be fixed in Node.js 13 (https://github.com/nodejs/node/issues/31378)
     req.socket.setTimeout(socketTimeout);
 

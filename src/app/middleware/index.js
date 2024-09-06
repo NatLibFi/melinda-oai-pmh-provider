@@ -46,7 +46,7 @@ export default async ({
 
   return async (req, res, next) => {
     const {query: {verb}} = req;
-
+    logger.debug(`Handling request from ${req.ip} : ${JSON.stringify(req.query)}`);
     // Will be fixed in Node.js 13 (https://github.com/nodejs/node/issues/31378)
     req.socket.setTimeout(socketTimeout);
 
@@ -263,12 +263,18 @@ export default async ({
         }
 
         function wrap() {
+          logger.debug(`wrap`);
           return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
             req.on('close', handleClose);
             const method = getMethod();
 
             try {
               const result = await method(params);
+              logger.debug(`Result: ${JSON.stringify(result)}`);
+              if (!result || result.length === 0) {
+                throw error('Empty result!');
+              }
+              logger.debug(`We got result ${result.length}`);
               await closeConnection();
               return resolve(result);
             } catch (err) {
@@ -288,6 +294,7 @@ export default async ({
             }
 
             async function closeConnection() {
+              logger.debug(`Closing connection: closeConnection`);
               if (req.aborted === false && params.connection) {
                 await params.connection.break();
                 return params.connection.close({drop: true});
@@ -295,18 +302,20 @@ export default async ({
             }
 
             async function handleClose() {
-              logger.log('info', 'Request cancelled');
+              logger.log('info', 'Request cancelled (handleClose)');
 
               if (params.connection) { // eslint-disable-line functional/no-conditional-statements
                 try {
+                  logger.debug(`Closing connection: handleClose`);
                   await params.connection.break();
                   await params.connection.close({drop: true});
                   return resolve();
                 } catch (err) {
+                  logger.debug(err);
                   if (isExpectedOracleError(err) === false) {
                     return reject(err);
                   }
-
+                  logger.debug(`Connection already closed`);
                   return resolve();
                 }
               }
@@ -314,6 +323,11 @@ export default async ({
               return resolve();
 
               function isExpectedOracleError(err) {
+                // Does new oracle dep use different error messages?
+                logger.debug(`We got error: ${err.message}`);
+                if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
+                  return true;
+                }
                 return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
               }
             }

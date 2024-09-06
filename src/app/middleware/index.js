@@ -294,10 +294,19 @@ export default async ({
             }
 
             async function closeConnection() {
-              logger.debug(`Closing connection: closeConnection`);
-              if (req.aborted === false && params.connection) {
-                await params.connection.break();
-                return params.connection.close({drop: true});
+              try {
+                logger.debug(`Closing connection: closeConnection`);
+                if (req.aborted === false && params.connection) {
+                  await params.connection.break();
+                  return params.connection.close({drop: true});
+                }
+              } catch (err) {
+                //logger.debug(err);
+                if (isExpectedOracleError(err) === false) {
+                  return reject(err);
+                }
+                logger.debug(`Connection already closed`);
+                return resolve();
               }
             }
 
@@ -321,16 +330,17 @@ export default async ({
               }
 
               return resolve();
-
-              function isExpectedOracleError(err) {
-                // Does new oracle dep use different error messages?
-                logger.debug(`We got error: ${err.message}`);
-                if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
-                  return true;
-                }
-                return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
-              }
             }
+
+            function isExpectedOracleError(err) {
+              // Does new oracle dep use different error messages?
+              logger.debug(`We got error: ${err.message}`);
+              if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
+                return true;
+              }
+              return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
+            }
+
           });
         }
 

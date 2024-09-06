@@ -295,7 +295,7 @@ export default async ({
 
             async function closeConnection() {
               try {
-                logger.debug(`Closing connection: closeConnection`);
+                logger.verbose(`Closing connection: closeConnection`);
                 if (req.aborted === false && params.connection) {
                   await params.connection.break();
                   return params.connection.close({drop: true});
@@ -303,10 +303,10 @@ export default async ({
               } catch (err) {
                 //logger.debug(err);
                 if (isExpectedOracleError(err) === false) {
-                  return reject(err);
+                  throw err;
                 }
-                logger.debug(`Connection already closed`);
-                return resolve();
+                logger.verbose(`Connection already closed`);
+                return;
               }
             }
 

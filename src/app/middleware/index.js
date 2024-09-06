@@ -271,10 +271,10 @@ export default async ({
             try {
               const result = await method(params);
               logger.debug(`Result: ${JSON.stringify(result)}`);
-              //if (!result || result.length === 0) {
-              //  throw error('Empty result!');
-              //}
-              //logger.debug(`We got result ${result.length}`);
+              if (!result || result.length === 0) {
+                throw error('Empty result!');
+              }
+              logger.debug(`We got result ${result.length}`);
               await closeConnection();
               return resolve(result);
             } catch (err) {
@@ -311,7 +311,7 @@ export default async ({
                   await params.connection.close({drop: true});
                   return resolve();
                 } catch (err) {
-                  //logger.debug(err);
+                  logger.debug(err);
                   if (isExpectedOracleError(err) === false) {
                     return reject(err);
                   }

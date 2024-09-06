@@ -46,7 +46,7 @@ export default async ({
 
   return async (req, res, next) => {
     const {query: {verb}} = req;
-    logger.debug(`Handling request: ${JSON.stringify(req.query)}`);
+    logger.debug(`Handling request from ${req.ip} : ${JSON.stringify(req.query)}`);
     // Will be fixed in Node.js 13 (https://github.com/nodejs/node/issues/31378)
     req.socket.setTimeout(socketTimeout);
 
@@ -270,6 +270,7 @@ export default async ({
 
             try {
               const result = await method(params);
+              logger.debug(`Result: ${JSON.stringify(result)}`);
               if (!result || result.length === 0) {
                 throw error('Empty result!');
               }
@@ -305,6 +306,7 @@ export default async ({
 
               if (params.connection) { // eslint-disable-line functional/no-conditional-statements
                 try {
+                  logger.debug(`Closing connection: handleClose`);
                   await params.connection.break();
                   await params.connection.close({drop: true});
                   return resolve();
@@ -322,8 +324,9 @@ export default async ({
 
               function isExpectedOracleError(err) {
                 // Does new oracle dep use different error messages?
+                logger.debug(`We got error: ${err.message}`);
                 if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
-                  return err.message;
+                  return true;
                 }
                 return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
               }

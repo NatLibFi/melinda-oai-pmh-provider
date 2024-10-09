@@ -9,3 +9,7 @@ sqlnet.ora
 wallet
 instantclient
 sets*
+volume/oracle/sqlnet.ora.appt
+volume/oracle/tnsnames.ora.appt
+volume/oracle/tnsnames.ora.tammi
+volume/oracle/tnsnames.ora.kuusi

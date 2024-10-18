@@ -15,7 +15,8 @@
 */
 
 import express from 'express';
-import oracledbOrig from '@natlibfi/oracledb-aleph';
+// import oracledbAleph from '@natlibfi/oracledb-aleph';
+import oracledbOrig from 'oracledb';
 import HttpStatus from 'http-status';
 import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commons';
 import createMiddleware from './middleware';

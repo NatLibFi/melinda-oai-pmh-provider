@@ -66,6 +66,7 @@ export function parseRecord(data, validate = false) {
 }
 
 export function formatRecord(record) {
+  // should we validate or not here?
   const seq = AlephSequential.to(record);
   const buffers = seq.split('\n').slice(0, -1).map(str => {
     const data = str.slice(10);

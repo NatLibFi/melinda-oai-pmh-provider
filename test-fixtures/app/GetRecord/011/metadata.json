@@ -225,7 +225,7 @@
                                 },
                                 {
                                     "code": "a",
-                                    "value": ""
+                                    "value": "foobar"
                                 },
                                 {
                                     "code": "0",
@@ -350,7 +350,7 @@
                                 },
                                 {
                                     "code": "b",
-                                    "value": ""
+                                    "value": "40"
                                 },
                                 {
                                     "code": "c",

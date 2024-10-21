@@ -24,6 +24,7 @@ import createMiddleware from './middleware';
 export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, useOrigOracledb = true) {
   const oracledb = useOrigOracledb ? oracledbOrig : oracledbAleph;
   const logger = createLogger();
+  logger.debug(useOrigOracledb ? `Using original oracledb` : `Using forked oracledb-aleph`);
   const pool = await initOracle();
   const server = await initExpress();
 
@@ -34,7 +35,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
   async function initOracle() {
     setOracleOptions();
 
-    logger.log('debug', 'Establishing connection to database...');
+    logger.log('debug', `Establishing connection to database... (${oracleConnectString})`);
     const pool = await oracledb.createPool({
       user: oracleUsername, password: oraclePassword,
       connectString: oracleConnectString

@@ -24,6 +24,7 @@ import queryFactory from './query';
 
 import createDebugLogger from 'debug';
 const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/db:index');
+const debugDev = debug.extend('dev');
 
 export default async function ({maxResults, sets, alephLibrary, connection, formatRecord}) {
   const logger = createLogger();
@@ -218,7 +219,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   function recordRowCallback({row, metadataPrefix, includeRecords = true}) {
-    debug(`recordLowCallback`);
+    debugDev(`recordRowCallback`);
     // We're parsing every record twice - not a good idea!
     const isDeleted = checkIfDeleted();
     const record = handleParseRecord();
@@ -235,13 +236,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
     // Need to parse record without validation (The record being malformed doesn't matter if it's deleted)
     function checkIfDeleted() {
-      debug(`recordLowCallback:checkIfDeleted`);
+      debugDev(`recordRowCallback:checkIfDeleted`);
       const record = handleParseRecord(false);
       return isDeletedRecord(record);
     }
 
     function handleParseRecord(validate) {
-      debug(`recordLowCallback:handleParseRecord`);
+      debugDev(`recordRowCallback:handleParseRecord`);
       try {
         return parseRecord(row.RECORD, validate);
       } catch (err) {

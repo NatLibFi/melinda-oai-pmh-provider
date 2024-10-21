@@ -16,8 +16,12 @@
 
 
 import {AlephSequential} from '@natlibfi/marc-record-serializers';
+import createDebugLogger from 'debug';
+
+const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provuder/record');
 
 export function parseRecord(data, validate = false) {
+  debug(`parseRecord`);
   const buffer = Buffer.from(data);
   return iterate();
 
@@ -39,6 +43,8 @@ export function parseRecord(data, validate = false) {
     }
 
     function transformRecord(str) {
+      debug(`transformRecord`);
+      // Create record from AlephSequential string
       const record = AlephSequential.from(str, getValidationOptions());
 
       format();
@@ -46,6 +52,7 @@ export function parseRecord(data, validate = false) {
       return record;
 
       function format() {
+        debug(`format`);
         record.leader = formatWhitespace(record.leader); // eslint-disable-line functional/immutable-data
         record.fields.filter(({value}) => value).forEach(({value}) => formatWhitespace(value));
 
@@ -66,7 +73,8 @@ export function parseRecord(data, validate = false) {
 }
 
 export function formatRecord(record) {
-  // should we validate or not here?
+  debug(`formatRecord`);
+  // Create record in Aleph-db-text form from record object, used for tests?
   const seq = AlephSequential.to(record);
   const buffers = seq.split('\n').slice(0, -1).map(str => {
     const data = str.slice(10);

@@ -207,7 +207,7 @@ export default async ({
       async function call() {
         const params = await getParams();
         const result = await wrap();
-
+        logger.debug(`Sending result`);
         return sendResponse({result, params});
 
         function getParams() {
@@ -270,7 +270,7 @@ export default async ({
 
             try {
               const result = await method(params);
-              logger.debug(`Result: ${JSON.stringify(result)}`);
+              logger.silly(`Result: ${JSON.stringify(result)}`);
               //if (!result || result.length === 0) {
               //  throw error('Empty result!');
               //}
@@ -430,7 +430,7 @@ export default async ({
   };
 
   async function getMethods() {
-    logger.debug(`getMethods - next getting connection`);
+    logger.debug(`getMethods`);
     const connection = await pool.getConnection();
     const methods = await databaseFactory({connection, sets, maxResults, alephLibrary, formatRecord});
 

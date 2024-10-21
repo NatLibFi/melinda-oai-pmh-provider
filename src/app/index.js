@@ -15,13 +15,14 @@
 */
 
 import express from 'express';
-// import oracledbAleph from '@natlibfi/oracledb-aleph';
+import oracledbAleph from '@natlibfi/oracledb-aleph';
 import oracledbOrig from 'oracledb';
 import HttpStatus from 'http-status';
 import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commons';
 import createMiddleware from './middleware';
 
-export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, /* istanbul ignore next: Default value not used in tests */ oracledb = oracledbOrig) {
+export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, useOrigOracledb = true) {
+  const oracledb = useOrigOracledb ? oracledbOrig : oracledbAleph;
   const logger = createLogger();
   const pool = await initOracle();
   const server = await initExpress();

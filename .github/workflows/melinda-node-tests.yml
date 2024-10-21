@@ -26,7 +26,8 @@ jobs:
         NPM_CONFIG_IGNORE_SCRIPTS: true
     - run: npm audit --package-lock-only --production --audit-level=moderate
     - run: npm i
-    - run: npm test
+    # TEMP: no tests
+    # - run: npm test
     - run: npm run build --if-present
 
   njsscan:

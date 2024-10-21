@@ -22,6 +22,9 @@ import {DB_TIME_FORMAT} from './common';
 import {parseRecord} from '../../record';
 import queryFactory from './query';
 
+import createDebugLogger from 'debug';
+const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/db:index');
+
 export default async function ({maxResults, sets, alephLibrary, connection, formatRecord}) {
   const logger = createLogger();
   const {getEarliestTimestamp, getHeadingsIndex, getRecords, getSingleRecord} = queryFactory({
@@ -103,6 +106,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   async function getRecord({connection, identifier, metadataPrefix}) {
+    debug(`getRecord`);
     const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
     const row = await resultSet.getRow();
@@ -129,6 +133,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     connection, from, until, set, metadataPrefix, cursor, lastCount,
     includeRecords = true
   }) {
+    debug(`queryRecords`);
     const params = getParams();
     return executeQuery(params);
 
@@ -148,33 +153,40 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     }
 
     async function executeQuery({connection, genQuery, rowCallback, cursor, lastCount}) {
+      debug(`executeQuery`);
       const resultSet = await doQuery(cursor);
+      debug(`We got a resultSet`);
       const {records, newCursor} = await pump();
 
       await resultSet.close();
 
       if (records.length < maxResults) {
+        debug(`No results left after this, not returning a cursor`);
         return {records, lastCount};
       }
 
+      debug(`There are results left, returning a cursor`);
       return {
         records, lastCount,
         cursor: newCursor
       };
 
       async function doQuery(cursor) {
+        debug(`doQuery`);
         const {query, args} = getQuery(genQuery(cursor));
         const {resultSet} = await connection.execute(query, args, {resultSet: true});
         return resultSet;
       }
 
       async function pump(records = []) {
+        debug(`pump`);
         const row = await resultSet.getRow();
 
         if (row) {
           const result = rowCallback(row);
 
           if (records.length + 1 === maxResults) {
+            debug(`maxResults ${maxResults} reached`);
             return genResults(records.concat(result));
           }
 
@@ -188,10 +200,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         return {records};
 
         function genResults(records) {
+          debug(`genResults`);
+          debug(`We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
           const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
 
           const lastId = sortedRecords.slice(-1)[0].id;
+          debug(`We have ${lastId} as last ID`);
 
           return {
             records: sortedRecords,
@@ -203,6 +218,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   function recordRowCallback({row, metadataPrefix, includeRecords = true}) {
+    debug(`recordLowCallback`);
+    // We're parsing every record twice - not a good idea!
     const isDeleted = checkIfDeleted();
     const record = handleParseRecord();
 
@@ -218,11 +235,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
     // Need to parse record without validation (The record being malformed doesn't matter if it's deleted)
     function checkIfDeleted() {
+      debug(`recordLowCallback:checkIfDeleted`);
       const record = handleParseRecord(false);
       return isDeletedRecord(record);
     }
 
     function handleParseRecord(validate) {
+      debug(`recordLowCallback:handleParseRecord`);
       try {
         return parseRecord(row.RECORD, validate);
       } catch (err) {

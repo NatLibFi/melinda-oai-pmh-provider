@@ -18,7 +18,7 @@
 import {AlephSequential} from '@natlibfi/marc-record-serializers';
 import createDebugLogger from 'debug';
 
-const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provuder/record');
+const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/record');
 
 export function parseRecord(data, validate = false) {
   debug(`parseRecord`);

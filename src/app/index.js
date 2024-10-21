@@ -35,13 +35,13 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
   async function initOracle() {
     setOracleOptions();
 
-    logger.log('debug', `Establishing connection to database... (${oracleConnectString})`);
+    logger.debug(`Establishing connection to database (pool)... (${oracleConnectString})`);
     const pool = await oracledb.createPool({
       user: oracleUsername, password: oraclePassword,
       connectString: oracleConnectString
     });
 
-    logger.log('debug', 'Connected to database!');
+    logger.debug('Connected to database!');
 
     return pool;
 

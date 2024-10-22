@@ -36,6 +36,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   const earliestTimestamp = await retrieveEarliestTimestamp();
 
   // Disable all validation because invalid records shouldn't crash the app
+  // DEVELOP: newer marc-record-js version have more validationOptions
   MarcRecord.setValidationOptions({
     fields: false,
     subfields: false,
@@ -224,13 +225,15 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     const isDeleted = isDeletedRecord(record);
     const validationErrors = record.getValidationErrors();
 
-    // We have a existing record with validationErrors
-    if (!isDeleted && validationErrors && validationErrors.length > 0) {
-      const errorMessage = `Parsing record ${row.ID} failed. ${validationErrors}`;
+    // We want to include records in response and have an existing record with validationErrors
+    // DEVELOP
+    if (includeRecords && !isDeleted && validationErrors && validationErrors.length > 0) {
+      const errorMessage = `Record ${row.ID} is invalid. ${validationErrors}`;
       logger.log('error', errorMessage);
       throw new Error(errorMessage);
     }
 
+    // DEVELOP: we return id for records with validationErrors - what should happen?
     if (includeRecords && isDeleted === false) {
       return {
         id: row.ID,

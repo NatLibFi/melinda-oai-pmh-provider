@@ -180,7 +180,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       }
 
       async function pump(records = []) {
-        debug(`pump`);
+        debugDev(`pump`);
         const row = await resultSet.getRow();
 
         if (row) {
@@ -220,9 +220,16 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
   function recordRowCallback({row, metadataPrefix, includeRecords = true}) {
     debugDev(`recordRowCallback`);
-    // We're parsing every record twice - not a good idea!
-    const isDeleted = checkIfDeleted();
-    const record = handleParseRecord();
+    const record = handleParseRecord(true, true);
+    const isDeleted = isDeletedRecord(record);
+    const validationErrors = record.getValidationErrors();
+
+    // We have a existing record with validationErrors
+    if (!isDeleted && validationErrors && validationErrors.length > 0) {
+      const errorMessage = `Parsing record ${row.ID} failed. ${validationErrors}`;
+      logger.log('error', errorMessage);
+      throw new Error(errorMessage);
+    }
 
     if (includeRecords && isDeleted === false) {
       return {
@@ -235,16 +242,16 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), isDeleted};
 
     // Need to parse record without validation (The record being malformed doesn't matter if it's deleted)
-    function checkIfDeleted() {
-      debugDev(`recordRowCallback:checkIfDeleted`);
-      const record = handleParseRecord(false);
-      return isDeletedRecord(record);
-    }
+    // function checkIfDeleted() {
+    //   debugDev(`recordRowCallback:checkIfDeleted`);
+    //   const record = handleParseRecord(false, false);
+    //   return isDeletedRecord(record);
+    // }
 
-    function handleParseRecord(validate) {
+    function handleParseRecord(validate, noFailValidation) {
       debugDev(`recordRowCallback:handleParseRecord`);
       try {
-        return parseRecord(row.RECORD, validate);
+        return parseRecord(row.RECORD, validate, noFailValidation);
       } catch (err) {
         logger.log('error', `Parsing record ${row.ID} failed.`);
         throw err;

@@ -22,7 +22,7 @@ const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/record');
 const debugDev = debug.extend('dev');
 
 
-export function parseRecord(data, validate = false) {
+export function parseRecord(data, validate = false, noFailValidation = false) {
   debugDev(`parseRecord`);
   const buffer = Buffer.from(data);
   return iterate();
@@ -54,6 +54,7 @@ export function parseRecord(data, validate = false) {
 
       return record;
 
+      // This could be done in marc-record-js / marc-record-serializers
       function format() {
         debugDev(`format`);
         record.leader = formatWhitespace(record.leader); // eslint-disable-line functional/immutable-data
@@ -66,11 +67,14 @@ export function parseRecord(data, validate = false) {
       }
 
       function getValidationOptions() {
-        if (validate) {
-          return {subfieldValues: false};
-        }
+        // Note that marc-record-js has currently more validationOptions than these
+        // noFailValidation: return record and possible validationErrors
 
-        return {fields: false, subfields: false, subfieldValues: false};
+        if (validate) {
+          return {subfieldValues: false, noFailValidation};
+        }
+        // Note that marc-record-js has more validationOptions than these
+        return {fields: false, subfields: false, subfieldValues: false, noFailValidation};
       }
     }
   }

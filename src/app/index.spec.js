@@ -36,7 +36,7 @@ function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbRes
     httpPort: 1337,
     oracleUsername: 'foo',
     oraclePassword: 'bar',
-    oracleConnectString: 'foobar',
+    oracleConnectString: 'foobar/foo',
     middlewareOptions: {
       sets,
       // Tests will break in the 4th millennium because resumption tokens will expire

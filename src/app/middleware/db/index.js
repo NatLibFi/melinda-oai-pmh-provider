@@ -223,9 +223,11 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     debugDev(`recordRowCallback`);
     const record = handleParseRecord(true, true);
     const isDeleted = isDeletedRecord(record);
-    debugDev(JSON.stringify(record));
+    //debugDev(record);
+    //debugDev(JSON.stringify(record));
 
     const validationErrors = record.getValidationErrors();
+    debugDev(JSON.stringify(validationErrors));
 
     // We want to include records in response and have an existing record with validationErrors
     // DEVELOP

@@ -1,5 +1,6 @@
 {
     "description": "Should respond with a record",
+    "skip": false,
     "contextName": "bib",
        "isPrivileged": false,
     "alephLibrary": "foo00",

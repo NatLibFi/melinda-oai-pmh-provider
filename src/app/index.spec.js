@@ -18,7 +18,7 @@ import {Parser, Builder} from 'xml2js';
 import {MarcRecord} from '@natlibfi/marc-record';
 import createOracleMock from '@natlibfi/oracledb-mock';
 import generateTests from '@natlibfi/fixugen-http-server';
-import {formatRecord} from './record';
+import {dbDataStringFromRecord} from './record';
 import startApp from '.';
 
 const oracleMock = createOracleMock();
@@ -67,7 +67,9 @@ function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbRes
     function format(rows) {
       return rows.map(row => {
         if ('RECORD' in row) {
-          return {...row, RECORD: formatRecord(new MarcRecord(row.RECORD))};
+          // eslint-disable-next-line no-console
+          //console.log(`RECORD`);
+          return {...row, RECORD: dbDataStringFromRecord(new MarcRecord(row.RECORD, {noFailValidation: true}))};
         }
 
         return row;

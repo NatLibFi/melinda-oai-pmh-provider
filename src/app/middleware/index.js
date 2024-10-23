@@ -278,8 +278,7 @@ export default async ({
               await closeConnection();
               return resolve(result);
             } catch (err) {
-              // eslint-disable-next-line no-console
-              console.log(`ERROR!`);
+              logger.error(`ERROR! ${err.message}`);
               await closeConnection();
               return reject(err);
             }

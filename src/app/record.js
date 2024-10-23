@@ -21,9 +21,8 @@ import createDebugLogger from 'debug';
 const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/record');
 const debugDev = debug.extend('dev');
 
-
 export function parseRecord(data, validate = false, noFailValidation = false) {
-  debugDev(`parseRecord`);
+  debugDev(`parseRecord: create AlephSequential from dbResult data`);
   const buffer = Buffer.from(data);
   return iterate();
 
@@ -46,7 +45,7 @@ export function parseRecord(data, validate = false, noFailValidation = false) {
     }
 
     function transformRecord(str) {
-      debugDev(`transformRecord`);
+      debugDev(`transformRecord: create marcRecord object from AlephSequential`);
       // Create record from AlephSequential string
       const record = AlephSequential.from(str, getValidationOptions());
 
@@ -56,7 +55,7 @@ export function parseRecord(data, validate = false, noFailValidation = false) {
 
       // This could be done in marc-record-js / marc-record-serializers
       function format() {
-        debugDev(`format`);
+        debugDev(`format whitespace in fixed fields`);
         record.leader = formatWhitespace(record.leader); // eslint-disable-line functional/immutable-data
         // we handle only fields with values = fixed length fields
         record.fields.filter(({value}) => value).forEach(({value}) => formatWhitespace(value));
@@ -69,21 +68,25 @@ export function parseRecord(data, validate = false, noFailValidation = false) {
       function getValidationOptions() {
         // Note that marc-record-js has currently more validationOptions than these
         // noFailValidation: return record and possible validationErrors
-
         if (validate) {
+          // ignore missing subfieldValues anyways
           return {subfieldValues: false, noFailValidation};
         }
-        // Note that marc-record-js has more validationOptions than these
+        // DEVELOP: Note that marc-record-js has more validationOptions than these
         return {fields: false, subfields: false, subfieldValues: false, noFailValidation};
       }
     }
   }
 }
 
-export function formatRecord(record) {
-  debugDev(`formatRecord`);
-  // Create record in Aleph-db-text form from record object, used for tests?
-  const seq = AlephSequential.to(record);
+// Create record in Aleph-db-text form from record object, used for tests
+export function dbDataStringFromRecord(record) {
+  debugDev(`dbDataStringFromRecord: create record data `);
+  const seq = AlephSequential.to(record, {subfieldValues: false});
+  debugDev(`Created AlephSequential from record`);
+  debugDev(seq);
+  debugDev(`Creating dbResult like string from AlephSequential`);
+
   const buffers = seq.split('\n').slice(0, -1).map(str => {
     const data = str.slice(10);
     const start = data.slice(0, 5);

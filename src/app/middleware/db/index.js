@@ -37,6 +37,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
   // Disable all validation because invalid records shouldn't crash the app
   // DEVELOP: newer marc-record-js version have more validationOptions
+  // validationOptions are also handled later in code
   MarcRecord.setValidationOptions({
     fields: false,
     subfields: false,
@@ -111,10 +112,11 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     debug(`getRecord`);
     const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
+    debug(`resultSet: ${JSON.stringify(resultSet)}`);
     const row = await resultSet.getRow();
 
     await resultSet.close();
-
+    debug(`row: ${row}`);
     if (row) {
       return recordRowCallback({row, metadataPrefix});
     }
@@ -221,16 +223,19 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
   function recordRowCallback({row, metadataPrefix, includeRecords = true}) {
     debugDev(`recordRowCallback`);
+    debugDev(row);
+
+    // Parse record, validate, but do not throw (yet) for validationErrors (validate:1, noFailValidation:1)
+    // see validationOptions used in record.js: parseRecord
     const record = handleParseRecord(true, true);
     const isDeleted = isDeletedRecord(record);
-    //debugDev(record);
-    //debugDev(JSON.stringify(record));
 
     const validationErrors = record.getValidationErrors();
-    debugDev(JSON.stringify(validationErrors));
+    debugDev(`validationErrors: ${JSON.stringify(validationErrors)}`);
 
     // We want to include records in response and have an existing record with validationErrors
-    // DEVELOP
+    // DEVELOP: we should handle erroring records somehow else than with 500!
+    // eslint-disable-next-line functional/no-conditional-statements
     if (includeRecords && !isDeleted && validationErrors && validationErrors.length > 0) {
       const errorMessage = `Record ${row.ID} is invalid. ${validationErrors}`;
       logger.log('error', errorMessage);
@@ -248,18 +253,15 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
     return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), isDeleted};
 
-    // Need to parse record without validation (The record being malformed doesn't matter if it's deleted)
-    // function checkIfDeleted() {
-    //   debugDev(`recordRowCallback:checkIfDeleted`);
-    //   const record = handleParseRecord(false, false);
-    //   return isDeletedRecord(record);
-    // }
-
     function handleParseRecord(validate, noFailValidation) {
       debugDev(`recordRowCallback:handleParseRecord`);
       try {
+        debugDev(row);
         return parseRecord(row.RECORD, validate, noFailValidation);
       } catch (err) {
+        // Error here if dbResult row is not convertable to AlephSequential by record.js
+        // or AlephSequential is not convertable to marc-record-object
+        // or validate:1 && noFailValidation:0 and marc-record-object fails it's validation
         logger.log('error', `Parsing record ${row.ID} failed.`);
         throw err;
       }

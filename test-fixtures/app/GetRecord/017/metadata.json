@@ -1,5 +1,8 @@
 {
-  "description": "Should respond with internal server?? error because of invalid record in database results",
+  "description": "Should respond with internal server error (500) because of invalid record in database results (validationErrors from marc-record)",
+  "comment": "It's currently impossible to create this test, we're validating just fields (AlephSequential has always FMT-field) and subfields (we cannot parse dbData string without subfields to AlephSequential - see 018)",
+  "skip": true,
+  "onlyDev": false,
   "contextName": "bib",
   "isPrivileged": false,
   "alephLibrary": "foo00",
@@ -18,29 +21,21 @@
   "dbResults": [
     [
       {
+        "TIME": "20000102050000"
+      }
+    ],
+    [
+      {
         "TIME": "20000102050000",
         "ID": "12345",
         "RECORD": {
-          "leader": "03106cam a2200721 i 4500",
+          "leader": "03106cam a2200721 i 4500 FOOBAR",
           "fields": [
             {
               "tag": "001",
               "value": "12345"
             },
-            {
-              "tag": "245",
-              "subfields": [
-                {
-                  "code": "a",
-                  "value": "Foo Bar"
-                }
-              ]
-            },
-            {
-              "tag": "699",
-              "ind1": "1",
-              "ind2": " "
-            }
+            {"tag": "245", "subfields": []}
           ]
         }
       }

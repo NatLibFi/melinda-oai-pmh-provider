@@ -101,7 +101,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   async function retrieveEarliestTimestamp() {
     const {query, args} = getQuery(getEarliestTimestamp());
 
-    const {resultSet} = await connection.execute(query, args, {resultSet: true}); 
+    const {resultSet} = await connection.execute(query, args, {resultSet: true});
     const row = await resultSet.getRow();
 
     await resultSet.close();
@@ -109,7 +109,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   async function getRecord({connection, identifier, metadataPrefix}) {
-    debuDev(`getRecord`);
+    debugDev(`getRecord`);
     const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
     debugDev(`resultSet: ${JSON.stringify(resultSet)}`);
@@ -183,7 +183,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       }
 
       async function pump(records = []) {
-        debugDevDev(`pump`);
+        debugDev(`pump`);
         const row = await resultSet.getRow();
 
         if (row) {

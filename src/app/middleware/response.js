@@ -52,6 +52,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
   }
 
   function generateIdentifyResponse({requestUrl, query, repoName, earliestTimestamp}) {
+    logger.debug(`generateIdentifyResponse`);
     return generateResponse({requestUrl, query, payload: {
       Identify: {
         repositoryName: [repoName],

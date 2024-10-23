@@ -1,0 +1,38 @@
+{
+  "description": "Should respond with internal server error because of invalid record in database results (cannot create AlephSequential) - line without subfields/value",
+  "comment": "We should handle this error better than with 500!",
+  "skip": false,
+  "onlyDev": false,
+  "contextName": "bib",
+  "isPrivileged": false,
+  "alephLibrary": "foo00",
+  "melindaPrefix": "FI-MELINDA",
+  "requests": [
+    {
+      "method": "GET",
+      "status": 500,
+      "requestParams": {
+        "verb": "GetRecord",
+        "metadataPrefix": "marc21",
+        "identifier": "oai:foo.bar/12345"
+      }
+    }
+  ],
+  "dbResults": [
+    [
+      {
+        "TIME": "20000102050000"
+      }
+    ],
+    [
+      {
+        "TIME": "20000102050000",
+        "ID": "12345",
+        "RECORD": {
+          "leader": "03106cam a2200721 i 4500",
+          "fields": [{"tag": "245", "subfields": []}]
+      }
+    }
+    ]
+  ]
+}

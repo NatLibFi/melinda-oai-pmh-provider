@@ -22,6 +22,10 @@ import {DB_TIME_FORMAT} from './common';
 import {parseRecord} from '../../record';
 import queryFactory from './query';
 
+import createDebugLogger from 'debug';
+const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/db:index');
+const debugDev = debug.extend('dev');
+
 export default async function ({maxResults, sets, alephLibrary, connection, formatRecord}) {
   const logger = createLogger();
   const {getEarliestTimestamp, getHeadingsIndex, getRecords, getSingleRecord} = queryFactory({
@@ -32,6 +36,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   const earliestTimestamp = await retrieveEarliestTimestamp();
 
   // Disable all validation because invalid records shouldn't crash the app
+  // DEVELOP: newer marc-record-js version have more validationOptions
+  // validationOptions are also handled later in code
   MarcRecord.setValidationOptions({
     fields: false,
     subfields: false,
@@ -103,12 +109,14 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   async function getRecord({connection, identifier, metadataPrefix}) {
+    debugDev(`getRecord`);
     const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
+    debugDev(`resultSet: ${JSON.stringify(resultSet)}`);
     const row = await resultSet.getRow();
 
     await resultSet.close();
-
+    debugDev(`row: ${row}`);
     if (row) {
       return recordRowCallback({row, metadataPrefix});
     }
@@ -129,6 +137,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     connection, from, until, set, metadataPrefix, cursor, lastCount,
     includeRecords = true
   }) {
+    debugDev(`queryRecords`);
     const params = getParams();
     return executeQuery(params);
 
@@ -148,33 +157,40 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     }
 
     async function executeQuery({connection, genQuery, rowCallback, cursor, lastCount}) {
+      debugDev(`executeQuery`);
       const resultSet = await doQuery(cursor);
+      debugDev(`We got a resultSet`);
       const {records, newCursor} = await pump();
 
       await resultSet.close();
 
       if (records.length < maxResults) {
+        debugDev(`No results left after this, not returning a cursor`);
         return {records, lastCount};
       }
 
+      debugDev(`There are results left, returning a cursor`);
       return {
         records, lastCount,
         cursor: newCursor
       };
 
       async function doQuery(cursor) {
+        debugDev(`doQuery`);
         const {query, args} = getQuery(genQuery(cursor));
         const {resultSet} = await connection.execute(query, args, {resultSet: true});
         return resultSet;
       }
 
       async function pump(records = []) {
+        debugDev(`pump`);
         const row = await resultSet.getRow();
 
         if (row) {
           const result = rowCallback(row);
 
           if (records.length + 1 === maxResults) {
+            debugDev(`maxResults ${maxResults} reached`);
             return genResults(records.concat(result));
           }
 
@@ -188,10 +204,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         return {records};
 
         function genResults(records) {
+          debugDev(`genResults`);
+          debug(`We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
           const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
 
           const lastId = sortedRecords.slice(-1)[0].id;
+          debug(`We have ${lastId} as last ID`);
 
           return {
             records: sortedRecords,
@@ -203,9 +222,27 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   function recordRowCallback({row, metadataPrefix, includeRecords = true}) {
-    const isDeleted = checkIfDeleted();
-    const record = handleParseRecord();
+    debugDev(`recordRowCallback`);
+    debugDev(row);
 
+    // Parse record, validate, but do not throw (yet) for validationErrors (validate:1, noFailValidation:1)
+    // see validationOptions used in record.js: parseRecord
+    const record = handleParseRecord(true, true);
+    const isDeleted = isDeletedRecord(record);
+
+    const validationErrors = record.getValidationErrors();
+    debugDev(`validationErrors: ${JSON.stringify(validationErrors)}`);
+
+    // We want to include records in response and have an existing record with validationErrors
+    // DEVELOP: we should handle erroring records somehow else than with 500!
+    // eslint-disable-next-line functional/no-conditional-statements
+    if (includeRecords && !isDeleted && validationErrors && validationErrors.length > 0) {
+      const errorMessage = `Record ${row.ID} is invalid. ${validationErrors}`;
+      logger.log('error', errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    // DEVELOP: we return id for records with validationErrors - what should happen?
     if (includeRecords && isDeleted === false) {
       return {
         id: row.ID,
@@ -216,16 +253,15 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
     return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), isDeleted};
 
-    // Need to parse record without validation (The record being malformed doesn't matter if it's deleted)
-    function checkIfDeleted() {
-      const record = handleParseRecord(false);
-      return isDeletedRecord(record);
-    }
-
-    function handleParseRecord(validate) {
+    function handleParseRecord(validate, noFailValidation) {
+      debugDev(`recordRowCallback:handleParseRecord`);
       try {
-        return parseRecord(row.RECORD, validate);
+        debugDev(row);
+        return parseRecord(row.RECORD, validate, noFailValidation);
       } catch (err) {
+        // Error here if dbResult row is not convertable to AlephSequential by record.js
+        // or AlephSequential is not convertable to marc-record-object
+        // or validate:1 && noFailValidation:0 and marc-record-object fails it's validation
         logger.log('error', `Parsing record ${row.ID} failed.`);
         throw err;
       }

@@ -24,6 +24,7 @@ import {parseResumptionToken, generateResumptionToken, errors} from '../../commo
 import contextFactory from './context';
 import databaseFactory from './db';
 import {metadataFormats, requestDateStampFormats} from './constants';
+import {sanitizeQueryParams} from './util';
 
 export default async ({
   contextOptions,
@@ -39,13 +40,13 @@ export default async ({
     generateGetRecordResponse, generateListRecordsResponse, generateListIdentifiersResponse
   } = responseFactory({oaiIdentifierPrefix, supportEmail});
 
-
+  logger.debug(`middleware`);
   const {repoName, isSupportedFormat, formatRecord} = contextFactory(contextOptions);
   const {getRecord, earliestTimestamp, listIdentifiers, listRecords} = await getMethods();
 
   return async (req, res, next) => {
     const {query: {verb}} = req;
-
+    logger.debug(`Handling request from ${req.ip} : ${JSON.stringify(req.query)}`);
     // Will be fixed in Node.js 13 (https://github.com/nodejs/node/issues/31378)
     req.socket.setTimeout(socketTimeout);
 
@@ -206,7 +207,7 @@ export default async ({
       async function call() {
         const params = await getParams();
         const result = await wrap();
-
+        logger.debug(`Sending result`);
         return sendResponse({result, params});
 
         function getParams() {
@@ -262,15 +263,22 @@ export default async ({
         }
 
         function wrap() {
+          logger.debug(`wrap`);
           return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
             req.on('close', handleClose);
             const method = getMethod();
 
             try {
               const result = await method(params);
+              logger.silly(`Result: ${JSON.stringify(result)}`);
+              //if (!result || result.length === 0) {
+              //  throw error('Empty result!');
+              //}
+              //logger.debug(`We got result ${result.length}`);
               await closeConnection();
               return resolve(result);
             } catch (err) {
+              logger.error(`ERROR! ${err.message}`);
               await closeConnection();
               return reject(err);
             }
@@ -287,6 +295,7 @@ export default async ({
             }
 
             async function closeConnection() {
+              logger.debug(`Closing connection: closeConnection`);
               if (req.aborted === false && params.connection) {
                 await params.connection.break();
                 return params.connection.close({drop: true});
@@ -294,18 +303,20 @@ export default async ({
             }
 
             async function handleClose() {
-              logger.log('info', 'Request cancelled');
+              logger.log('info', 'Request cancelled (handleClose)');
 
-              if (params.connection) { // eslint-disable-line functional/no-conditional-statement
+              if (params.connection) { // eslint-disable-line functional/no-conditional-statements
                 try {
+                  logger.debug(`Closing connection: handleClose`);
                   await params.connection.break();
                   await params.connection.close({drop: true});
                   return resolve();
                 } catch (err) {
+                  //logger.debug(err);
                   if (isExpectedOracleError(err) === false) {
                     return reject(err);
                   }
-
+                  logger.debug(`Connection already closed`);
                   return resolve();
                 }
               }
@@ -313,6 +324,11 @@ export default async ({
               return resolve();
 
               function isExpectedOracleError(err) {
+                // Does new oracle dep use different error messages?
+                logger.debug(`We got error: ${err.message}`);
+                if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
+                  return true;
+                }
                 return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
               }
             }
@@ -331,7 +347,7 @@ export default async ({
 
     async function sendResponse({error, result, params}) {
       const requestUrl = instanceUrl;
-      const query = clone(req.query);
+      const query = sanitizeQueryParams(clone(req.query)); // njsscan-ignore: express_xss
 
       if (error) {
         return res.send(await generateErrorResponse({query, requestUrl, error}));
@@ -415,6 +431,7 @@ export default async ({
   };
 
   async function getMethods() {
+    logger.debug(`getMethods`);
     const connection = await pool.getConnection();
     const methods = await databaseFactory({connection, sets, maxResults, alephLibrary, formatRecord});
 

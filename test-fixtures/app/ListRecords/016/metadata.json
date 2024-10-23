@@ -1,0 +1,57 @@
+{
+  "description": "Should respond with internal server error (500) because of an invalid record in database results (validationErrors from marc-record)",
+  "comment": "It's currently impossible to create this test, we're validating just fields (AlephSequential has always FMT-field) and subfields (we cannot parse dbData string without subfields to AlephSequential - see 018)",
+  "skip": true,
+  "onlyDev": false,
+  "contextName": "bib",
+     "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
+  "requests": [
+      { "method": "GET", "status": 500, "requestParams": { "verb": "ListRecords", "metadataPrefix": "marc21" } }
+  ],    
+  "dbResults": [
+    [
+      {
+        "TIME": "20000102050000"
+      }
+    ],
+    [
+      {
+        "TIME": "20000102050000",
+        "ID": "1234567",
+        "RECORD": {
+          "leader": "03106cam a2200721 i 4500",
+          "fields": [
+            {
+              "tag": "001",
+              "value": "1234567"
+            },
+            {"tag": "245", "subfields": []}
+      ]}
+      },
+      {
+        "TIME": "20090701001000",
+        "ID": "89101112",
+        "RECORD": {
+          "leader": "03106cam a2200721 i 4500",
+          "fields": [
+            {
+              "tag": "001",
+              "value": "89101112"
+            },
+            {
+              "tag": "245",
+              "subfields": [
+                {
+                  "code": "a",
+                  "value": "Bar Foo"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  ]
+}

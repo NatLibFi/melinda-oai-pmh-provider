@@ -182,11 +182,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         return resultSet;
       }
 
-      async function pump(records = []) {
-        debugDev(`pump`);
+      async function pump(records = [], rowCount = 0) {
+        debugDev(`pump: ${rowCount}`);
         const row = await resultSet.getRow();
 
         if (row) {
+          const newRowCount = rowCount + 1;
+          logRows(newRowCount);
           const result = rowCallback(row);
 
           if (records.length + 1 === maxResults) {
@@ -194,7 +196,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
             return genResults(records.concat(result));
           }
 
-          return pump(records.concat(result));
+          return pump(records.concat(result), newRowCount);
         }
 
         if (records.length > 0) {
@@ -280,5 +282,18 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       logger.log('debug', `Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
     }
   }
+
+  function logRows(rowCount) {
+    if (rowCount === 1 || rowCount % 250 === 0) {
+      logger.verbose(`Handling row: ${rowCount}`);
+      return;
+    }
+    if (rowCount % 25 === 0) {
+      logger.debug(`Handling row: ${rowCount}`);
+      return;
+    }
+    logger.silly(`Handling row: ${rowCount}`);
+  }
+
 }
 

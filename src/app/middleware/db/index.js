@@ -101,7 +101,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   async function retrieveEarliestTimestamp() {
     const {query, args} = getQuery(getEarliestTimestamp());
 
-    const {resultSet} = await connection.execute(query, args, {resultSet: true});
+    const {resultSet} = await connection.execute(query, args, {resultSet: true}); 
     const row = await resultSet.getRow();
 
     await resultSet.close();
@@ -109,14 +109,14 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   async function getRecord({connection, identifier, metadataPrefix}) {
-    debug(`getRecord`);
+    debuDev(`getRecord`);
     const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
-    debug(`resultSet: ${JSON.stringify(resultSet)}`);
+    debugDev(`resultSet: ${JSON.stringify(resultSet)}`);
     const row = await resultSet.getRow();
 
     await resultSet.close();
-    debug(`row: ${row}`);
+    debugDev(`row: ${row}`);
     if (row) {
       return recordRowCallback({row, metadataPrefix});
     }
@@ -137,7 +137,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     connection, from, until, set, metadataPrefix, cursor, lastCount,
     includeRecords = true
   }) {
-    debug(`queryRecords`);
+    debugDev(`queryRecords`);
     const params = getParams();
     return executeQuery(params);
 
@@ -157,40 +157,40 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     }
 
     async function executeQuery({connection, genQuery, rowCallback, cursor, lastCount}) {
-      debug(`executeQuery`);
+      debugDev(`executeQuery`);
       const resultSet = await doQuery(cursor);
-      debug(`We got a resultSet`);
+      debugDev(`We got a resultSet`);
       const {records, newCursor} = await pump();
 
       await resultSet.close();
 
       if (records.length < maxResults) {
-        debug(`No results left after this, not returning a cursor`);
+        debugDev(`No results left after this, not returning a cursor`);
         return {records, lastCount};
       }
 
-      debug(`There are results left, returning a cursor`);
+      debugDev(`There are results left, returning a cursor`);
       return {
         records, lastCount,
         cursor: newCursor
       };
 
       async function doQuery(cursor) {
-        debug(`doQuery`);
+        debugDev(`doQuery`);
         const {query, args} = getQuery(genQuery(cursor));
         const {resultSet} = await connection.execute(query, args, {resultSet: true});
         return resultSet;
       }
 
       async function pump(records = []) {
-        debugDev(`pump`);
+        debugDevDev(`pump`);
         const row = await resultSet.getRow();
 
         if (row) {
           const result = rowCallback(row);
 
           if (records.length + 1 === maxResults) {
-            debug(`maxResults ${maxResults} reached`);
+            debugDev(`maxResults ${maxResults} reached`);
             return genResults(records.concat(result));
           }
 
@@ -204,7 +204,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         return {records};
 
         function genResults(records) {
-          debug(`genResults`);
+          debugDev(`genResults`);
           debug(`We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
           const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));

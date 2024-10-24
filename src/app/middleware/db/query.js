@@ -22,7 +22,7 @@ export default ({library, limit}) => ({
     query: `
        SELECT id, time, z00_data record FROM (
          SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13
-         WHERE z13_rec_key = ':identifier'
+         WHERE z13_rec_key = :identifier
        )
        JOIN ${library}.z00 ON id = z00_doc_number`
   }),
@@ -90,7 +90,7 @@ export default ({library, limit}) => ({
           return `
             SELECT id, time, z00_data record FROM (
               SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1
-              WHERE s1.z13_rec_key > ':cursor' AND ${conditions}
+              WHERE s1.z13_rec_key > :cursor AND ${conditions}
               ORDER BY z13_rec_key ASC
               FETCH NEXT ${limit} ROWS ONLY
             ) JOIN ${library}.z00 ON id = z00_doc_number`;
@@ -158,7 +158,7 @@ export default ({library, limit}) => ({
         return `
           WITH ids AS (
             SELECT z00_doc_number id FROM ${library}.z00
-            WHERE z00_doc_number > ':cursor'
+            WHERE z00_doc_number > :cursor
             ORDER BY z00_doc_number ASC
             FETCH NEXT ${limit} ROWS ONLY
           )

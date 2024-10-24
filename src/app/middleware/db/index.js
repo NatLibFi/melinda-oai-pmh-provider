@@ -112,7 +112,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     debugDev(`${logLabel} getRecord`);
     const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}), logLabel);
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
-    debugDev(`${logLabel} resultSet: ${JSON.stringify(resultSet)}`);
+    // DO NOT try to JSON.stringify resultSet! its circular.
+    //debugDev(`${logLabel} resultSet: ${JSON.stringify(resultSet)}`);
     const row = await resultSet.getRow();
 
     await resultSet.close();

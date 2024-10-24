@@ -274,7 +274,8 @@ export default async ({
 
             try {
               const result = await method(params);
-              logger.silly(`${logLabel} Result: ${JSON.stringify(result)}`);
+              // is result circular?
+              //logger.silly(`${logLabel} Result: ${JSON.stringify(result)}`);
               //if (!result || result.length === 0) {
               //  throw error('Empty result!');
               //}

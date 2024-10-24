@@ -140,7 +140,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }) {
     debugDev(`${logLabel} queryRecords`);
     const params = getParams();
-    debugDev(`${logLabel} params: ${JSON.stringify(params)}`);
+    // Do not strigingify params there is a circularity in connection!
+    //debugDev(`${logLabel} params: ${JSON.stringify(params)}`);
     return executeQuery(params);
 
     function getParams() {

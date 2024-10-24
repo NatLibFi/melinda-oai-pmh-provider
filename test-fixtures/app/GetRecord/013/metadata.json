@@ -1,0 +1,374 @@
+{
+    "description": "Should respond with a authority work record with privileged mode on",
+    "contextName": "autWorks",  
+    "isPrivileged": true,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-ASTERI-W",
+    "requests": [
+        { "method": "GET", "status": 200,
+            "requestParams": {
+                "verb": "GetRecord", 
+                "metadataPrefix": "marc21",
+                "identifier": "oai:foo.bar/12345"
+            }
+        }        
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ],
+        [
+            {
+                "TIME": "20000102050000",
+                "ID": "12345",
+                "RECORD": {
+                    "leader": "01427cz  a2200349n  4500",
+                    "fields": [
+                        {
+                            "tag": "001",
+                            "value": "12345"
+                        },
+                        {
+                            "tag": "005",
+                            "value": "20200212152142.0"
+                        },
+                        {
+                            "tag": "008",
+                            "value": "850101|n|anznnbabn           | ana      "
+                        },
+                        {
+                            "tag": "024",
+                            "ind1": "7",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "http://www.yso.fi/onto/yso/p10187"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "uri"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "035",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "(FI-ASTERI-W)12345"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "040",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "FI-NL"
+                                },
+                                {
+                                    "code": "b",
+                                    "value": "fin"
+                                },
+                                {
+                                    "code": "f",
+                                    "value": "yso/fin"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "065",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "39"
+                                },
+                                {
+                                    "code": "c",
+                                    "value": "Liikenne. Kuljetus. Posti. Pakkausteollisuus"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p26577"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "yso"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "150",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "osoitteet"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p10187"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "450",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "osoite"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "450",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "osoitteisto"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "450",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "osoitteistot"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "450",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "postiosoite"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "450",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "postiosoitteet"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "550",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "w",
+                                    "value": "g"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": "tieto"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p261"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "550",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "w",
+                                    "value": "h"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": "Internet-osoitteet"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p10185"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "550",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "w",
+                                    "value": "h"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": "foobar"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p15904"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "550",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "w",
+                                    "value": "n"
+                                },
+                                {
+                                    "code": "a",
+                                    "value": "yhteystiedot"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p11141"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "688",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Luotu: 1985-01-01"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "688",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Viimeksi muokattu: 2020-01-25"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "750",
+                            "ind1": " ",
+                            "ind2": "7",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "addresses"
+                                },
+                                {
+                                    "code": "4",
+                                    "value": "EQ"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "yso/eng"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p10187"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "750",
+                            "ind1": " ",
+                            "ind2": "7",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "adresser (kommunikation)"
+                                },
+                                {
+                                    "code": "4",
+                                    "value": "EQ"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "yso/swe"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://www.yso.fi/onto/yso/p10187"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "750",
+                            "ind1": " ",
+                            "ind2": "0",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Street addresses"
+                                },
+                                {
+                                    "code": "4",
+                                    "value": "~EQ"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "http://id.loc.gov/authorities/subjects/sh85128579"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "CAT",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "LOAD-YSO"
+                                },
+                                {
+                                    "code": "b",
+                                    "value": "30"
+                                },
+                                {
+                                    "code": "c",
+                                    "value": "20200212"
+                                },
+                                {
+                                    "code": "l",
+                                    "value": "FIN10"
+                                },
+                                {
+                                    "code": "h",
+                                    "value": "1521"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    ]
+}

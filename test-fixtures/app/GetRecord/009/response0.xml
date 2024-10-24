@@ -12,7 +12,7 @@
 				<record xmlns="http://www.loc.gov/MARC21/slim">
 					<leader>01956cz  a2200517n  4500</leader>
 					<controlfield tag="001">12345</controlfield>
-					<controlfield tag="003">FI-MELINDA</controlfield>
+					<controlfield tag="003">FI-ASTERI-N</controlfield>
 					<controlfield tag="005">20200312200039.0</controlfield>
 					<controlfield tag="008">941113|n|az|||aabn           | aaa      </controlfield>
 					<datafield tag="024" ind1="7" ind2=" ">
@@ -20,7 +20,7 @@
 						<subfield code="2">isni</subfield>
 					</datafield>
 					<datafield tag="035" ind1=" " ind2=" ">
-						<subfield code="a">(FI-MELINDA)12345</subfield>
+						<subfield code="a">(FI-ASTERI-N)12345</subfield>
 					</datafield>
 					<datafield tag="040" ind1=" " ind2=" ">
 						<subfield code="a">FI-NL</subfield>

@@ -2,6 +2,8 @@
     "description": "Should respond with a record with privileged mode on",
     "contextName": "bib",  
     "isPrivileged": true,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
     "requests": [
         { "method": "GET", "status": 200,
             "requestParams": {

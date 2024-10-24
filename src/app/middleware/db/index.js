@@ -22,6 +22,10 @@ import {DB_TIME_FORMAT} from './common';
 import {parseRecord} from '../../record';
 import queryFactory from './query';
 
+import createDebugLogger from 'debug';
+const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/db:index');
+const debugDev = debug.extend('dev');
+
 export default async function ({maxResults, sets, alephLibrary, connection, formatRecord}) {
   const logger = createLogger();
   const {getEarliestTimestamp, getHeadingsIndex, getRecords, getSingleRecord} = queryFactory({
@@ -32,6 +36,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   const earliestTimestamp = await retrieveEarliestTimestamp();
 
   // Disable all validation because invalid records shouldn't crash the app
+  // DEVELOP: newer marc-record-js version have more validationOptions
+  // validationOptions are also handled later in code
   MarcRecord.setValidationOptions({
     fields: false,
     subfields: false,
@@ -93,8 +99,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   async function retrieveEarliestTimestamp() {
+    logger.debug(`retrieveEarliestTimestamp`);
     const {query, args} = getQuery(getEarliestTimestamp());
-
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
     const row = await resultSet.getRow();
 
@@ -102,15 +108,18 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     return moment.utc(row.TIME, DB_TIME_FORMAT);
   }
 
-  async function getRecord({connection, identifier, metadataPrefix}) {
-    const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
+  async function getRecord({logLabel, connection, identifier, metadataPrefix}) {
+    debugDev(`${logLabel} getRecord`);
+    const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}), logLabel);
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
+    // DO NOT try to JSON.stringify resultSet! its circular.
+    //debugDev(`${logLabel} resultSet: ${JSON.stringify(resultSet)}`);
     const row = await resultSet.getRow();
 
     await resultSet.close();
-
+    debugDev(`${logLabel} row: ${row}`);
     if (row) {
-      return recordRowCallback({row, metadataPrefix});
+      return recordRowCallback({logLabel, row, metadataPrefix});
     }
   }
 
@@ -126,10 +135,14 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   function queryRecords({
+    logLabel,
     connection, from, until, set, metadataPrefix, cursor, lastCount,
     includeRecords = true
   }) {
+    debugDev(`${logLabel} queryRecords`);
     const params = getParams();
+    // Do not strigingify params there is a circularity in connection!
+    //debugDev(`${logLabel} params: ${JSON.stringify(params)}`);
     return executeQuery(params);
 
     function getParams() {
@@ -138,47 +151,57 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       const endTime = until ? until.local() : until;
 
       const rowCallback = row => recordRowCallback({
-        row, includeRecords, metadataPrefix
+        logLabel, row, includeRecords, metadataPrefix
       });
 
       return {
+        logLabel,
         rowCallback, connection, cursor, lastCount,
         genQuery: cursor => getRecords({cursor, startTime, endTime, indexes: setIndexes})
       };
     }
 
-    async function executeQuery({connection, genQuery, rowCallback, cursor, lastCount}) {
+    async function executeQuery({logLabel, connection, genQuery, rowCallback, cursor, lastCount}) {
+      debugDev(`${logLabel} executeQuery`);
       const resultSet = await doQuery(cursor);
+      debugDev(`${logLabel} We got a resultSet`);
       const {records, newCursor} = await pump();
 
       await resultSet.close();
 
       if (records.length < maxResults) {
+        debugDev(`${logLabel} No results left after this, not returning a cursor`);
         return {records, lastCount};
       }
 
+      debugDev(`${logLabel} There are results left, returning a cursor`);
       return {
         records, lastCount,
         cursor: newCursor
       };
 
       async function doQuery(cursor) {
-        const {query, args} = getQuery(genQuery(cursor));
+        debugDev(`${logLabel} doQuery`);
+        const {query, args} = getQuery(genQuery(cursor), logLabel);
         const {resultSet} = await connection.execute(query, args, {resultSet: true});
         return resultSet;
       }
 
-      async function pump(records = []) {
+      async function pump(records = [], rowCount = 0) {
+        debugDev(`${logLabel} pump: ${rowCount}`);
         const row = await resultSet.getRow();
 
         if (row) {
+          const newRowCount = rowCount + 1;
+          logRows(newRowCount, logLabel);
           const result = rowCallback(row);
 
           if (records.length + 1 === maxResults) {
+            debugDev(`${logLabel} maxResults ${maxResults} reached`);
             return genResults(records.concat(result));
           }
 
-          return pump(records.concat(result));
+          return pump(records.concat(result), newRowCount);
         }
 
         if (records.length > 0) {
@@ -188,10 +211,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         return {records};
 
         function genResults(records) {
+          debugDev(`${logLabel} genResults`);
+          debug(`${logLabel} We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
           const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
 
           const lastId = sortedRecords.slice(-1)[0].id;
+          debug(`${logLabel} We have ${lastId} as last ID`);
 
           return {
             records: sortedRecords,
@@ -202,10 +228,28 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     }
   }
 
-  function recordRowCallback({row, metadataPrefix, includeRecords = true}) {
-    const isDeleted = checkIfDeleted();
-    const record = handleParseRecord();
+  function recordRowCallback({logLabel, row, metadataPrefix, includeRecords = true}) {
+    debugDev(`${logLabel} recordRowCallback`);
+    debugDev(row);
 
+    // Parse record, validate, but do not throw (yet) for validationErrors (validate:1, noFailValidation:1)
+    // see validationOptions used in record.js: parseRecord
+    const record = handleParseRecord(true, true);
+    const isDeleted = isDeletedRecord(record);
+
+    const validationErrors = record.getValidationErrors();
+    debugDev(`${logLabel} validationErrors: ${JSON.stringify(validationErrors)}`);
+
+    // We want to include records in response and have an existing record with validationErrors
+    // DEVELOP: we should handle erroring records somehow else than with 500!
+    // eslint-disable-next-line functional/no-conditional-statements
+    if (includeRecords && !isDeleted && validationErrors && validationErrors.length > 0) {
+      const errorMessage = `Record ${row.ID} is invalid. ${validationErrors}`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    // DEVELOP: we return id for records with validationErrors - what should happen?
     if (includeRecords && isDeleted === false) {
       return {
         id: row.ID,
@@ -216,23 +260,23 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
     return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), isDeleted};
 
-    // Need to parse record without validation (The record being malformed doesn't matter if it's deleted)
-    function checkIfDeleted() {
-      const record = handleParseRecord(false);
-      return isDeletedRecord(record);
-    }
-
-    function handleParseRecord(validate) {
+    function handleParseRecord(validate, noFailValidation) {
+      debugDev(`${logLabel} recordRowCallback:handleParseRecord`);
       try {
-        return parseRecord(row.RECORD, validate);
+        debugDev(row);
+        return parseRecord({data: row.RECORD, validate, noFailValidation, logLabel});
       } catch (err) {
-        logger.log('error', `Parsing record ${row.ID} failed.`);
+        // Error here if dbResult row is not convertable to AlephSequential by record.js
+        // or AlephSequential is not convertable to marc-record-object
+        // or validate:1 && noFailValidation:0 and marc-record-object fails it's validation
+        logger.error(`${logLabel} Parsing record ${row.ID} failed.`);
         throw err;
       }
     }
   }
 
-  function getQuery({query, args}) {
+  function getQuery({query, args}, logLabel) {
+    debug(`${logLabel ? logLabel : ''} GetQuery`);
     debugQuery(query, args);
 
     return {
@@ -241,8 +285,22 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     };
 
     function debugQuery(query, args) {
-      logger.log('debug', `Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
+      //logger.debug(`${logLabel} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
+      logger.debug(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
     }
   }
+
+  function logRows(rowCount, logLabel) {
+    if (rowCount === 1 || rowCount % 250 === 0) {
+      logger.verbose(`${logLabel} Handling row: ${rowCount}`);
+      return;
+    }
+    if (rowCount % 25 === 0) {
+      logger.debug(`${logLabel} Handling row: ${rowCount}`);
+      return;
+    }
+    logger.silly(`${logLabel} Handling row: ${rowCount}`);
+  }
+
 }
 

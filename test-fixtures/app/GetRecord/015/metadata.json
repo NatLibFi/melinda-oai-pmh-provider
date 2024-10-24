@@ -1,0 +1,200 @@
+{
+    "description": "Should respond with a authority name record, with Aleph internal prefixes updated to standard ISIL prefixes",
+    "contextName": "autNames",
+    "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-ASTERI-N",
+    "requests": [
+        { "method": "GET", "status": 200,
+            "requestParams": {
+                "verb": "GetRecord", 
+                "metadataPrefix": "marc21",
+                "identifier": "oai:foo.bar/12345"
+            }
+        }        
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ],
+        [
+            {
+                "TIME": "20000102050000",
+                "ID": "12345",
+                "RECORD": {
+                    "leader": "01956cz  a2200517n  4500",
+                    "fields": [
+                        {
+                            "tag": "001",
+                            "value": "12345"
+                        },
+                        {
+                            "tag": "005",
+                            "value": "20200312200039.0"
+                        },
+                        {
+                            "tag": "008",
+                            "value": "941113|n|az|||aabn           | aaa      "
+                        },
+                        {
+                            "tag": "024",
+                            "ind1": "7",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "0000000121021001"
+                                },
+                                {
+                                    "code": "2",
+                                    "value": "isni"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "035",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "(FI-ASTERI-N)12345"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "040",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "FI-NL"
+                                },
+                                {
+                                    "code": "b",
+                                    "value": "fin"
+                                },
+                                {
+                                    "code": "e",
+                                    "value": "rda"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "FI-NLD"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "100",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Kivi, Aleksis,"
+                                },
+                                {
+                                    "code": "d",
+                                    "value": "1834-1872"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FOO00)12345"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "500",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar agent name $0 (FIN11) - (FI-ASTERI-N)"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FIN11)555666"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "530",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar teos $0 (FIN13) - (FI-ASTERI-W)"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FIN13)000222444"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "550",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar subject $0 (FIN10) - (FI-ASTERI-S)"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FIN10)000111444"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "599",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar aux $0 (FIN12) - (FI-ASTERI-A)"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FIN12)000222444"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "667",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "foobar"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "670",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar bib $w (FIN01) - (FI-MELINDA)"
+                                },
+                                {
+                                    "code": "w",
+                                    "value": "(FIN01)000333666"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    ]
+}

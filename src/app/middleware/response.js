@@ -31,8 +31,8 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     generateGetRecordResponse
   };
 
-  function generateErrorResponse({requestUrl, query, error}) {
-    return generateResponse({requestUrl, query: formatQuery(), payload: {
+  function generateErrorResponse({logLabel, requestUrl, query, error}) {
+    return generateResponse({logLabel, requestUrl, query: formatQuery(), payload: {
       error: {
         $: {code: error}
       }
@@ -45,14 +45,16 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }
   }
 
-  async function generateGetRecordResponse({requestUrl, query, format, ...record}) {
-    return generateResponse({requestUrl, query, payload: {
-      GetRecord: {record: [await generateRecordObject({...record, format})]}
+  async function generateGetRecordResponse({logLabel, requestUrl, query, format, ...record}) {
+    logger.silly(`${logLabel} generateGetRecordResponse`);
+    return generateResponse({logLabel, requestUrl, query, payload: {
+      GetRecord: {record: [await generateRecordObject({...record, format}, {logLabel})]}
     }});
   }
 
-  function generateIdentifyResponse({requestUrl, query, repoName, earliestTimestamp}) {
-    return generateResponse({requestUrl, query, payload: {
+  function generateIdentifyResponse({logLabel, requestUrl, query, repoName, earliestTimestamp}) {
+    logger.debug(`${logLabel} generateIdentifyResponse`);
+    return generateResponse({logLabel, requestUrl, query, payload: {
       Identify: {
         repositoryName: [repoName],
         baseURL: [requestUrl.split('?')[0]],
@@ -65,8 +67,8 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }});
   }
 
-  function generateListMetadataFormatsResponse({requestUrl, query, formats}) {
-    return generateResponse({requestUrl, query, payload: {
+  function generateListMetadataFormatsResponse({logLabel, requestUrl, query, formats}) {
+    return generateResponse({logLabel, requestUrl, query, payload: {
       ListMetadataFormats: {
         metadataFormat: formats.map(({prefix, schema, namespace}) => ({
           metadataPrefix: [prefix],
@@ -77,8 +79,8 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }});
   }
 
-  function generateListSetsResponse({requestUrl, query, sets}) {
-    return generateResponse({requestUrl, query, payload: {
+  function generateListSetsResponse({logLabel, requestUrl, query, sets}) {
+    return generateResponse({logLabel, requestUrl, query, payload: {
       ListSets: {
         set: sets.map(({spec, name, description}) => ({
           setSpec: [spec],
@@ -89,19 +91,20 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }});
   }
 
-  async function generateListRecordsResponse({requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
-    return generateResponse({requestUrl, query, payload: {
+  async function generateListRecordsResponse({logLabel, requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
+    return generateResponse({logLabel, requestUrl, query, payload: {
       ListRecords: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format})
     }});
   }
 
-  async function generateListIdentifiersResponse({requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
-    return generateResponse({requestUrl, query, payload: {
+  async function generateListIdentifiersResponse({logLabel, requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
+    return generateResponse({logLabel, requestUrl, query, payload: {
       ListIdentifiers: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format})
     }});
   }
 
-  function generateResponse({requestUrl, query, payload}) {
+  function generateResponse({logLabel, requestUrl, query, payload}) {
+    logger.debug(`${logLabel} generateResponse`);
     const obj = generate();
     return toXML();
 
@@ -234,34 +237,41 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
         const formattedRecord = removeInvalidCharacters();
         return doTransformation();
 
+        // DEVELOP: do we need to do this here? marc-record-js does not accept controlcharacters since v7.3.0 if validationOptions: {noControlCharacters: true}
         // See https://github.com/Leonidas-from-XIV/node-xml2js/issues/547
         function removeInvalidCharacters() {
-          const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu; // eslint-disable-line no-control-regex
-          const newRecord = MarcRecord.clone(record, {subfieldValues: false});
+          const newRecord = MarcRecord.clone(record, {subfieldValues: false, noControlCharacters: true, noFailValidation: true});
 
-          newRecord.fields.forEach(field => {
-            if (field.value) {
-              if (PATTERN.test(field.value)) {
-                logger.log('warn', `Record ${id} contains invalid characters. Cleaning up...`);
-                field.value = field.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+          // Clean record only if we got validationErrors from our marcRecord
+          if (newRecord.getValidationErrors > 0) {
+            const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu; // eslint-disable-line no-control-regex
+            newRecord.fields.forEach(field => {
+              if (field.value) {
+                if (PATTERN.test(field.value)) {
+                  logger.warn(`Record ${id} contains invalid characters. Cleaning up...`);
+                  //logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
+                  field.value = field.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+                  return;
+                }
+
                 return;
               }
 
-              return;
-            }
+              field.subfields.forEach(subfield => {
+                if (PATTERN.test(subfield.value)) {
+                  logger.warn(`Record ${id} contains invalid characters. Cleaning up...`);
+                  //logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
+                  subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+                  return;
+                }
 
-            field.subfields.forEach(subfield => {
-              if (PATTERN.test(subfield.value)) {
-                logger.log('warn', `Record ${id} contains invalid characters. Cleaning up...`);
-                subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
                 return;
-              }
-
-              return;
+              });
             });
-          });
-
-          return newRecord;
+            // return cleaned record
+            return newRecord;
+          }
+          return record;
         }
 
         function doTransformation() {

@@ -24,6 +24,8 @@ import {parseResumptionToken, generateResumptionToken, errors} from '../../commo
 import contextFactory from './context';
 import databaseFactory from './db';
 import {metadataFormats, requestDateStampFormats} from './constants';
+import {sanitizeQueryParams} from './util';
+import {v4 as uuid} from 'uuid';
 
 export default async ({
   contextOptions,
@@ -39,13 +41,15 @@ export default async ({
     generateGetRecordResponse, generateListRecordsResponse, generateListIdentifiersResponse
   } = responseFactory({oaiIdentifierPrefix, supportEmail});
 
-
+  logger.debug(`middleware`);
   const {repoName, isSupportedFormat, formatRecord} = contextFactory(contextOptions);
   const {getRecord, earliestTimestamp, listIdentifiers, listRecords} = await getMethods();
 
   return async (req, res, next) => {
-    const {query: {verb}} = req;
-
+    // eslint-disable-next-line functional/immutable-data
+    req.logLabel = uuid();
+    const {query: {verb}, logLabel} = req;
+    logger.debug(`${logLabel} Handling request from ${req.ip} : ${JSON.stringify(req.query)}`);
     // Will be fixed in Node.js 13 (https://github.com/nodejs/node/issues/31378)
     req.socket.setTimeout(socketTimeout);
 
@@ -206,11 +210,12 @@ export default async ({
       async function call() {
         const params = await getParams();
         const result = await wrap();
-
+        logger.debug(`${logLabel} Sending result`);
         return sendResponse({result, params});
 
         function getParams() {
-          const params = 'resumptionToken' in req.query ? parseToken() : parse(req.query);
+          const parsedParams = 'resumptionToken' in req.query ? parseToken() : parse(req.query);
+          const params = {logLabel, ...parsedParams};
           return needsDb() ? addConnection() : params;
 
           function parseToken() {
@@ -251,26 +256,34 @@ export default async ({
           }
 
           async function addConnection() {
-            logger.log('debug', 'Requesting a new connection from the pool...');
+            logger.debug(`${logLabel} Requesting a new connection from the pool...`);
 
             const connection = await pool.getConnection();
 
-            logger.log('debug', 'Connection acquired!');
+            logger.debug(`${logLabel} Connection acquired!`);
 
             return {...params, connection};
           }
         }
 
         function wrap() {
+          logger.debug(`${logLabel} wrap`);
           return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
             req.on('close', handleClose);
             const method = getMethod();
 
             try {
               const result = await method(params);
+              // is result circular?
+              //logger.silly(`${logLabel} Result: ${JSON.stringify(result)}`);
+              //if (!result || result.length === 0) {
+              //  throw error('Empty result!');
+              //}
+              //logger.debug(`${logLabel} We got result ${result.length}`);
               await closeConnection();
               return resolve(result);
             } catch (err) {
+              logger.error(`${logLabel} ERROR! ${err.message}`);
               await closeConnection();
               return reject(err);
             }
@@ -287,6 +300,7 @@ export default async ({
             }
 
             async function closeConnection() {
+              logger.debug(`${logLabel} Closing connection: closeConnection`);
               if (req.aborted === false && params.connection) {
                 await params.connection.break();
                 return params.connection.close({drop: true});
@@ -294,18 +308,20 @@ export default async ({
             }
 
             async function handleClose() {
-              logger.log('info', 'Request cancelled');
+              logger.info(`${logLabel} Request cancelled (handleClose)`);
 
-              if (params.connection) { // eslint-disable-line functional/no-conditional-statement
+              if (params.connection) { // eslint-disable-line functional/no-conditional-statements
                 try {
+                  logger.debug(`${logLabel} Closing connection: handleClose`);
                   await params.connection.break();
                   await params.connection.close({drop: true});
                   return resolve();
                 } catch (err) {
+                  //logger.debug(`${logLabel} ${err}`);
                   if (isExpectedOracleError(err) === false) {
                     return reject(err);
                   }
-
+                  logger.debug(`${logLabel} Connection already closed`);
                   return resolve();
                 }
               }
@@ -313,6 +329,11 @@ export default async ({
               return resolve();
 
               function isExpectedOracleError(err) {
+                // Does new oracle dep use different error messages?
+                logger.debug(`${logLabel} We got error: ${err.message}`);
+                if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
+                  return true;
+                }
                 return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
               }
             }
@@ -331,29 +352,29 @@ export default async ({
 
     async function sendResponse({error, result, params}) {
       const requestUrl = instanceUrl;
-      const query = clone(req.query);
+      const query = sanitizeQueryParams(clone(req.query)); // njsscan-ignore: express_xss
 
       if (error) {
-        return res.send(await generateErrorResponse({query, requestUrl, error}));
+        return res.send(await generateErrorResponse({logLabel, query, requestUrl, error}));
       }
 
       return res.send(await generatePayload(verb));
 
       function generatePayload(method) {
         if (method === 'Identify') {
-          return generateIdentifyResponse({requestUrl, query, repoName, earliestTimestamp});
+          return generateIdentifyResponse({logLabel, requestUrl, query, repoName, earliestTimestamp});
         }
 
         if (method === 'ListMetadataFormats') {
           if (result.length === 0) {
-            return generateErrorResponse({query, requestUrl, error: errors.idDoesNotExist});
+            return generateErrorResponse({logLabel, query, requestUrl, error: errors.idDoesNotExist});
           }
 
-          return generateListMetadataFormatsResponse({requestUrl, query, formats: result});
+          return generateListMetadataFormatsResponse({logLabel, requestUrl, query, formats: result});
         }
 
         if (method === 'ListSets') {
-          return generateListSetsResponse({requestUrl, query, sets: result});
+          return generateListSetsResponse({logLabel, requestUrl, query, sets: result});
         }
 
         if (method === 'ListRecords') {
@@ -380,7 +401,7 @@ export default async ({
           const {records, cursor, lastCount} = result;
 
           if (records.length === 0) {
-            return generateErrorResponse({query, requestUrl, error: errors.noRecordsMatch});
+            return generateErrorResponse({logLabel, query, requestUrl, error: errors.noRecordsMatch});
           }
 
 
@@ -394,14 +415,14 @@ export default async ({
             });
 
             return callback({
-              requestUrl, query, records, token, tokenExpirationTime,
+              logLabel, requestUrl, query, records, token, tokenExpirationTime,
               format: params.metadataPrefix,
               cursor: lastCount || 0
             });
           }
 
           return callback({
-            requestUrl, query, records, format: params.metadataPrefix,
+            logLabel, requestUrl, query, records, format: params.metadataPrefix,
             cursor: lastCount || 0
           });
 
@@ -415,6 +436,7 @@ export default async ({
   };
 
   async function getMethods() {
+    logger.debug(`getMethods`);
     const connection = await pool.getConnection();
     const methods = await databaseFactory({connection, sets, maxResults, alephLibrary, formatRecord});
 

@@ -83,4 +83,5 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
       .filter(([, v]) => v)
       .reduce((acc, [k, v]) => ({...acc, [k]: v}), {});
   }
+
 }

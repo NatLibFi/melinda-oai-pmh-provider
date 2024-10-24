@@ -20,19 +20,18 @@ export default ({library, limit}) => ({
   getSingleRecord: ({identifier}) => ({
     args: {identifier},
     query: `
-      SELECT id, time, z00_data record FROM (
-        SELECT DISTINCT z106_rec_key id, MAX(z106_upd_time_stamp) time FROM ${library}.z106
-        WHERE z106_rec_key = :identifier
-        GROUP BY z106_rec_key
-      )
-      JOIN ${library}.z00 ON id = z00_doc_number`
+       SELECT id, time, z00_data record FROM (
+         SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13
+         WHERE z13_rec_key = :identifier
+       )
+       JOIN ${library}.z00 ON id = z00_doc_number`
   }),
   getHeadingsIndex: ({value}) => ({
     args: {value},
     query: `SELECT z01_acc_sequence id FROM ${library}.z01 WHERE z01_rec_key like :value`
   }),
   getEarliestTimestamp: () => ({
-    query: `SELECT MIN(z106_upd_time_stamp) time FROM ${library}.z106`
+    query: `SELECT MIN(z13_upd_time_stamp) time FROM ${library}.z13`
   }),
   getRecords: ({cursor = '000000000', startTime, endTime, indexes = {}}) => {
     return {
@@ -83,19 +82,19 @@ export default ({library, limit}) => ({
         return indexes.heading ? index() : basic();
 
         function basic() {
-          const range = 's1.z106_upd_time_stamp >= :startTime AND s1.z106_upd_time_stamp <= :endTime';
-          const start = 's1.z106_upd_time_stamp >= :startTime';
-          const end = 's1.z106_upd_time_stamp <= :endTime';
+          const range = 's1.z13_upd_time_stamp >= :startTime AND s1.z13_upd_time_stamp <= :endTime';
+          const start = 's1.z13_upd_time_stamp >= :startTime';
+          const end = 's1.z13_upd_time_stamp <= :endTime';
           const conditions = generateConditions();
 
           return `
             SELECT id, time, z00_data record FROM (
-              SELECT DISTINCT z106_rec_key id, MAX(z106_upd_time_stamp) time FROM ${library}.z106 s1
-              WHERE s1.z106_rec_key > :cursor AND ${conditions}
-              GROUP BY z106_rec_key
-              ORDER BY z106_rec_key ASC
+              SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1
+              WHERE s1.z13_rec_key > :cursor AND ${conditions}
+              ORDER BY z13_rec_key ASC
               FETCH NEXT ${limit} ROWS ONLY
             ) JOIN ${library}.z00 ON id = z00_doc_number`;
+
 
           function generateConditions() {
             if (startTime && endTime) {
@@ -107,18 +106,17 @@ export default ({library, limit}) => ({
         }
 
         function index() {
-          const range = 's1.z106_upd_time_stamp >= :startTime AND s1.z106_upd_time_stamp <= :endTime';
-          const start = 's1.z106_upd_time_stamp >= :startTime';
-          const end = 's1.z106_upd_time_stamp <= :endTime';
+          const range = 's1.z13_upd_time_stamp >= :startTime AND s1.z13_upd_time_stamp <= :endTime';
+          const start = 's1.z13_upd_time_stamp >= :startTime';
+          const end = 's1.z13_upd_time_stamp <= :endTime';
           const conditions = generateConditions();
           const indexStatements = indexes.heading.map((value, index) => `JOIN ${library}.z02 h${index} ON id = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join('\n');
 
           return `
             WITH ids AS (
-              SELECT DISTINCT z106_rec_key id, MAX(z106_upd_time_stamp) time FROM ${library}.z106 s1
-              WHERE s1.z106_rec_key > :cursor AND ${conditions}
-              GROUP BY z106_rec_key
-              ORDER BY z106_rec_key ASC
+              SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1
+              WHERE s1.z13_rec_key > :cursor AND ${conditions}
+              ORDER BY z13_rec_key ASC
             )
             SELECT id, time, z00_data record FROM ids
             ${indexStatements}
@@ -138,7 +136,6 @@ export default ({library, limit}) => ({
       function genIndex() {
         const [initialIndex] = indexes.heading;
         const joinStatements = indexes.heading.slice(1).map((value, index) => `JOIN ${library}.z02 h${index} ON id = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join('\n');
-
         return `
           WITH base AS (
             SELECT z02_doc_number id FROM ${library}.z02
@@ -147,13 +144,12 @@ export default ({library, limit}) => ({
           ),
           ids AS (
             SELECT id FROM base
-            ${joinStatements}  
+            ${joinStatements}
             FETCH NEXT ${limit} ROWS ONLY
           )
           SELECT id, time, z00_data record FROM (
-            SELECT DISTINCT id, MAX(z106_upd_time_stamp) time FROM ids
-            JOIN ${library}.z106 ON id = z106_rec_key
-            GROUP BY id
+            SELECT id, z13_upd_time_stamp time FROM ids
+            JOIN ${library}.z13 ON id = z13_rec_key
           )
           JOIN ${library}.z00 ON id = z00_doc_number`;
       }
@@ -164,12 +160,11 @@ export default ({library, limit}) => ({
             SELECT z00_doc_number id FROM ${library}.z00
             WHERE z00_doc_number > :cursor
             ORDER BY z00_doc_number ASC
-            FETCH NEXT ${limit} ROWS ONLY  
+            FETCH NEXT ${limit} ROWS ONLY
           )
           SELECT id, time, z00_data record FROM (
-            SELECT DISTINCT id, MAX(z106_upd_time_stamp) time FROM ids
-            JOIN ${library}.z106 ON id = z106_rec_key
-            GROUP BY id
+            SELECT id, z13_upd_time_stamp time FROM ids
+            JOIN ${library}.z13 ON id = z13_rec_key
           )
           JOIN ${library}.z00 ON id = z00_doc_number`;
       }

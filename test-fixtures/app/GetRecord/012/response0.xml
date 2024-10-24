@@ -63,7 +63,7 @@
 					</datafield>
 					<datafield tag="550" ind1=" " ind2=" ">
 						<subfield code="w">h</subfield>
-						<subfield code="a"/>
+						<subfield code="a">foobar</subfield>
 						<subfield code="0">http://www.yso.fi/onto/yso/p15904</subfield>
 					</datafield>
 					<datafield tag="550" ind1=" " ind2=" ">

@@ -1,15 +1,21 @@
 {
   "description": "Should respond with internal server error because of malformed database results",
-  "contextName": "bib",  
+  "skip": false,
+  "onlyDev": false,
+  "contextName": "bib",
   "isPrivileged": false,
+  "alephLibrary": "foo00",
+  "melindaPrefix": "FI-MELINDA",
   "requests": [
-    { "method": "GET", "status": 500,
+    {
+      "method": "GET",
+      "status": 500,
       "requestParams": {
-        "verb": "GetRecord", 
+        "verb": "GetRecord",
         "metadataPrefix": "marc21",
         "identifier": "oai:foo.bar/12345"
       }
-    }        
+    }
   ],
   "dbResults": [
     [
@@ -21,7 +27,7 @@
       {
         "TIME": "20000102050000",
         "ID": "12345"
-        }
-      ]
+      }
     ]
-  }
+  ]
+}

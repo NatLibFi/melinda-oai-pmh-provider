@@ -99,8 +99,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   async function retrieveEarliestTimestamp() {
+    logger.debug(`retrieveEarliestTimestamp`);
     const {query, args} = getQuery(getEarliestTimestamp());
-
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
     const row = await resultSet.getRow();
 
@@ -108,17 +108,17 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     return moment.utc(row.TIME, DB_TIME_FORMAT);
   }
 
-  async function getRecord({connection, identifier, metadataPrefix}) {
-    debugDev(`getRecord`);
-    const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}));
+  async function getRecord({logLabel, connection, identifier, metadataPrefix}) {
+    debugDev(`${logLabel} getRecord`);
+    const {query, args} = getQuery(getSingleRecord({identifier: toAlephId(identifier)}), logLabel);
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
-    debugDev(`resultSet: ${JSON.stringify(resultSet)}`);
+    debugDev(`${logLabel} resultSet: ${JSON.stringify(resultSet)}`);
     const row = await resultSet.getRow();
 
     await resultSet.close();
-    debugDev(`row: ${row}`);
+    debugDev(`${logLabel} row: ${row}`);
     if (row) {
-      return recordRowCallback({row, metadataPrefix});
+      return recordRowCallback({logLabel, row, metadataPrefix});
     }
   }
 
@@ -134,11 +134,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   }
 
   function queryRecords({
+    logLabel,
     connection, from, until, set, metadataPrefix, cursor, lastCount,
     includeRecords = true
   }) {
-    debugDev(`queryRecords`);
+    debugDev(`${logLabel} queryRecords`);
     const params = getParams();
+    debugDev(`${logLabel} params: ${JSON.stringify(params)}`);
     return executeQuery(params);
 
     function getParams() {
@@ -147,52 +149,53 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       const endTime = until ? until.local() : until;
 
       const rowCallback = row => recordRowCallback({
-        row, includeRecords, metadataPrefix
+        logLabel, row, includeRecords, metadataPrefix
       });
 
       return {
+        logLabel,
         rowCallback, connection, cursor, lastCount,
         genQuery: cursor => getRecords({cursor, startTime, endTime, indexes: setIndexes})
       };
     }
 
-    async function executeQuery({connection, genQuery, rowCallback, cursor, lastCount}) {
-      debugDev(`executeQuery`);
+    async function executeQuery({logLabel, connection, genQuery, rowCallback, cursor, lastCount}) {
+      debugDev(`${logLabel} executeQuery`);
       const resultSet = await doQuery(cursor);
-      debugDev(`We got a resultSet`);
+      debugDev(`${logLabel} We got a resultSet`);
       const {records, newCursor} = await pump();
 
       await resultSet.close();
 
       if (records.length < maxResults) {
-        debugDev(`No results left after this, not returning a cursor`);
+        debugDev(`${logLabel} No results left after this, not returning a cursor`);
         return {records, lastCount};
       }
 
-      debugDev(`There are results left, returning a cursor`);
+      debugDev(`${logLabel} There are results left, returning a cursor`);
       return {
         records, lastCount,
         cursor: newCursor
       };
 
       async function doQuery(cursor) {
-        debugDev(`doQuery`);
-        const {query, args} = getQuery(genQuery(cursor));
+        debugDev(`${logLabel} doQuery`);
+        const {query, args} = getQuery(genQuery(cursor), logLabel);
         const {resultSet} = await connection.execute(query, args, {resultSet: true});
         return resultSet;
       }
 
       async function pump(records = [], rowCount = 0) {
-        debugDev(`pump: ${rowCount}`);
+        debugDev(`${logLabel} pump: ${rowCount}`);
         const row = await resultSet.getRow();
 
         if (row) {
           const newRowCount = rowCount + 1;
-          logRows(newRowCount);
+          logRows(newRowCount, logLabel);
           const result = rowCallback(row);
 
           if (records.length + 1 === maxResults) {
-            debugDev(`maxResults ${maxResults} reached`);
+            debugDev(`${logLabel} maxResults ${maxResults} reached`);
             return genResults(records.concat(result));
           }
 
@@ -206,13 +209,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         return {records};
 
         function genResults(records) {
-          debugDev(`genResults`);
-          debug(`We have ${records.length} records`);
+          debugDev(`${logLabel} genResults`);
+          debug(`${logLabel} We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
           const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
 
           const lastId = sortedRecords.slice(-1)[0].id;
-          debug(`We have ${lastId} as last ID`);
+          debug(`${logLabel} We have ${lastId} as last ID`);
 
           return {
             records: sortedRecords,
@@ -223,8 +226,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     }
   }
 
-  function recordRowCallback({row, metadataPrefix, includeRecords = true}) {
-    debugDev(`recordRowCallback`);
+  function recordRowCallback({logLabel, row, metadataPrefix, includeRecords = true}) {
+    debugDev(`${logLabel} recordRowCallback`);
     debugDev(row);
 
     // Parse record, validate, but do not throw (yet) for validationErrors (validate:1, noFailValidation:1)
@@ -233,14 +236,14 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     const isDeleted = isDeletedRecord(record);
 
     const validationErrors = record.getValidationErrors();
-    debugDev(`validationErrors: ${JSON.stringify(validationErrors)}`);
+    debugDev(`${logLabel} validationErrors: ${JSON.stringify(validationErrors)}`);
 
     // We want to include records in response and have an existing record with validationErrors
     // DEVELOP: we should handle erroring records somehow else than with 500!
     // eslint-disable-next-line functional/no-conditional-statements
     if (includeRecords && !isDeleted && validationErrors && validationErrors.length > 0) {
       const errorMessage = `Record ${row.ID} is invalid. ${validationErrors}`;
-      logger.log('error', errorMessage);
+      logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -256,21 +259,22 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), isDeleted};
 
     function handleParseRecord(validate, noFailValidation) {
-      debugDev(`recordRowCallback:handleParseRecord`);
+      debugDev(`${logLabel} recordRowCallback:handleParseRecord`);
       try {
         debugDev(row);
-        return parseRecord(row.RECORD, validate, noFailValidation);
+        return parseRecord({data: row.RECORD, validate, noFailValidation, logLabel});
       } catch (err) {
         // Error here if dbResult row is not convertable to AlephSequential by record.js
         // or AlephSequential is not convertable to marc-record-object
         // or validate:1 && noFailValidation:0 and marc-record-object fails it's validation
-        logger.log('error', `Parsing record ${row.ID} failed.`);
+        logger.error(`${logLabel} Parsing record ${row.ID} failed.`);
         throw err;
       }
     }
   }
 
-  function getQuery({query, args}) {
+  function getQuery({query, args}, logLabel) {
+    debug(`${logLabel ? logLabel : ''} GetQuery`);
     debugQuery(query, args);
 
     return {
@@ -279,20 +283,21 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     };
 
     function debugQuery(query, args) {
-      logger.log('debug', `Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
+      //logger.debug(`${logLabel} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
+      logger.debug(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
     }
   }
 
-  function logRows(rowCount) {
+  function logRows(rowCount, logLabel) {
     if (rowCount === 1 || rowCount % 250 === 0) {
-      logger.verbose(`Handling row: ${rowCount}`);
+      logger.verbose(`${logLabel} Handling row: ${rowCount}`);
       return;
     }
     if (rowCount % 25 === 0) {
-      logger.debug(`Handling row: ${rowCount}`);
+      logger.debug(`${logLabel} Handling row: ${rowCount}`);
       return;
     }
-    logger.silly(`Handling row: ${rowCount}`);
+    logger.silly(`${logLabel} Handling row: ${rowCount}`);
   }
 
 }

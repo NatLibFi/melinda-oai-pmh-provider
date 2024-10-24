@@ -61,7 +61,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
     app.enable('trust proxy', Boolean(enableProxy));
 
     app.use(createExpressLogger({
-      msg: '{{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
+      msg: '{{req.logLabel}} {{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
     }));
 
 
@@ -69,7 +69,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
 
     app.use(handleError);
 
-    return app.listen(httpPort, () => logger.log('info', 'Started Melinda OAI-PMH provider'));
+    return app.listen(httpPort, () => logger.info('Started Melinda OAI-PMH provider'));
 
     // Express requires next to be present for the error handler to work, even if that argument is not used
     function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars

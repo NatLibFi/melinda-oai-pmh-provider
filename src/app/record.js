@@ -21,8 +21,8 @@ import createDebugLogger from 'debug';
 const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/record');
 const debugDev = debug.extend('dev');
 
-export function parseRecord(data, validate = false, noFailValidation = false) {
-  debugDev(`parseRecord: create AlephSequential from dbResult data`);
+export function parseRecord({data, validate = false, noFailValidation = false, logLabel}) {
+  debugDev(`${logLabel} parseRecord: create AlephSequential from dbResult data`);
   const buffer = Buffer.from(data);
   return iterate();
 
@@ -45,7 +45,7 @@ export function parseRecord(data, validate = false, noFailValidation = false) {
     }
 
     function transformRecord(str) {
-      debugDev(`transformRecord: create marcRecord object from AlephSequential`);
+      debugDev(`${logLabel} transformRecord: create marcRecord object from AlephSequential`);
       // Create record from AlephSequential string
       const record = AlephSequential.from(str, getValidationOptions());
 
@@ -55,7 +55,7 @@ export function parseRecord(data, validate = false, noFailValidation = false) {
 
       // This could be done in marc-record-js / marc-record-serializers
       function format() {
-        debugDev(`format whitespace in fixed fields`);
+        debugDev(`${logLabel} format whitespace in fixed fields`);
         record.leader = formatWhitespace(record.leader); // eslint-disable-line functional/immutable-data
         // we handle only fields with values = fixed length fields
         record.fields.filter(({value}) => value).forEach(({value}) => formatWhitespace(value));

@@ -113,7 +113,6 @@ export default ({library, limit}) => ({
             SELECT id, time, z00_data record FROM (
               SELECT DISTINCT z13_rec_key id, MAX(z13_upd_time_stamp) time FROM ${library}.z13 s1
               WHERE s1.z13_rec_key > :cursor AND ${conditions}
-              GROUP BY z13_rec_key
               ORDER BY z13_rec_key ASC
               FETCH NEXT ${limit} ROWS ONLY
             ) JOIN ${library}.z00 ON id = z00_doc_number`;
@@ -157,7 +156,6 @@ export default ({library, limit}) => ({
             WITH ids AS (
               SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1
               WHERE s1.z13_rec_key > :cursor AND ${conditions}
-              GROUP BY z13_rec_key
               ORDER BY z13_rec_key ASC
             )
             SELECT id, time, z00_data record FROM ids

@@ -237,36 +237,41 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
         const formattedRecord = removeInvalidCharacters();
         return doTransformation();
 
+        // DEVELOP: do we need to do this here? marc-record-js does not accept controlcharacters since v7.3.0 if validationOptions: {noControlCharacters: true}
         // See https://github.com/Leonidas-from-XIV/node-xml2js/issues/547
         function removeInvalidCharacters() {
-          const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu; // eslint-disable-line no-control-regex
-          const newRecord = MarcRecord.clone(record, {subfieldValues: false});
+          const newRecord = MarcRecord.clone(record, {subfieldValues: false, noControlCharacters: true, noFailValidation: true});
 
-          newRecord.fields.forEach(field => {
-            if (field.value) {
-              if (PATTERN.test(field.value)) {
-                logger.warn(`Record ${id} contains invalid characters. Cleaning up...`);
-                //logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
-                field.value = field.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+          // Clean record only if we got validationErrors from our marcRecord
+          if (newRecord.getValidationErrors > 0) {
+            const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu; // eslint-disable-line no-control-regex
+            newRecord.fields.forEach(field => {
+              if (field.value) {
+                if (PATTERN.test(field.value)) {
+                  logger.warn(`Record ${id} contains invalid characters. Cleaning up...`);
+                  //logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
+                  field.value = field.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+                  return;
+                }
+
                 return;
               }
 
-              return;
-            }
+              field.subfields.forEach(subfield => {
+                if (PATTERN.test(subfield.value)) {
+                  logger.warn(`Record ${id} contains invalid characters. Cleaning up...`);
+                  //logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
+                  subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+                  return;
+                }
 
-            field.subfields.forEach(subfield => {
-              if (PATTERN.test(subfield.value)) {
-                logger.warn(`Record ${id} contains invalid characters. Cleaning up...`);
-                //logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
-                subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
                 return;
-              }
-
-              return;
+              });
             });
-          });
-
-          return newRecord;
+            // return cleaned record
+            return newRecord;
+          }
+          return record;
         }
 
         function doTransformation() {

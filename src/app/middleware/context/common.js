@@ -15,7 +15,10 @@
 */
 
 import {MarcRecord} from '@natlibfi/marc-record';
-//import createDebugLogger from 'debug';
+import createDebugLogger from 'debug';
+
+const debug = createDebugLogger(`@natlibfi/melinda-oai-pmh-provider/common`);
+const debugDev = debug.extend('dev');
 
 const replacePrefixesOptionsOut = [
   {
@@ -78,10 +81,11 @@ export function formatAut(params) {
 export function formatRecord({
   record, id, metadataPrefix,
   oldPrefix, newPrefix,
-  nonStandardSubfields
+  nonStandardSubfields,
+  logLabel
 }) {
   const newRecord = MarcRecord.clone(record);
-
+  debugDev(`${logLabel} Formatting record (${id}) to ${metadataPrefix}`);
   formatAleph();
   // Replace all aleph-internal prefixes with standard ISIL prefixes
   replaceAllPrefixes(replacePrefixesOptionsOut);

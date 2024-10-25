@@ -19,11 +19,12 @@ import {formatAut, stripPrivateFields as stripPrivateFieldsDefault} from './comm
 export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
   repoName: 'Melinda OAI-PMH provider for authority work records',
   isSupportedFormat: f => ['marc21', 'melinda_marc'].includes(f),
-  formatRecord: (record, id, metadataPrefix) => {
+  formatRecord: (record, id, metadataPrefix, logLabel) => {
     const newRecord = formatAut({
       record, id, metadataPrefix,
       oldPrefix: alephLibrary.toUpperCase(),
-      newPrefix: melindaPrefix
+      newPrefix: melindaPrefix,
+      logLabel
     });
 
     return isPrivileged ? newRecord : stripPrivateFields(newRecord);

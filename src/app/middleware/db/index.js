@@ -254,7 +254,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       return {
         id: row.ID,
         time: moment.utc(row.TIME, DB_TIME_FORMAT),
-        record: formatRecord(record, row.ID, metadataPrefix)
+        record: formatRecord(record, row.ID, metadataPrefix, logLabel)
       };
     }
 

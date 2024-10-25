@@ -93,13 +93,13 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
 
   async function generateListRecordsResponse({logLabel, requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
     return generateResponse({logLabel, requestUrl, query, payload: {
-      ListRecords: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format})
+      ListRecords: await generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, format})
     }});
   }
 
   async function generateListIdentifiersResponse({logLabel, requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
     return generateResponse({logLabel, requestUrl, query, payload: {
-      ListIdentifiers: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format})
+      ListIdentifiers: await generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, format})
     }});
   }
 
@@ -170,9 +170,10 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }
   }
 
-  async function generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format}) {
+  async function generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, format}) {
+    logger.debug(`${logLabel} generateListResourcesResponse`);
     const obj = {
-      record: await Promise.all(records.map(record => generateRecordObject({...record, format})))
+      record: await Promise.all(records.map(record => generateRecordObject({logLabel, ...record, format})))
     };
 
     if (token) {
@@ -193,7 +194,8 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }
   }
 
-  async function generateRecordObject({time, id, record, isDeleted, format}) {
+  async function generateRecordObject({logLabel, time, id, record, isDeleted, format}) {
+    logger.debug(`${logLabel} generateRecordObject`);
     const obj = {
       header: [
         {
@@ -227,6 +229,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     return obj;
 
     function transformRecord() {
+      logger.debug(`${logLabel} transformRecord`);
       const str = transform();
 
       return new Promise((resolve, reject) => {
@@ -240,16 +243,19 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
         // DEVELOP: do we need to do this here? marc-record-js does not accept controlcharacters since v7.3.0 if validationOptions: {noControlCharacters: true}
         // See https://github.com/Leonidas-from-XIV/node-xml2js/issues/547
         function removeInvalidCharacters() {
+          logger.debug(`${logLabel} removeInvalidCharacters`);
           const newRecord = MarcRecord.clone(record, {subfieldValues: false, noControlCharacters: true, noFailValidation: true});
+          const validationErrors = newRecord.getValidationErrors;
+          logger.debug(`${logLabel} validationErrors: ${JSON.stringify(validationErrors)}`);
 
           // Clean record only if we got validationErrors from our marcRecord
           if (newRecord.getValidationErrors > 0) {
+            logger.debug(`${logLabel} We got validationErrors, cleaning up record`);
             const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu; // eslint-disable-line no-control-regex
             newRecord.fields.forEach(field => {
               if (field.value) {
                 if (PATTERN.test(field.value)) {
-                  logger.warn(`Record ${id} contains invalid characters. Cleaning up...`);
-                  //logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
+                  logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
                   field.value = field.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
                   return;
                 }
@@ -259,8 +265,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
 
               field.subfields.forEach(subfield => {
                 if (PATTERN.test(subfield.value)) {
-                  logger.warn(`Record ${id} contains invalid characters. Cleaning up...`);
-                  //logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
+                  logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
                   subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
                   return;
                 }
@@ -271,14 +276,17 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
             // return cleaned record
             return newRecord;
           }
+          logger.debug(`${logLabel} No validationErrors, returning original record`);
           return record;
         }
 
         function doTransformation() {
           if (format === 'oai_dc') {
+            logger.debug(`${logLabel} Record to DC (${format})`);
             return marcToDC(formattedRecord);
           }
 
+          logger.debug(`${logLabel} Record to MARCXML (${format})`);
           return MARCXML.to(formattedRecord, {omitDeclaration: true});
         }
       }

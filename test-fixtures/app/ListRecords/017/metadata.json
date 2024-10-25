@@ -1,7 +1,7 @@
 {
   "description": "Should respond with an incomplete list with a resumption token (used with from parameter)",
   "skip": false,
-  "onlyDev": false,
+  "onlyDev": true,
   "requests": [
     {
       "method": "GET",

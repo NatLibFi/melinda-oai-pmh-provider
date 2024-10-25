@@ -1,9 +1,9 @@
 {
-    "description": "FIX: Should respond with a record which includes invalid characters",
-    "description2": "skipped, because updated marc-record-js refuses to handle controlCharacters",
-    "skip": true,
+    "description": "Should respond with a record which includes invalid characters in database",
+    "skip": false,
+    "onlyDev": false,
     "contextName": "bib",
-       "isPrivileged": false,
+    "isPrivileged": false,
     "alephLibrary": "foo00",
     "melindaPrefix": "FI-MELINDA",
     "requests": [

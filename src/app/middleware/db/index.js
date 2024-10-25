@@ -25,6 +25,7 @@ import queryFactory from './query';
 import createDebugLogger from 'debug';
 const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/db:index');
 const debugDev = debug.extend('dev');
+const debugDevData = debugDev.extend('data');
 
 export default async function ({maxResults, sets, alephLibrary, connection, formatRecord}) {
   const logger = createLogger();
@@ -117,7 +118,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     const row = await resultSet.getRow();
 
     await resultSet.close();
-    debugDev(`${logLabel} row: ${row}`);
+    debugDevData(`${logLabel} row: ${row}`);
     if (row) {
       return recordRowCallback({logLabel, row, metadataPrefix});
     }
@@ -230,7 +231,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
   function recordRowCallback({logLabel, row, metadataPrefix, includeRecords = true}) {
     debugDev(`${logLabel} recordRowCallback`);
-    debugDev(row);
+    //debugDev(row);
 
     // Parse record, validate, but do not throw (yet) for validationErrors (validate:1, noFailValidation:1)
     // see validationOptions used in record.js: parseRecord
@@ -263,7 +264,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     function handleParseRecord(validate, noFailValidation) {
       debugDev(`${logLabel} recordRowCallback:handleParseRecord`);
       try {
-        debugDev(row);
+        debugDevData(row);
         return parseRecord({data: row.RECORD, validate, noFailValidation, logLabel});
       } catch (err) {
         // Error here if dbResult row is not convertable to AlephSequential by record.js

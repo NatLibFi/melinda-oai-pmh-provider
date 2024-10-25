@@ -20,6 +20,8 @@ import createDebugLogger from 'debug';
 
 const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/record');
 const debugDev = debug.extend('dev');
+const debugDevData = debugDev.extend('data');
+
 
 export function parseRecord({data, validate = false, noFailValidation = false, logLabel}) {
   debugDev(`${logLabel} parseRecord: create AlephSequential from dbResult data`);
@@ -84,7 +86,7 @@ export function dbDataStringFromRecord(record) {
   debugDev(`dbDataStringFromRecord: create record data `);
   const seq = AlephSequential.to(record, {subfieldValues: false});
   debugDev(`Created AlephSequential from record`);
-  debugDev(seq);
+  debugDevData(seq);
   debugDev(`Creating dbResult like string from AlephSequential`);
 
   const buffers = seq.split('\n').slice(0, -1).map(str => {

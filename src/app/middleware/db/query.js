@@ -1,5 +1,5 @@
 /**
-* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
+* Copyright 2019-2020, 2024 University Of Helsinki (The National Library Of Finland)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -68,105 +68,36 @@ export default ({library, limit}) => ({
     }
 
     function genQuery() {
-      if (startTime || endTime) {
-        return genTime();
-      }
-
-      if (indexes.heading) {
-        return genIndex();
-      }
-
-      return all();
-
-      function genTime() {
-        return indexes.heading ? index() : basic();
-
-        function basic() {
-          const range = 's1.z13_upd_time_stamp >= :startTime AND s1.z13_upd_time_stamp <= :endTime';
-          const start = 's1.z13_upd_time_stamp >= :startTime';
-          const end = 's1.z13_upd_time_stamp <= :endTime';
-          const conditions = generateConditions();
-
-          return `
-            SELECT id, time, z00_data record FROM (
-              SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1
-              WHERE s1.z13_rec_key > :cursor AND ${conditions}
-              ORDER BY z13_rec_key ASC
-              FETCH NEXT ${limit} ROWS ONLY
-            ) JOIN ${library}.z00 ON id = z00_doc_number`;
-
-
-          function generateConditions() {
-            if (startTime && endTime) {
-              return range;
-            }
-
-            return startTime ? start : end;
-          }
-        }
-
-        function index() {
-          const range = 's1.z13_upd_time_stamp >= :startTime AND s1.z13_upd_time_stamp <= :endTime';
-          const start = 's1.z13_upd_time_stamp >= :startTime';
-          const end = 's1.z13_upd_time_stamp <= :endTime';
-          const conditions = generateConditions();
-          const indexStatements = indexes.heading.map((value, index) => `JOIN ${library}.z02 h${index} ON id = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join('\n');
-
-          return `
-            WITH ids AS (
-              SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1
-              WHERE s1.z13_rec_key > :cursor AND ${conditions}
-              ORDER BY z13_rec_key ASC
-            )
-            SELECT id, time, z00_data record FROM ids
-            ${indexStatements}
-            JOIN ${library}.z00 ON id = z00_doc_number
-            FETCH NEXT 1000 ROWS ONLY`;
-
-          function generateConditions() {
-            if (startTime && endTime) {
-              return range;
-            }
-
-            return startTime ? start : end;
-          }
-        }
-      }
-
-      function genIndex() {
-        const [initialIndex] = indexes.heading;
-        const joinStatements = indexes.heading.slice(1).map((value, index) => `JOIN ${library}.z02 h${index} ON id = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join('\n');
-        return `
-          WITH base AS (
-            SELECT z02_doc_number id FROM ${library}.z02
-            WHERE z02_rec_key LIKE '${initialIndex}' AND z02_doc_number > :cursor
-            ORDER BY z02_doc_number ASC
-          ),
-          ids AS (
-            SELECT id FROM base
-            ${joinStatements}
-            FETCH NEXT ${limit} ROWS ONLY
-          )
-          SELECT id, time, z00_data record FROM (
-            SELECT id, z13_upd_time_stamp time FROM ids
-            JOIN ${library}.z13 ON id = z13_rec_key
-          )
+      const conditions = generateTimeConditions();
+      const indexStatements = generateIndexStatements();
+      return `
+        SELECT id, time, z00_data record FROM (
+          SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1
+          ${indexStatements}
+          WHERE s1.z13_rec_key > :cursor ${conditions}
+          FETCH NEXT ${limit + 1} ROWS ONLY)
           JOIN ${library}.z00 ON id = z00_doc_number`;
+
+      function generateTimeConditions() {
+        const start = 's1.z13_upd_time_stamp >= :startTime';
+        const end = 's1.z13_upd_time_stamp <= :endTime';
+        if (startTime && endTime) {
+          return `AND ${start} AND ${end}`;
+        }
+        if (startTime) {
+          return `AND ${start}`;
+        }
+        if (endTime) {
+          return `AND ${end}`;
+        }
+        return '';
       }
 
-      function all() {
-        return `
-          WITH ids AS (
-            SELECT z00_doc_number id FROM ${library}.z00
-            WHERE z00_doc_number > :cursor
-            ORDER BY z00_doc_number ASC
-            FETCH NEXT ${limit} ROWS ONLY
-          )
-          SELECT id, time, z00_data record FROM (
-            SELECT id, z13_upd_time_stamp time FROM ids
-            JOIN ${library}.z13 ON id = z13_rec_key
-          )
-          JOIN ${library}.z00 ON id = z00_doc_number`;
+      function generateIndexStatements() {
+        if (indexes.heading) {
+          return indexes.heading.map((value, index) => `JOIN ${library}.z02 h${index} ON z13_rec_key = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join('\n');
+        }
+        return '';
       }
     }
   }

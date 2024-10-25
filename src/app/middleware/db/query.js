@@ -17,15 +17,20 @@
 import {DB_TIME_FORMAT} from './common';
 
 export default ({library, limit}) => ({
-  getSingleRecord: ({identifier}) => ({
-    args: {identifier},
-    query: `
+  getSingleRecord: ({identifier}) => {
+    if (identifier) {
+      return {
+        args: {identifier},
+        query: `
        SELECT id, time, z00_data record FROM (
          SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13
          WHERE z13_rec_key = :identifier
        )
        JOIN ${library}.z00 ON id = z00_doc_number`
-  }),
+      };
+    }
+    throw new Error(`getSingleRecord needs identifier`);
+  },
   getHeadingsIndex: ({value}) => ({
     args: {value},
     query: `SELECT z01_acc_sequence id FROM ${library}.z01 WHERE z01_rec_key like :value`

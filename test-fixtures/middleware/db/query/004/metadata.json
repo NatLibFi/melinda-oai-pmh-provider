@@ -1,0 +1,14 @@
+{
+  "description": "Should return query for getting earliest timestamp",
+  "skip": false,
+  "onlyDev": false,
+  "alephLibrary": "foo00",
+  "limit": 100,
+  "testFunction": "getSingleRecord",
+  "params": {"identifier": "000000001"},
+  "expectedResult": {"args": {
+      "identifier": "000000001"
+    },
+    "query": "\n       SELECT id, time, z00_data record FROM (\n         SELECT z13_rec_key id, z13_upd_time_stamp time FROM foo00.z13\n         WHERE z13_rec_key = :identifier\n       )\n       JOIN foo00.z00 ON id = z00_doc_number"
+  }
+}

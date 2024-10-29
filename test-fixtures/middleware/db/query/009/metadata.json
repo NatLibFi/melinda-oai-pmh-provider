@@ -1,7 +1,7 @@
 {
   "description": "Should return query for getting records, with indexes",
-  "skip": false,
-  "only": true,
+  "skip": true,
+  "onlyDev": false,
   "alephLibrary": "foo00",
   "limit": 100,
   "testFunction": "getRecords",

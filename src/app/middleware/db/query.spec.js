@@ -47,8 +47,8 @@ describe('query', () => {
         // we'll need to format startTime and endTime params before handing them to test
         const newParams = {
           ...params,
-          startTime: params.startTime ? parseTime(params.startTime) : undefined,
-          endTime: params.endTime ? parseTime(params.endTime) : undefined
+          startTime: params?.startTime ? parseTime(params.startTime) : undefined,
+          endTime: params?.endTime ? parseTime(params.endTime) : undefined
         };
 
         const result = functionToTest(newParams);

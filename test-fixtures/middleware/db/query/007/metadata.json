@@ -1,7 +1,7 @@
 {
   "description": "Should return query for getting records with end parameter",
   "skip": false,
-  "only": true,
+  "onlyDev": false,
   "alephLibrary": "foo00",
   "limit": 100,
   "testFunction": "getRecords",

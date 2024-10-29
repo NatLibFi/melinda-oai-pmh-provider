@@ -56,6 +56,7 @@ export default async ({
     try {
       await handle();
     } catch (err) {
+      logger.debug(`middleware/error ${err}, sending apiError`);
       return err instanceof ApiError ? sendResponse({error: err.code}) : next(err);
     }
 
@@ -334,6 +335,7 @@ export default async ({
                 if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
                   return true;
                 }
+                // Should we handle Error: ORA-01013: user requested cancel of current operation here too?
                 return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
               }
             }

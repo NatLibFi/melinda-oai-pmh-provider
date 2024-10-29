@@ -21,6 +21,9 @@ import {READERS} from '@natlibfi/fixura';
 //import query from './query.js';
 import queryFactory from './query';
 import createDebugLogger from 'debug';
+import moment from 'moment';
+import {requestDateStampFormats} from '../constants';
+
 
 const debug = createDebugLogger('@natlibfi/melinda-rest-oai-pmh-provider:db:query:test');
 const debugData = debug.extend('data');
@@ -41,7 +44,14 @@ describe('query', () => {
       try {
         debug(testFunction);
         const functionToTest = getFunction(testFunction);
-        const result = functionToTest(params);
+        // we'll need to format startTime and endTime params before handing them to test
+        const newParams = {
+          ...params,
+          startTime: params.startTime ? parseTime(params.startTime) : undefined,
+          endTime: params.endTime ? parseTime(params.endTime) : undefined
+        };
+
+        const result = functionToTest(newParams);
         debugData(result);
         //expect(JSON.stringify(result)).to.equal(JSON.stringify(expectedResult));
         expect(result).to.eql(expectedResult);
@@ -55,6 +65,12 @@ describe('query', () => {
         }
         debug(`Not expected to throw`);
         throw err;
+      }
+
+
+      function parseTime(stamp) {
+        debug(`parsing: ${stamp}`);
+        return moment.utc(stamp, requestDateStampFormats);
       }
 
       function getFunction(testFunction) {

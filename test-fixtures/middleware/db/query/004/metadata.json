@@ -1,5 +1,5 @@
 {
-  "description": "Should return query for getting earliest timestamp",
+  "description": "Should return query for getting single record",
   "skip": false,
   "onlyDev": false,
   "alephLibrary": "foo00",

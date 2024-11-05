@@ -73,6 +73,8 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
 
     // Express requires next to be present for the error handler to work, even if that argument is not used
     function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
+      logger.debug(`HandleError: ${err.message}`);
+
       // The correct way would be to throw if the error is unexpected...There is a race condition between the request aborted event handler and running async function.
       /* istanbul ignore if: Not easily tested */
       if (req.aborted) {

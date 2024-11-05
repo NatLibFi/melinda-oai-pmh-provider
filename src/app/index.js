@@ -15,14 +15,14 @@
 */
 
 import express from 'express';
-//import oracledbAleph from '@natlibfi/oracledb-aleph';
-import oracledbOrig from 'oracledb';
+import oracledbAleph from '@natlibfi/oracledb-aleph';
+//import oracledbOrig from 'oracledb';
 import HttpStatus from 'http-status';
 import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commons';
 import createMiddleware from './middleware';
 
 // oracledb parameter for using oracledbMock for tests!
-export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, oracledb = oracledbOrig) {
+export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, oracledb = oracledbAleph) {
   //const oracledb = useOrigOracledb ? oracledbOrig : oracledbAleph;
   const logger = createLogger();
   //logger.debug(`Using original node-oracledb ${useOrigOracledb}`);

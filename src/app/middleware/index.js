@@ -335,7 +335,10 @@ export default async ({
                 if ('message' in err && (/^DPI-1010: not connected/u).test(err.message)) {
                   return true;
                 }
-                // Should we handle Error: ORA-01013: user requested cancel of current operation here too?
+                // Try handling Error: ORA-01013: user requested cancel of current operation here too
+                if ('message' in err && (/^ORA-01013: user requested cancel of current operation/u).test(err.message)) {
+                  return true;
+                }
                 return 'message' in err && (/^NJS-003: invalid connection/u).test(err.message);
               }
             }

@@ -1,6 +1,5 @@
 
 
-
 import moment from 'moment';
 import {clone} from '@natlibfi/melinda-commons';
 import {createLogger} from '@natlibfi/melinda-backend-commons';

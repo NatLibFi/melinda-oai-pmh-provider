@@ -1,6 +1,5 @@
 
 
-
 import startApp from './app';
 import * as config from './config';
 

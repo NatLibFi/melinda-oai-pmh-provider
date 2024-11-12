@@ -1,6 +1,5 @@
 
 
-
 import {AlephSequential} from '@natlibfi/marc-record-serializers';
 import createDebugLogger from 'debug';
 

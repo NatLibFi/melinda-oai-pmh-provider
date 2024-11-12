@@ -2,7 +2,7 @@
 
 # About the implementation
 - Authoritative source of records is z00. If any of these records don't have an entry in z106, that's an error
-  - This was a problem previously when near 100k of records were missing entries in z106. Reason: unknown. Fixed by creating the corresponding entries in z106
+  - This was a problem previously when near 100k of records were missing entries in z106. Reason: unknown. Fixed by creating the corresponding entries in z106 (Note: v2.0.0)
       - Should this happen again the problem would manifest itself as OAI-PMH returning less records than it should the flow control would break
 - Flow control is based on on [keyset pagination](https://taylorbrazelton.com/posts/2019/03/offset-vs-seek-pagination/).
 - When Aleph's headings indexing is in progress, the service doesn't return correct results (For set queries, which use these indexes) because the even though the record data has been updated, the index has not

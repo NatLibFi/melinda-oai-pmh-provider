@@ -43,6 +43,7 @@
 		"@natlibfi/melinda-backend-commons": "^2.3.5",
 		"@natlibfi/melinda-commons": "^13.0.19-alpha.1",
 		"@natlibfi/oracledb-aleph": "^6.6.0",
+		"debug": "^4.3.7",
 		"express": "^4.21.1",
 		"http-status": "^1.8.1",
 		"langs": "^2.0.0",
@@ -70,7 +71,7 @@
 		"eslint": "^8.57.1",
 		"mocha": "^10.8.2",
 		"nodemon": "^3.1.7",
-		"nyc": "^15.1.0"
+		"nyc": "^17.1.0"
 	},
 	"eslintConfig": {
 		"extends": "@natlibfi/melinda-backend"

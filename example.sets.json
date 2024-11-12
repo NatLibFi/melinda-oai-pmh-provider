@@ -1,0 +1,98 @@
+[
+  {
+    "spec": "fennica",
+    "name": "Fennica",
+    "description": "The Finnish national bibliography",
+    "indexes": {
+      "heading": [
+        "HLOW LFIKKA%",
+        "H042 LFINB %"
+      ]
+    }
+  },
+  {
+    "spec": "viola",
+    "name": "Viola",
+    "description": "The Finnish national discography",
+    "indexes": {
+      "heading": [
+        "HLOW LFIKKA%",
+        "H042 LFINBD %"
+      ]
+    }
+  },
+  {
+    "spec": "arto",
+    "name": "Arto",
+    "description": "Finnish periodical and monograph articles",
+    "indexes": {
+      "heading": [
+        "H960 LARTO %"
+      ]
+    }
+  },
+  {
+    "spec": "musa",
+    "name": "Music Archive Finland",
+    "description": "A national central archive that stores materials relating to Finnish music",
+    "indexes": {
+      "heading": [
+        "HLOW LMUSA %"
+      ]
+    }
+  },
+  {
+    "spec": "monographic",
+    "name": "Monographic records",
+    "description": "Monographic records",
+    "indexes": {
+      "heading": [
+        "HBL  LM %"
+      ]
+    }
+  },
+  {
+    "spec": "serial",
+    "name": "Serial records",
+    "description": "Serial records",
+    "indexes": {
+      "heading": [
+        "HBL  LS %"
+      ]
+    }
+  },
+  {
+    "spec": "monographic:fennica",
+    "name": "Monographic records (Fennica)",
+    "description": "The Finnish national bibliograpy - Monographic records",
+    "indexes": {
+      "heading": [
+        "HLOW LFIKKA%",
+        "H042 LFINB %",
+        "HBL  LM %"
+      ]
+    }
+  },
+  {
+    "spec": "serial:fennica",
+    "name": "Serial records (Fennica)",
+    "description": "The Finnish national bibliograpy - Serial records",
+    "indexes": {
+      "heading": [
+        "HLOW LFIKKA%",
+        "H042 LFINB %",
+        "HBL  LS %"
+      ]
+    }
+  },
+  {
+    "spec": "helmet",
+    "name": "Helmet",
+    "description": "Helsinki Metropolitan Area Libraries",
+    "indexes": {
+      "heading": [
+        "HSIB LHELME %"
+      ]
+    }
+  }
+]

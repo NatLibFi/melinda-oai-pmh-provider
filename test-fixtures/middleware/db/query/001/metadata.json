@@ -1,0 +1,11 @@
+{
+  "description": "Should return query for getting earliest timestamp",
+  "skip": false,
+  "onlyDev": false,
+  "alephLibrary": "foo00",
+  "limit": 100,
+  "testFunction": "getEarliestTimestamp",
+  "expectedResult": {
+    "query": "SELECT MIN(z13_upd_time_stamp) time FROM foo00.z13"
+  }
+}

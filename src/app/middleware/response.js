@@ -1,18 +1,4 @@
-/**
-* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+
 
 import moment from 'moment';
 import {MarcRecord} from '@natlibfi/marc-record';
@@ -21,6 +7,11 @@ import {createLogger} from '@natlibfi/melinda-backend-commons';
 import {Parser, Builder} from 'xml2js';
 import marcToDC from './marc-to-dc';
 import {errors} from './../../common';
+import createDebugLogger from 'debug';
+
+const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/response');
+const debugDev = debug.extend('dev');
+const debugDevData = debugDev.extend('data');
 
 export default ({oaiIdentifierPrefix, supportEmail}) => {
   const logger = createLogger();
@@ -31,8 +22,8 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     generateGetRecordResponse
   };
 
-  function generateErrorResponse({requestUrl, query, error}) {
-    return generateResponse({requestUrl, query: formatQuery(), payload: {
+  function generateErrorResponse({logLabel = '', requestUrl, query, error}) {
+    return generateResponse({logLabel, requestUrl, query: formatQuery(), payload: {
       error: {
         $: {code: error}
       }
@@ -45,14 +36,16 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }
   }
 
-  async function generateGetRecordResponse({requestUrl, query, format, ...record}) {
-    return generateResponse({requestUrl, query, payload: {
-      GetRecord: {record: [await generateRecordObject({...record, format})]}
+  async function generateGetRecordResponse({logLabel = '', requestUrl, query, format, ...record}) {
+    debugDev(`${logLabel} generateGetRecordResponse`);
+    return generateResponse({logLabel, requestUrl, query, payload: {
+      GetRecord: {record: [await generateRecordObject({...record, format}, {logLabel})]}
     }});
   }
 
-  function generateIdentifyResponse({requestUrl, query, repoName, earliestTimestamp}) {
-    return generateResponse({requestUrl, query, payload: {
+  function generateIdentifyResponse({logLabel = '', requestUrl, query, repoName, earliestTimestamp}) {
+    debugDev(`${logLabel} generateIdentifyResponse`);
+    return generateResponse({logLabel, requestUrl, query, payload: {
       Identify: {
         repositoryName: [repoName],
         baseURL: [requestUrl.split('?')[0]],
@@ -65,8 +58,8 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }});
   }
 
-  function generateListMetadataFormatsResponse({requestUrl, query, formats}) {
-    return generateResponse({requestUrl, query, payload: {
+  function generateListMetadataFormatsResponse({logLabel = '', requestUrl, query, formats}) {
+    return generateResponse({logLabel, requestUrl, query, payload: {
       ListMetadataFormats: {
         metadataFormat: formats.map(({prefix, schema, namespace}) => ({
           metadataPrefix: [prefix],
@@ -77,8 +70,8 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }});
   }
 
-  function generateListSetsResponse({requestUrl, query, sets}) {
-    return generateResponse({requestUrl, query, payload: {
+  function generateListSetsResponse({logLabel = '', requestUrl, query, sets}) {
+    return generateResponse({logLabel, requestUrl, query, payload: {
       ListSets: {
         set: sets.map(({spec, name, description}) => ({
           setSpec: [spec],
@@ -89,19 +82,20 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }});
   }
 
-  async function generateListRecordsResponse({requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
-    return generateResponse({requestUrl, query, payload: {
-      ListRecords: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format})
+  async function generateListRecordsResponse({logLabel = '', requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
+    return generateResponse({logLabel, requestUrl, query, payload: {
+      ListRecords: await generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, format})
     }});
   }
 
-  async function generateListIdentifiersResponse({requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
-    return generateResponse({requestUrl, query, payload: {
-      ListIdentifiers: await generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format})
+  async function generateListIdentifiersResponse({logLabel = '', requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
+    return generateResponse({logLabel, requestUrl, query, payload: {
+      ListIdentifiers: await generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, format})
     }});
   }
 
-  function generateResponse({requestUrl, query, payload}) {
+  function generateResponse({logLabel = '', requestUrl, query, payload}) {
+    debugDev(`${logLabel} generateResponse`);
     const obj = generate();
     return toXML();
 
@@ -167,9 +161,10 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }
   }
 
-  async function generateListResourcesResponse({records, token, tokenExpirationTime, cursor, format}) {
+  async function generateListResourcesResponse({logLabel = '', records, token, tokenExpirationTime, cursor, format}) {
+    debugDev(`${logLabel} generateListResourcesResponse`);
     const obj = {
-      record: await Promise.all(records.map(record => generateRecordObject({...record, format})))
+      record: await Promise.all(records.map(record => generateRecordObject({logLabel, ...record, format})))
     };
 
     if (token) {
@@ -190,7 +185,8 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }
   }
 
-  async function generateRecordObject({time, id, record, isDeleted, format}) {
+  async function generateRecordObject({time, id, record, isDeleted, format, logLabel = ''}) {
+    debugDev(`${logLabel} generateRecordObject`);
     const obj = {
       header: [
         {
@@ -224,6 +220,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     return obj;
 
     function transformRecord() {
+      debugDev(`${logLabel} transformRecord`);
       const str = transform();
 
       return new Promise((resolve, reject) => {
@@ -234,41 +231,54 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
         const formattedRecord = removeInvalidCharacters();
         return doTransformation();
 
+        // DEVELOP: do we need to do this here? marc-record-js does not accept controlcharacters since v7.3.0 if validationOptions: {noControlCharacters: true}
         // See https://github.com/Leonidas-from-XIV/node-xml2js/issues/547
         function removeInvalidCharacters() {
-          const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu; // eslint-disable-line no-control-regex
-          const newRecord = MarcRecord.clone(record, {subfieldValues: false});
+          debugDev(`${logLabel} removeInvalidCharacters`);
+          const newRecord = MarcRecord.clone(record, {subfieldValues: false, noControlCharacters: true, noFailValidation: true});
+          const validationErrors = newRecord.getValidationErrors();
+          debugDevData(JSON.stringify(newRecord));
+          debugDev(`${logLabel} validationErrors: ${JSON.stringify(validationErrors)}`);
 
-          newRecord.fields.forEach(field => {
-            if (field.value) {
-              if (PATTERN.test(field.value)) {
-                logger.log('warn', `Record ${id} contains invalid characters. Cleaning up...`);
-                field.value = field.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+          // Clean record only if we got validationErrors from our marcRecord
+          if (validationErrors.length > 0) {
+            debugDev(`${logLabel} We got validationErrors, cleaning up record`);
+            const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu; // eslint-disable-line no-control-regex
+            newRecord.fields.forEach(field => {
+              if (field.value) {
+                if (PATTERN.test(field.value)) {
+                  logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
+                  field.value = field.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+                  return;
+                }
+
                 return;
               }
 
-              return;
-            }
+              field.subfields.forEach(subfield => {
+                if (PATTERN.test(subfield.value)) {
+                  logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
+                  subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+                  return;
+                }
 
-            field.subfields.forEach(subfield => {
-              if (PATTERN.test(subfield.value)) {
-                logger.log('warn', `Record ${id} contains invalid characters. Cleaning up...`);
-                subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
                 return;
-              }
-
-              return;
+              });
             });
-          });
-
-          return newRecord;
+            // return cleaned record
+            return newRecord;
+          }
+          debugDev(`${logLabel} No validationErrors, returning original record`);
+          return record;
         }
 
         function doTransformation() {
           if (format === 'oai_dc') {
+            debugDev(`${logLabel} Record to DC (${format})`);
             return marcToDC(formattedRecord);
           }
 
+          debugDev(`${logLabel} Record to MARCXML (${format})`);
           return MARCXML.to(formattedRecord, {omitDeclaration: true});
         }
       }

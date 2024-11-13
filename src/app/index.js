@@ -1,28 +1,17 @@
-/**
-* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+
 
 import express from 'express';
-import oracledbOrig from '@natlibfi/oracledb-aleph';
+import oracledbAleph from '@natlibfi/oracledb-aleph';
+//import oracledbOrig from 'oracledb';
 import HttpStatus from 'http-status';
 import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commons';
 import createMiddleware from './middleware';
 
-export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, /* istanbul ignore next: Default value not used in tests */ oracledb = oracledbOrig) {
+// oracledb parameter for using oracledbMock for tests!
+export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, oracledb = oracledbAleph) {
+  //const oracledb = useOrigOracledb ? oracledbOrig : oracledbAleph;
   const logger = createLogger();
-
+  //logger.debug(`Using original node-oracledb ${useOrigOracledb}`);
   const pool = await initOracle();
   const server = await initExpress();
 
@@ -33,14 +22,13 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
   async function initOracle() {
     setOracleOptions();
 
-    logger.log('debug', 'Establishing connection to database...');
-
+    logger.debug(`Establishing connection to database (pool)... (${oracleConnectString})`);
     const pool = await oracledb.createPool({
       user: oracleUsername, password: oraclePassword,
       connectString: oracleConnectString
     });
 
-    logger.log('debug', 'Connected to database!');
+    logger.debug('Connected to database!');
 
     return pool;
 
@@ -53,12 +41,13 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
   }
 
   async function initExpress() {
+    logger.debug(`initExpress`);
     const app = express();
 
     app.enable('trust proxy', Boolean(enableProxy));
 
     app.use(createExpressLogger({
-      msg: '{{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
+      msg: '{{req.logLabel}} {{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
     }));
 
 
@@ -66,10 +55,13 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
 
     app.use(handleError);
 
-    return app.listen(httpPort, () => logger.log('info', 'Started Melinda OAI-PMH provider'));
+    return app.listen(httpPort, () => logger.info('Started Melinda OAI-PMH provider'));
 
     // Express requires next to be present for the error handler to work, even if that argument is not used
     function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
+      logger.debug(`HandleError: ${err.message}`);
+      logger.debug(`req.aborted: ${req.aborted}`);
+
       // The correct way would be to throw if the error is unexpected...There is a race condition between the request aborted event handler and running async function.
       /* istanbul ignore if: Not easily tested */
       if (req.aborted) {

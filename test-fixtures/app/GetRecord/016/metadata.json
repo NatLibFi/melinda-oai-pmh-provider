@@ -1,0 +1,120 @@
+{
+    "description": "Should respond with a bib record, with Aleph internal prefixes updated to standard ISIL prefixes",
+    "contextName": "bib",
+    "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
+    "requests": [
+        { "method": "GET", "status": 200,
+            "requestParams": {
+                "verb": "GetRecord", 
+                "metadataPrefix": "marc21",
+                "identifier": "oai:foo.bar/12345"
+            }
+        }        
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ],
+        [
+            {
+                "TIME": "20000102050000",
+                "ID": "12345",
+                "RECORD": {
+                        "leader": "03106cam a2200721 i 4500",
+                        "fields": [
+                            {
+                                "tag": "001",
+                                "value": "12345"
+                            },
+                            {
+                                "tag": "245",
+                                "subfields": [{
+                                    "code": "a",
+                                    "value": "Foo Bar"
+                                    }]
+                                },
+                        {
+                            "tag": "699",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar agent name $0 (FIN11) - (FI-ASTERI-N)"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FIN11)555666"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "699",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar teos $0 (FIN13) - (FI-ASTERI-W)"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FIN13)000222444"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "699",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar subject $0 (FIN10) - (FI-ASTERI-S)"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FIN10)000111444"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "699",
+                            "ind1": "1",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar aux $0 (FIN12) - (FI-ASTERI-A)"
+                                },
+                                {
+                                    "code": "0",
+                                    "value": "(FIN12)000222444"
+                                }
+                            ]
+                        },
+                        {
+                            "tag": "699",
+                            "ind1": " ",
+                            "ind2": " ",
+                            "subfields": [
+                                {
+                                    "code": "a",
+                                    "value": "Foobar bib $w (FIN01) - (FI-MELINDA)"
+                                },
+                                {
+                                    "code": "w",
+                                    "value": "(FIN01)000333666"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    ]
+}

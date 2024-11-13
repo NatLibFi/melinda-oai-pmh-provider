@@ -1,24 +1,10 @@
-/**
-* Copyright 2019-2020 University Of Helsinki (The National Library Of Finland)
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+
 
 import {Parser, Builder} from 'xml2js';
 import {MarcRecord} from '@natlibfi/marc-record';
 import createOracleMock from '@natlibfi/oracledb-mock';
 import generateTests from '@natlibfi/fixugen-http-server';
-import {formatRecord} from './record';
+import {dbDataStringFromRecord} from './record';
 import startApp from '.';
 
 const oracleMock = createOracleMock();
@@ -28,7 +14,7 @@ generateTests({
   path: [__dirname, '..', '..', 'test-fixtures', 'app']
 });
 
-function callback({contextName, isPrivileged, dbResults, sets = []}) {
+function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbResults, sets = []}) {
   oracleMock._clear();
   oracleMock._execute(formatDbResults());
 
@@ -36,13 +22,14 @@ function callback({contextName, isPrivileged, dbResults, sets = []}) {
     httpPort: 1337,
     oracleUsername: 'foo',
     oraclePassword: 'bar',
-    oracleConnectString: 'foobar',
+    oracleConnectString: 'foobar/foo',
     middlewareOptions: {
       sets,
       // Tests will break in the 4th millennium because resumption tokens will expire
       resumptionTokenTimeout: 31536000000000,
       maxResults: 3,
-      alephLibrary: 'foo00',
+      alephLibrary,
+      //alephLibrary: 'foo00',
       instanceUrl: `http://localhost:1337`,
       oaiIdentifierPrefix: 'oai:foo.bar',
       supportEmail: 'foo@foo.bar',
@@ -50,8 +37,10 @@ function callback({contextName, isPrivileged, dbResults, sets = []}) {
       socketTimeout: 0,
       contextOptions: {
         contextName, isPrivileged,
-        alephLibrary: 'foo00',
-        melindaPrefix: 'FI-MELINDA'
+        alephLibrary,
+        melindaPrefix
+        //alephLibrary: 'foo00',
+        //melindaPrefix: 'FI-MELINDA'
       }
     }
   }, oracleMock);
@@ -64,7 +53,9 @@ function callback({contextName, isPrivileged, dbResults, sets = []}) {
     function format(rows) {
       return rows.map(row => {
         if ('RECORD' in row) {
-          return {...row, RECORD: formatRecord(new MarcRecord(row.RECORD))};
+          // eslint-disable-next-line no-console
+          //console.log(`RECORD`);
+          return {...row, RECORD: dbDataStringFromRecord(new MarcRecord(row.RECORD, {noFailValidation: true}))};
         }
 
         return row;
@@ -74,7 +65,7 @@ function callback({contextName, isPrivileged, dbResults, sets = []}) {
 }
 
 async function formatResponse(headers, originalPayload) {
-  if (originalPayload) { // eslint-disable-line functional/no-conditional-statement
+  if (originalPayload) { // eslint-disable-line functional/no-conditional-statements
     try {
       const obj = await parse(originalPayload);
       const modified = format(obj);

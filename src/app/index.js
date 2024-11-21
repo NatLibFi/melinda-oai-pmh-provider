@@ -36,7 +36,9 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
       oracledb.outFormat = oracledb.OBJECT; // eslint-disable-line functional/immutable-data
       oracledb.poolTimeout = 20; // eslint-disable-line functional/immutable-data
       oracledb.events = false; // eslint-disable-line functional/immutable-data
-      oracledb.poolPingInterval = 10; // eslint-disable-line functional/immutable-data
+      // Check connection usability always
+      oracledb.poolPingInterval = 0; // eslint-disable-line functional/immutable-data
+      //oracledb.poolPingInterval = 10; // eslint-disable-line functional/immutable-data
     }
   }
 

@@ -76,7 +76,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
           await resultSet.close();
 
-          cache[value] = `${row.ID}%`; // eslint-disable-line functional/immutable-data, require-atomic-updates
+          cache[value] = `${row.ID}`; // eslint-disable-line functional/immutable-data, require-atomic-updates
+          // cache[value] = `${row.ID}%`; // eslint-disable-line functional/immutable-data, require-atomic-updates
           return getHeadingIndexes(values.slice(1), results.concat(cache[value]));
         }
 

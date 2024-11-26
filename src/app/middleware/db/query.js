@@ -73,7 +73,8 @@ export default ({library, limit}) => ({
 
       function generateIndexStatements() {
         if (indexes.heading) {
-          return indexes.heading.map((value, index) => `JOIN ${library}.z02 h${index} ON z13_rec_key = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join(' ');
+        // return indexes.heading.map((value, index) => `JOIN ${library}.z02 h${index} ON z13_rec_key = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join(' ');
+          return indexes.heading.map((value, index) => `AND EXISTS (SELECT 1 FROM ${library}.z02 h${index} WHERE h${index}.z02_rec_key = CONCAT('${value}', s1.z13_rec_key))'`).join(' ');
         }
         return '';
       }

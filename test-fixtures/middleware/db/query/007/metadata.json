@@ -11,6 +11,6 @@
       "cursor": "000000000",
       "endTime": "201001010000000"
     },
-    "query": "SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM foo00.z13 s1  WHERE s1.z13_rec_key > ':cursor' AND s1.z13_rec_key <= '999999998' AND s1.z13_upd_time_stamp <= ':endTime' FETCH NEXT 101 ROWS ONLY) JOIN foo00.z00 ON id = z00_doc_number"
+    "query": "SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM foo00.z13 s1 WHERE s1.z13_rec_key > ':cursor' AND s1.z13_rec_key <= '999999998' AND s1.z13_upd_time_stamp <= ':endTime'  FETCH NEXT 101 ROWS ONLY) JOIN foo00.z00 ON id = z00_doc_number"
     }
 }

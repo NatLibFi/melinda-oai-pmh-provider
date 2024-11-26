@@ -8,6 +8,6 @@
   "params": {"value": "foobar"},
   "expectedResult": {
     "args": {"value": "foobar"},
-    "query": "SELECT z01_acc_sequence id FROM foo00.z01 WHERE z01_rec_key like :value"
+    "query": "SELECT z01_acc_sequence id FROM foo00.z01 WHERE z01_rec_key like ':value'"
   }
 }

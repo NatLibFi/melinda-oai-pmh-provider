@@ -1,4 +1,4 @@
-import {DB_TIME_FORMAT} from './common';
+import {DB_TIME_FORMAT, MAX_DOC_NUMBER} from './common';
 
 export default ({library, limit}) => ({
   getSingleRecord: ({identifier}) => {
@@ -54,7 +54,7 @@ export default ({library, limit}) => ({
     function genQuery() {
       const conditions = generateTimeConditions();
       const indexStatements = generateIndexStatements();
-      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 ${indexStatements} WHERE s1.z13_rec_key > ':cursor' ${conditions} FETCH NEXT ${limit + 1} ROWS ONLY) JOIN ${library}.z00 ON id = z00_doc_number`;
+      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 ${indexStatements} WHERE s1.z13_rec_key > ':cursor' AND s1.z13_rec_key <= '${MAX_DOC_NUMBER}' ${conditions} FETCH NEXT ${limit + 1} ROWS ONLY) JOIN ${library}.z00 ON id = z00_doc_number`;
 
       function generateTimeConditions() {
         const start = `s1.z13_upd_time_stamp >= ':startTime'`;

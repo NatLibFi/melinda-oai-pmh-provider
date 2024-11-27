@@ -82,15 +82,15 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }});
   }
 
-  async function generateListRecordsResponse({logLabel = '', requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
+  async function generateListRecordsResponse({logLabel = '', requestUrl, query, token, tokenExpirationTime, cursor, timeCursor, records, format}) {
     return generateResponse({logLabel, requestUrl, query, payload: {
-      ListRecords: await generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, format})
+      ListRecords: await generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, timeCursor, format})
     }});
   }
 
-  async function generateListIdentifiersResponse({logLabel = '', requestUrl, query, token, tokenExpirationTime, cursor, records, format}) {
+  async function generateListIdentifiersResponse({logLabel = '', requestUrl, query, token, tokenExpirationTime, cursor, timeCursor, records, format}) {
     return generateResponse({logLabel, requestUrl, query, payload: {
-      ListIdentifiers: await generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, format})
+      ListIdentifiers: await generateListResourcesResponse({logLabel, records, token, tokenExpirationTime, cursor, timeCursor, format})
     }});
   }
 
@@ -161,7 +161,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
     }
   }
 
-  async function generateListResourcesResponse({logLabel = '', records, token, tokenExpirationTime, cursor, format}) {
+  async function generateListResourcesResponse({logLabel = '', records, token, tokenExpirationTime, cursor, timeCursor, format}) {
     debugDev(`${logLabel} generateListResourcesResponse`);
     const obj = {
       record: await Promise.all(records.map(record => generateRecordObject({logLabel, ...record, format})))
@@ -181,7 +181,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
 
     function genAttr() {
       const expirationDate = tokenExpirationTime.toISOString();
-      return {expirationDate, cursor};
+      return {expirationDate, cursor, timeCursor};
     }
   }
 

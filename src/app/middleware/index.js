@@ -388,20 +388,20 @@ export default async ({
         }
 
         function listResources(callback) {
-          const {records, cursor, lastCount} = result;
+          const {records, cursor, timeCursor, lastCount} = result;
 
           if (records.length === 0) {
             return generateErrorResponse({logLabel, query, requestUrl, error: errors.noRecordsMatch});
           }
 
 
-          if (cursor) {
+          if (cursor || timeCursor) {
             const newCount = calculateNewCount();
 
             const {token, tokenExpirationTime} = generateResumptionToken({
               ...params,
               lastCount: newCount,
-              secretEncryptionKey, resumptionTokenTimeout, cursor
+              secretEncryptionKey, resumptionTokenTimeout, cursor, timeCursor
             });
 
             return callback({

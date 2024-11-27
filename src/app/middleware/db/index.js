@@ -215,7 +215,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           return {
             records: sortedRecords,
             newCursor: toAlephId(lastId),
-            newTimeCursor: lastTime
+            newTimeCursor: lastTime.format(DB_TIME_FORMAT)
           };
         }
       }

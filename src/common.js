@@ -16,7 +16,7 @@ export const errors = {
 
 export function generateResumptionToken({
   secretEncryptionKey, resumptionTokenTimeout,
-  cursor, metadataPrefix, from, until, set, lastCount,
+  cursor, timeCursor, metadataPrefix, from, until, set, lastCount,
   currentTime = moment()
 }) {
   const tokenExpirationTime = generateResumptionExpirationTime();
@@ -33,23 +33,23 @@ export function generateResumptionToken({
   function generateValue() {
     const expirationTime = tokenExpirationTime.toISOString();
 
-    return `${expirationTime};${cursor};${metadataPrefix};${from ? from.toISOString() : ''};${until ? until.toISOString() : ''};${set || ''};${lastCount || 0}`;
+    return `${expirationTime};${cursor};${timeCursor};${metadataPrefix};${from ? from.toISOString() : ''};${until ? until.toISOString() : ''};${set || ''};${lastCount || 0}`;
   }
 }
 
 export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false}) {
   const str = decryptToken();
-  const [expirationTime, cursor, metadataPrefix, from, until, set, lastCountArg] = str.split(/;/gu);
+  const [expirationTime, cursor, timeCursor, metadataPrefix, from, until, set, lastCountArg] = str.split(/;/gu);
   const lastCount = Number(lastCountArg);
   const expires = moment(expirationTime);
 
   if (expires.isValid() && moment().isBefore(expires)) {
-    return filter({cursor, metadataPrefix, set, from, until, lastCount});
+    return filter({cursor, timeCursor, metadataPrefix, set, from, until, lastCount});
   }
 
   /* istanbul ignore if: Exists only for the CLI which won't be tested */
   if (ignoreError) {
-    return filter({cursor, metadataPrefix, set, from, until, lastCount});
+    return filter({cursor, timeCursor, metadataPrefix, set, from, until, lastCount});
   }
 
   throw new ApiError({verb, code: errors.badResumptionToken});

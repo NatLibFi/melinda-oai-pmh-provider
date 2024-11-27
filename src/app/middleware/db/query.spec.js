@@ -22,7 +22,7 @@ describe('query', () => {
     fixura: {
       reader: READERS.JSON
     },
-    callback: ({alephLibrary = 'foo00', maxResults = 100, testFunction, params, expectedResult, expectedToThrow = false, expectedErrorMessage}) => {
+    callback: ({alephLibrary = 'foo00', maxResults = 100, testFunction, params, indexes = {}, expectedResult, expectedToThrow = false, expectedErrorMessage}) => {
       const {getEarliestTimestamp, getHeadingsIndex, getRecords, getSingleRecord} = queryFactory({
         library: alephLibrary, limit: maxResults
       });
@@ -34,7 +34,8 @@ describe('query', () => {
         const newParams = {
           ...params,
           startTime: params?.startTime ? parseTime(params.startTime) : undefined,
-          endTime: params?.endTime ? parseTime(params.endTime) : undefined
+          endTime: params?.endTime ? parseTime(params.endTime) : undefined,
+          indexes
         };
 
         const result = functionToTest(newParams);

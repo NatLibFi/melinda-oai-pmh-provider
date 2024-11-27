@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-oai-pmh-provider.git"
 	},
 	"license": "MIT",
-	"version": "2.0.2",
+	"version": "2.0.3-alpha.2",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -40,7 +40,7 @@
 		"@babel/runtime": "^7.26.0",
 		"@natlibfi/marc-record": "^9.1.1",
 		"@natlibfi/marc-record-serializers": "^10.1.4",
-		"@natlibfi/melinda-backend-commons": "^2.3.5",
+		"@natlibfi/melinda-backend-commons": "^2.3.6",
 		"@natlibfi/melinda-commons": "^13.0.19-alpha.2",
 		"@natlibfi/oracledb-aleph": "^6.6.0",
 		"debug": "^4.3.7",
@@ -61,7 +61,7 @@
 		"@babel/register": "^7.25.9",
 		"@natlibfi/eslint-config-melinda-backend": "^3.0.5",
 		"@natlibfi/fixugen": "^2.0.12",
-		"@natlibfi/fixugen-http-server": "^1.1.16",
+		"@natlibfi/fixugen-http-server": "^1.1.17",
 		"@natlibfi/fixura": "^3.0.11",
 		"@natlibfi/oracledb-mock": "^1.0.3",
 		"babel-plugin-istanbul": "^7.0.0",

@@ -10,6 +10,6 @@
     "args": {
       "cursor": "000000000"
     },
-    "query": "\n        SELECT id, time, z00_data record FROM (\n          SELECT z13_rec_key id, z13_upd_time_stamp time FROM foo00.z13 s1\n          \n          WHERE s1.z13_rec_key > :cursor \n          FETCH NEXT 101 ROWS ONLY)\n          JOIN foo00.z00 ON id = z00_doc_number"
-  }
+    "query": "SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM foo00.z13 s1 WHERE s1.z13_rec_key > :cursor AND s1.z13_rec_key <= 999999998   ORDER BY s1.z13_rec_key FETCH NEXT 101 ROWS ONLY) JOIN foo00.z00 ON id = z00_doc_number"
+    }
 }

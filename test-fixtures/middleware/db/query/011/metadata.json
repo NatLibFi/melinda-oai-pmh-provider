@@ -1,5 +1,5 @@
 {
-  "description": "Should return query for getting records with both end and start parameter",
+  "description": "Should return query for getting records with both end and start parameter and timeCursor",
   "skip": false,
   "onlyDev": false,
   "alephLibrary": "foo00",
@@ -7,11 +7,12 @@
   "testFunction": "getRecords",
   "params": {
     "startTime": "2010-01-01",
-    "endTime": "2020-02-02"},
+    "endTime": "2020-02-02",
+    "timeCursor": "201501010000000"},
   "expectedResult": {
     "args": {
       "endTime": "202002020000000",
-      "startTime": "201001010000000"
+      "startTime": "201501010000000"
     },
     "query": "SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM foo00.z13 s1 WHERE s1.z13_upd_time_stamp >= :startTime AND s1.z13_upd_time_stamp <= :endTime  ORDER BY s1.z13_upd_time_stamp FETCH NEXT 101 ROWS ONLY) JOIN foo00.z00 ON id = z00_doc_number"
   }

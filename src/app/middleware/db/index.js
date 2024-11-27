@@ -1,5 +1,3 @@
-
-
 import moment from 'moment';
 import {isDeletedRecord, toAlephId} from '@natlibfi/melinda-commons';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
@@ -124,10 +122,11 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
   function queryRecords({
     logLabel,
-    connection, from, until, set, metadataPrefix, cursor, lastCount,
+    connection, from, until, set, metadataPrefix, cursor, timeCursor, lastCount,
     includeRecords = true
   }) {
     debugDev(`${logLabel} queryRecords`);
+    logger.debug(`${logLabel} We got a from: ${from}, until: ${until}, set ${set}, metaDataPrefix ${metadataPrefix}, cursor: ${cursor}, timeCursor: ${timeCursor}`);
     const params = getParams();
     // Do not strigingify params there is a circularity in connection!
     //debugDev(`${logLabel} params: ${JSON.stringify(params)}`);
@@ -142,18 +141,19 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         logLabel, row, includeRecords, metadataPrefix
       });
 
+      logger.debug(`${logLabel} We got a indexes: ${JSON.stringify(indexes)}, startTime: ${startTime}, endTime ${endTime}`);
       return {
         logLabel,
-        rowCallback, connection, cursor, lastCount,
-        genQuery: cursor => getRecords({cursor, startTime, endTime, indexes: setIndexes})
+        rowCallback, connection, cursor, timeCursor, lastCount,
+        genQuery: (cursor, timeCursor) => getRecords({cursor, timeCursor, startTime, endTime, indexes: setIndexes})
       };
     }
 
-    async function executeQuery({logLabel, connection, genQuery, rowCallback, cursor, lastCount}) {
+    async function executeQuery({logLabel, connection, genQuery, rowCallback, cursor, timeCursor, lastCount}) {
       debugDev(`${logLabel} executeQuery`);
-      const resultSet = await doQuery(cursor);
+      const resultSet = await doQuery(cursor, timeCursor);
       debugDev(`${logLabel} We got a resultSet`);
-      const {records, newCursor} = await pump();
+      const {records, newCursor, newTimeCursor} = await pump();
 
       await resultSet.close();
 
@@ -165,12 +165,13 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       debugDev(`${logLabel} There are results left, returning a cursor`);
       return {
         records, lastCount,
-        cursor: newCursor
+        cursor: newCursor,
+        timeCursor: newTimeCursor
       };
 
-      async function doQuery(cursor) {
+      async function doQuery(cursor, timeCursor) {
         debugDev(`${logLabel} doQuery`);
-        const {query, args} = getQuery(genQuery(cursor), logLabel);
+        const {query, args} = getQuery(genQuery(cursor, timeCursor), logLabel);
         const {resultSet} = await connection.execute(query, args, {resultSet: true});
         return resultSet;
       }
@@ -196,20 +197,25 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           return genResults(records);
         }
 
+        // empty array
         return {records};
 
         function genResults(records) {
           debugDev(`${logLabel} genResults`);
           debug(`${logLabel} We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
+          // Do we need this sort, when we have sort in query?
           const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
 
           const lastId = sortedRecords.slice(-1)[0].id;
+          const lastTime = sortedRecords.slice(-1)[0].time;
           debug(`${logLabel} We have ${lastId} as last ID`);
+          debug(`${logLabel} We have ${lastTime} as last time`);
 
           return {
             records: sortedRecords,
-            newCursor: toAlephId(lastId)
+            newCursor: toAlephId(lastId),
+            newTimeCursor: lastTime
           };
         }
       }

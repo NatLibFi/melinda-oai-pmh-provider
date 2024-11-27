@@ -274,7 +274,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
     function debugQuery(query, args) {
       //logger.debug(`${logLabel} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
-      logger.debug(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
+      logger.verbose(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
     }
   }
 

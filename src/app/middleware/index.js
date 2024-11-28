@@ -212,7 +212,8 @@ export default async ({
             logger.debug(`${logLabel} Parsing resumptionToken for parameters`);
             const params = parseResumptionToken({
               secretEncryptionKey, verb,
-              token: req.query.resumptionToken
+              token: req.query.resumptionToken,
+              sets
             });
 
             // DEVELOP: We should probably validate also params from resumptionToken?

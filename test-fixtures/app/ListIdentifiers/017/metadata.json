@@ -1,13 +1,13 @@
 {
-  "description": "Should respond with an error because of an invalid resumption token",
-  "onlyDev": true,
+  "description": "Should respond with an error because of an invalid resumption token (invalid timeCursor in token)",
+  "onlyDev": false,
   "requests": [
     {
       "method": "GET",
       "status": 200,
       "requestParams": {
         "verb": "ListIdentifiers",
-        "resumptionToken": "foobar"
+        "resumptionToken": "bR/SihcDPND+nrKbLtrvpUjnVowl61NRCXEYbvOb8nhhff1Ezy+Qk9nMhVBaey8TGc4vtFiaGA=="
       }
     }
   ],

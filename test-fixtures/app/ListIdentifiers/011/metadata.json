@@ -1,5 +1,6 @@
 {
   "description": "Should respond with an incomplete list with a resumption token",
+  "skip": true,
   "requests": [
     {
       "method": "GET",

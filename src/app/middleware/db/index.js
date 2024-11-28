@@ -213,7 +213,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
             if (from || until) {
               return records;
             }
-            return [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
+            return records;
+            //return [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
           }
 
           // NOTE: if we want to sort we should sort on time if we have timebased query

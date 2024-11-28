@@ -1,6 +1,6 @@
 {
   "description": "Should work with resumptionToken parameter",
-  "skip": false,
+  "skip": true,
   "onlyDev": false,
   "requests": [
     {

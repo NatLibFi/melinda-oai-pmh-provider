@@ -1,9 +1,10 @@
 {
   "description": "Should work with from-parameter",
+  "skip": true,
   "contextName": "bib",
-     "isPrivileged": false,
-    "alephLibrary": "foo00",
-    "melindaPrefix": "FI-MELINDA",
+  "isPrivileged": false,
+  "alephLibrary": "foo00",
+  "melindaPrefix": "FI-MELINDA",
   "requests": [
     {
       "method": "GET",

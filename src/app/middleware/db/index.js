@@ -210,15 +210,15 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           // Do we need this sort, when we have sort in query?
           const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
 
-          const lastId = sortedRecords.slice(-1)[0].id;
-          const lastTime = sortedRecords.slice(-1)[0].time;
+          const lastId = toAlephId(sortedRecords.slice(-1)[0].id);
+          const lastTime = sortedRecords.slice(-1)[0].time.format(DB_TIME_FORMAT);
           debug(`${logLabel} We have ${lastId} as last ID`);
           debug(`${logLabel} We have ${lastTime} as last time`);
 
           return {
             records: sortedRecords,
-            newCursor: toAlephId(lastId),
-            newTimeCursor: lastTime.format(DB_TIME_FORMAT)
+            newCursor: lastId,
+            newTimeCursor: lastTime
           };
         }
       }

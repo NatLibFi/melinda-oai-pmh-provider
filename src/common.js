@@ -1,8 +1,10 @@
 
 
 import moment from 'moment';
-import {encryptString, decryptString, createLogger} from '@natlibfi/melinda-backend-commons';
+import {encryptString, decryptString} from '@natlibfi/melinda-backend-commons';
+// import { createLogger } from '@natlibfi/melinda-backend-commons/';
 import ApiError from './api-error';
+import createDebugLogger from 'debug';
 
 export const errors = {
   badArgument: 'badArgument',
@@ -19,13 +21,15 @@ export function generateResumptionToken({
   cursor, timeCursor, metadataPrefix, from, until, set, lastCount,
   currentTime = moment()
 }) {
-  const logger = createLogger();
+  //const logger = createLogger();
+  const debug = createDebugLogger(`@natlibfi/melinda-oai-pmh-provider/generateResumptionToken`);
+  const debugDev = debug.extend('dev');
   const tokenExpirationTime = generateResumptionExpirationTime();
   const value = generateValue();
   const token = encryptString({key: secretEncryptionKey, value, algorithm: 'aes-256-cbc'});
-  logger.debug(`resumptionToken: value: ${value}}`);
-  logger.debug(`resumptionToken: token: ${token}}`);
-  logger.debug(`resumptionToken: tokenExpirationTime: ${tokenExpirationTime}}`);
+  debugDev(`resumptionToken: value: ${value}}`);
+  debugDev(`resumptionToken: token: ${token}}`);
+  debugDev(`resumptionToken: tokenExpirationTime: ${tokenExpirationTime}}`);
 
 
   return {token, tokenExpirationTime};
@@ -38,16 +42,18 @@ export function generateResumptionToken({
   function generateValue() {
     const expirationTime = tokenExpirationTime.toISOString();
 
-    return `${expirationTime};${cursor};${timeCursor || ''};${metadataPrefix};${from ? from.toISOString() : ''};${until ? until.toISOString() : ''};${set || ''};${lastCount || 0}`;
+    return `${expirationTime};${cursor};${metadataPrefix};${from ? from.toISOString() : ''};${until ? until.toISOString() : ''};${set || ''};${lastCount || 0};${timeCursor || ''}`;
   }
 }
 
 export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false}) {
-  const logger = createLogger();
-  logger.debug(`resumptionToken: token ${token}`);
+  //const logger = createLogger();
+  const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/parseResumptionToken');
+  const debugDev = debug.extend('dev');
+  debugDev(`resumptionToken: token ${token}`);
   const str = decryptToken();
-  logger.debug(`resumptionToken: string ${str}`);
-  const [expirationTime, cursor, timeCursor, metadataPrefix, from, until, set, lastCountArg] = str.split(/;/gu);
+  debugDev(`resumptionToken: string ${str}`);
+  const [expirationTime, cursor, metadataPrefix, from, until, set, lastCountArg, timeCursor] = str.split(/;/gu);
   const lastCount = Number(lastCountArg);
   const expires = moment(expirationTime);
 

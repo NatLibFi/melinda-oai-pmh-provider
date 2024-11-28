@@ -11,6 +11,7 @@ import databaseFactory from './db';
 import {metadataFormats, requestDateStampFormats} from './constants';
 import {sanitizeQueryParams} from './util';
 import {v4 as uuid} from 'uuid';
+import createDebugLogger from 'debug';
 
 export default async ({
   contextOptions,
@@ -20,6 +21,8 @@ export default async ({
   socketTimeout
 }) => {
   const logger = createLogger();
+  const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/middleware');
+  const debugDev = debug.extend('dev');
   const {
     generateErrorResponse, generateIdentifyResponse,
     generateListMetadataFormatsResponse, generateListSetsResponse,
@@ -201,10 +204,12 @@ export default async ({
 
         function getParams() {
           const parsedParams = 'resumptionToken' in req.query ? parseToken() : parse(req.query);
+          debugDev(`parsedParams: ${JSON.stringify(parsedParams)}`);
           const params = {logLabel, ...parsedParams};
           return needsDb() ? addConnection() : params;
 
           function parseToken() {
+            logger.debug(`${logLabel} Parsing resumptionToken for parameters`);
             const params = parseResumptionToken({
               secretEncryptionKey, verb,
               token: req.query.resumptionToken

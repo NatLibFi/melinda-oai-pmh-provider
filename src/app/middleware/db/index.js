@@ -32,6 +32,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   return {listRecords, listIdentifiers, getRecord, earliestTimestamp};
 
   function getIndexes() {
+    debugDev(`getIndexes: sets: ${JSON.stringify(sets)}`);
     if (sets.length === 0) {
       return {};
     }
@@ -61,6 +62,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       return results;
 
       async function getHeadingIndexes(values, results = []) {
+        debugDev(`getHeadingsIndexes`);
         const [value] = values;
 
         if (value) {
@@ -86,6 +88,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
   async function retrieveEarliestTimestamp() {
     logger.debug(`retrieveEarliestTimestamp`);
+    debugDev(`retrieveEarliestTimestamp`);
     const {query, args} = getQuery(getEarliestTimestamp());
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
     const row = await resultSet.getRow();
@@ -158,11 +161,11 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       await resultSet.close();
 
       if (records.length < maxResults) {
-        debugDev(`${logLabel} No results left after this, not returning a cursor`);
+        debugDev(`${logLabel} No results left after this, not returning cursors`);
         return {records, lastCount};
       }
 
-      debugDev(`${logLabel} There are results left, returning a cursor`);
+      debugDev(`${logLabel} There are results left, returning cursors`);
       return {
         records, lastCount,
         cursor: newCursor,
@@ -279,6 +282,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     };
 
     function debugQuery(query, args) {
+      debug(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
       //logger.debug(`${logLabel} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
       logger.verbose(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
     }

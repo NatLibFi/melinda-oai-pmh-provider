@@ -25,16 +25,18 @@ export function generateResumptionToken({
   const debug = createDebugLogger(`@natlibfi/melinda-oai-pmh-provider/generateResumptionToken`);
   const debugDev = debug.extend('dev');
   const tokenExpirationTime = generateResumptionExpirationTime();
+  debugDev(`resumptionToken: tokenExpirationTime: "${tokenExpirationTime}"`);
   const value = generateValue();
+  debugDev(`resumptionToken: value: ${value}`);
   const token = encryptString({key: secretEncryptionKey, value, algorithm: 'aes-256-cbc'});
-  debugDev(`resumptionToken: value: ${value}}`);
-  debugDev(`resumptionToken: token: ${token}}`);
-  debugDev(`resumptionToken: tokenExpirationTime: ${tokenExpirationTime}}`);
-
+  debugDev(`resumptionToken: token: ${token}`);
 
   return {token, tokenExpirationTime};
 
   function generateResumptionExpirationTime() {
+    debugDev(`Generate expirationTime`);
+    debugDev(`Current time: ${JSON.stringify(currentTime)}`);
+    debugDev(`ResumptionTokenTimeout: ${resumptionTokenTimeout}`);
     const currentTimeObj = typeof currentTime === 'string' ? /* istanbul ignore next: Exists only for the CLI which won't be tested */ moment(currentTime) : currentTime;
     return currentTimeObj.add(resumptionTokenTimeout, 'milliseconds');
   }
@@ -42,7 +44,7 @@ export function generateResumptionToken({
   function generateValue() {
     const expirationTime = tokenExpirationTime.toISOString();
 
-    return `${expirationTime};${cursor};${metadataPrefix};${from ? from.toISOString() : ''};${until ? until.toISOString() : ''};${set || ''};${lastCount || 0};${timeCursor || ''}`;
+    return `${expirationTime};${cursor};${metadataPrefix || ''};${from ? from.toISOString() : ''};${until ? until.toISOString() : ''};${set || ''};${lastCount || 0};${timeCursor || ''}`;
   }
 }
 
@@ -56,6 +58,7 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
   const [expirationTime, cursor, metadataPrefix, from, until, set, lastCountArg, timeCursor] = str.split(/;/gu);
   const lastCount = Number(lastCountArg);
   const expires = moment(expirationTime);
+  debugDev(`Expires: ${expires}`);
 
   if (expires.isValid() && moment().isBefore(expires)) {
     return filter({cursor, timeCursor, metadataPrefix, set, from, until, lastCount});

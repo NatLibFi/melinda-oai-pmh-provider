@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {parseResumptionToken, generateResumptionToken} from './common';
 
 run();
@@ -5,6 +6,10 @@ run();
 function run() {
   const {SECRET_ENCRYPTION_KEY: secretEncryptionKey, RESUMPTION_TOKEN_TIMEOUT: resumptionTokenTimeout} = process.env; // eslint-disable-line no-process-env
   const [op, ...args] = process.argv.slice(2);
+  // eslint-disable-next-line no-console
+  console.log(process.argv);
+  console.log(op);
+  console.log(JSON.stringify(args));
 
   if (op === undefined) {
     console.error('Missing params!'); // eslint-disable-line no-console

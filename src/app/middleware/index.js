@@ -215,6 +215,8 @@ export default async ({
               token: req.query.resumptionToken
             });
 
+            // DEVELOP: We should probably validate also params from resumptionToken?
+
             return parse(params);
           }
 

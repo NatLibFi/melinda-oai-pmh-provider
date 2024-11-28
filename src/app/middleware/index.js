@@ -396,14 +396,19 @@ export default async ({
 
         function listResources(callback) {
           const {records, cursor, timeCursor, lastCount} = result;
+          debugDev(`listResources`);
+          debugDev(`records: ${records ? records.length : 'no records'}, cursor: ${cursor}, timeCursor: ${timeCursor}, lastCount: ${lastCount}`);
 
           if (records.length === 0) {
+            debugDev(`No records!`);
             return generateErrorResponse({logLabel, query, requestUrl, error: errors.noRecordsMatch});
           }
 
 
           if (cursor || timeCursor) {
+            debugDev(`Records and cursor/timeCursor`);
             const newCount = calculateNewCount();
+            debugDev(`newCount: ${newCount}`);
 
             const {token, tokenExpirationTime} = generateResumptionToken({
               ...params,
@@ -414,12 +419,14 @@ export default async ({
             return callback({
               logLabel, requestUrl, query, records, token, tokenExpirationTime,
               format: params.metadataPrefix,
+              // why we have named this cursor?
               cursor: lastCount || 0
             });
           }
 
           return callback({
             logLabel, requestUrl, query, records, format: params.metadataPrefix,
+            // why we have named this cursor?
             cursor: lastCount || 0
           });
 

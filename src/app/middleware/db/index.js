@@ -208,7 +208,9 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           debug(`${logLabel} We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
           // Do we need this sort, when we have sort in query?
-          const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
+          //const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
+          // NOTE: if we want to sort we should sort on time if we have timebased query
+          const sortedRecords = records;
 
           const lastId = toAlephId(sortedRecords.slice(-1)[0].id);
           const lastTime = sortedRecords.slice(-1)[0].time.format(DB_TIME_FORMAT);

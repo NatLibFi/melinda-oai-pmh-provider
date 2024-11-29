@@ -190,8 +190,11 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           logRows(newRowCount, logLabel);
           const result = rowCallback(row);
 
-          if (records.length + 1 === maxResults) {
-            debugDev(`${logLabel} maxResults ${maxResults} reached`);
+          // Do we need this? Our queries have a limit?
+          // Some kind of sanity check for cases where query returns far too much stuff?
+          const overFlowLimit = maxResults + 100;
+          if (records.length + 1 === overFlowLimit) {
+            debugDev(`${logLabel} maxResults ${maxResults / overFlowLimit} reached`);
             return genResults(records.concat(result));
           }
 

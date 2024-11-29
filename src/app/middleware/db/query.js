@@ -69,7 +69,7 @@ export default ({library, limit}) => ({
     function genQuery() {
       const indexStatements = generateIndexStatements();
 
-      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 WHERE s1.z13_rec_key > :cursor AND s1.z13_rec_key <= ${MAX_DOC_NUMBER} ${indexStatements} ORDER BY s1.z13_rec_key FETCH NEXT ${limit + 1} ROWS ONLY) JOIN ${library}.z00 ON id = z00_doc_number`;
+      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 WHERE s1.z13_rec_key > :cursor AND s1.z13_rec_key <= ${MAX_DOC_NUMBER} ${indexStatements} ORDER BY s1.z13_rec_key FETCH NEXT ${limit} ROWS ONLY) JOIN ${library}.z00 ON id = z00_doc_number`;
     }
 
     function genTimeQuery() {
@@ -77,7 +77,7 @@ export default ({library, limit}) => ({
       const indexStatements = generateIndexStatements();
 
       // DEVELOP: should we have here WITH TIES instead of only?
-      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 ${conditions} ${indexStatements} ORDER BY s1.z13_upd_time_stamp FETCH NEXT ${limit + 1} ROWS ONLY) JOIN ${library}.z00 ON id = z00_doc_number`;
+      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 ${conditions} ${indexStatements} ORDER BY s1.z13_upd_time_stamp FETCH NEXT ${limit} ROWS WITH TIES) JOIN ${library}.z00 ON id = z00_doc_number`;
 
       function generateTimeConditions() {
         // DEVELOP we get results with last time here!

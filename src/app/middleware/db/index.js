@@ -212,8 +212,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           debugDev(`${logLabel} genResults`);
           debug(`${logLabel} We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
-          // Do we need this sort, when we have sort in query?
-
+          // Do we need this sort, when we have sort in query? No we dont (and timed queries should be sorted by time anywyas)
+          /*
           function sortRecords(records) {
             if (from || until) {
               return records;
@@ -224,15 +224,15 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
           // NOTE: if we want to sort we should sort on time if we have timebased query
           const sortedRecords = sortRecords(records);
-
-          const lastId = toAlephId(sortedRecords.slice(-1)[0].id);
+          */
+          const lastId = toAlephId(records.slice(-1)[0].id);
           // let's keep the time string as it is - but it's not a string, it's already converted to time ...
-          const lastTimeStr = sortedRecords.slice(-1)[0].timeCursor;
+          const lastTimeStr = records.slice(-1)[0].timeCursor;
           debug(`${logLabel} We have ${lastId} as last ID`);
           debug(`${logLabel} We have ${lastTimeStr} as last time`);
 
           return {
-            records: sortedRecords,
+            records,
             newCursor: lastId,
             newTimeCursor: lastTimeStr
           };

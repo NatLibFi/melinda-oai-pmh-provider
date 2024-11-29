@@ -1,6 +1,6 @@
 {
   "description": "Should work with from-parameter",
-  "skip": true,
+  "skip": false,
   "contextName": "bib",
   "isPrivileged": false,
   "alephLibrary": "foo00",

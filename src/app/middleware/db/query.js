@@ -34,7 +34,8 @@ export default ({library, limit}) => ({
 
       const startTimeArg = startTime ? startTime.format(DB_TIME_FORMAT) : undefined;
       const endTimeArg = endTime ? endTime.format(DB_TIME_FORMAT) : undefined;
-      const actualStartTimeArg = timeCursor && timeCursor > startTimeArg ? timeCursor : startTimeArg;
+      // If we are using timeCursor, we do not want records that we already have, so let's grow startTime with 1 ms
+      const actualStartTimeArg = timeCursor && timeCursor > startTimeArg ? (Number(timeCursor) + 1).toString() : startTimeArg;
 
       const args = {};
 
@@ -75,9 +76,11 @@ export default ({library, limit}) => ({
       const conditions = generateTimeConditions();
       const indexStatements = generateIndexStatements();
 
+      // DEVELOP: should we have here WITH TIES instead of only?
       return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 ${conditions} ${indexStatements} ORDER BY s1.z13_upd_time_stamp FETCH NEXT ${limit + 1} ROWS ONLY) JOIN ${library}.z00 ON id = z00_doc_number`;
 
       function generateTimeConditions() {
+        // DEVELOP we get results with last time here!
         const start = `s1.z13_upd_time_stamp >= :startTime`;
         const end = `s1.z13_upd_time_stamp <= :endTime`;
         if (startTime && endTime) {

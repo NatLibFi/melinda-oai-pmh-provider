@@ -1,5 +1,6 @@
 {
   "description": "Should return query for getting records with both end and start parameter and timeCursor",
+  "comment": "Use timeCursor when it exists and is greater than (original) startTime, grow timeCursor with 1 ms to avoid getting duplicate results",
   "skip": false,
   "onlyDev": false,
   "alephLibrary": "foo00",
@@ -12,7 +13,7 @@
   "expectedResult": {
     "args": {
       "endTime": "202002020000000",
-      "startTime": "201501010000000"
+      "startTime": "201501010000001"
     },
     "query": "SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM foo00.z13 s1 WHERE s1.z13_upd_time_stamp >= :startTime AND s1.z13_upd_time_stamp <= :endTime  ORDER BY s1.z13_upd_time_stamp FETCH NEXT 101 ROWS ONLY) JOIN foo00.z00 ON id = z00_doc_number"
   }

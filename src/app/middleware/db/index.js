@@ -221,14 +221,15 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           const sortedRecords = sortRecords(records);
 
           const lastId = toAlephId(sortedRecords.slice(-1)[0].id);
-          const lastTime = sortedRecords.slice(-1)[0].time.format(DB_TIME_FORMAT);
+          // let's keep the time string as it is
+          const lastTimeStr = sortedRecords.slice(-1)[0].time;
           debug(`${logLabel} We have ${lastId} as last ID`);
-          debug(`${logLabel} We have ${lastTime} as last time`);
+          debug(`${logLabel} We have ${lastTimeStr} as last time`);
 
           return {
             records: sortedRecords,
             newCursor: lastId,
-            newTimeCursor: lastTime
+            newTimeCursor: lastTimeStr
           };
         }
       }

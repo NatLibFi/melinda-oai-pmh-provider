@@ -183,6 +183,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         debugDev(`${logLabel} pump: ${rowCount}`);
         const row = await resultSet.getRow();
 
+        // DEVELOP: check that we get ties when running a timed query
+
         if (row) {
           const newRowCount = rowCount + 1;
           logRows(newRowCount, logLabel);
@@ -221,8 +223,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           const sortedRecords = sortRecords(records);
 
           const lastId = toAlephId(sortedRecords.slice(-1)[0].id);
-          // let's keep the time string as it is
-          const lastTimeStr = sortedRecords.slice(-1)[0].time;
+          // let's keep the time string as it is - but it's not a string, it's already converted to time ...
+          const lastTimeStr = sortedRecords.slice(-1)[0].timeCursor;
           debug(`${logLabel} We have ${lastId} as last ID`);
           debug(`${logLabel} We have ${lastTimeStr} as last time`);
 
@@ -262,11 +264,12 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       return {
         id: row.ID,
         time: moment.utc(row.TIME, DB_TIME_FORMAT),
+        timeCursor: row.TIME,
         record: formatRecord(record, row.ID, metadataPrefix, logLabel)
       };
     }
 
-    return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), isDeleted};
+    return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), timeCursor: row.TIME, isDeleted};
 
     function handleParseRecord(validate, noFailValidation) {
       debugDev(`${logLabel} recordRowCallback:handleParseRecord`);

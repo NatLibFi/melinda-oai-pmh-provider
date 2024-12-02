@@ -1,7 +1,7 @@
 {
-  "description": "Should respond with an incomplete list with a resumption token (used with from parameter)",
+  "description": "Should respond with an incomplete list including ties (if there aren't too many) with a resumption token (used with from parameter, time sorted db response)",
   "skip": false,
-  "onlyDev": true,
+  "onlyDev": false,
   "requests": [
     {
       "method": "GET",
@@ -26,13 +26,13 @@
     [
       {
         "TIME": "20000102050000",
-        "ID": "1234567",
+        "ID": "001234567",
         "RECORD": {
           "leader": "03106cam a2200721 i 4500",
           "fields": [
             {
               "tag": "001",
-              "value": "1234567"
+              "value": "001234567"
             },
             {
               "tag": "245",
@@ -48,13 +48,13 @@
       },
       {
         "TIME": "20090701001000",
-        "ID": "89101112",
+        "ID": "089101112",
         "RECORD": {
           "leader": "03106cam a2200721 i 4500",
           "fields": [
             {
               "tag": "001",
-              "value": "89101112"
+              "value": "089101112"
             },
             {
               "tag": "245",
@@ -70,13 +70,13 @@
       },
       {
         "TIME": "20100101000100",
-        "ID": "13141516",
+        "ID": "013141516",
         "RECORD": {
           "leader": "03106cam a2200721 i 4500",
           "fields": [
             {
               "tag": "001",
-              "value": "13141516"
+              "value": "013141516"
             },
             {
               "tag": "245",
@@ -92,13 +92,13 @@
       },
       {
         "TIME": "20100101000110",
-        "ID": "17181920",
+        "ID": "017181920",
         "RECORD": {
           "leader": "03106cam a2200721 i 4500",
           "fields": [
             {
               "tag": "001",
-              "value": "17181920"
+              "value": "017181920"
             },
             {
               "tag": "245",
@@ -106,50 +106,6 @@
                 {
                   "code": "a",
                   "value": "Fubar1"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        "TIME": "20100102001100",
-        "ID": "21222324",
-        "RECORD": {
-          "leader": "03106cam a2200721 i 4500",
-          "fields": [
-            {
-              "tag": "001",
-              "value": "21222324"
-            },
-            {
-              "tag": "245",
-              "subfields": [
-                {
-                  "code": "a",
-                  "value": "Fubar2"
-                }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        "TIME": "20110101000100",
-        "ID": "25262728",
-        "RECORD": {
-          "leader": "03106cam a2200721 i 4500",
-          "fields": [
-            {
-              "tag": "001",
-              "value": "25262728"
-            },
-            {
-              "tag": "245",
-              "subfields": [
-                {
-                  "code": "a",
-                  "value": "Fubar3"
                 }
               ]
             }

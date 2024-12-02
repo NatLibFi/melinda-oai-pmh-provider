@@ -89,6 +89,7 @@ async function formatResponse(headers, originalPayload) {
     if (Object.keys(obj['OAI-PMH']).some(k => keys.includes(k))) {
       const [key, value] = Object.entries(obj['OAI-PMH']).find(([k]) => keys.includes(k));
 
+      // resumptionToken expirationDate and value is always formatted!
       if ('resumptionToken' in value[0]) {
         const modified = standardFormat(obj);
 

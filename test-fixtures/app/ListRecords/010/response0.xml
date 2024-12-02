@@ -5,16 +5,16 @@
 	<ListRecords>
 		<record>
 			<header>
-				<identifier>oai:foo.bar/1234567</identifier>
+				<identifier>oai:foo.bar/001234567</identifier>
 				<datestamp>2000-01-02T05:00:00.000Z</datestamp>
 			</header>
 			<metadata>
 				<record xmlns="http://www.loc.gov/MARC21/slim">
 					<leader>03106cam a2200721 i 4500</leader>
-					<controlfield tag="001">1234567</controlfield>
+					<controlfield tag="001">001234567</controlfield>
 					<controlfield tag="003">FI-MELINDA</controlfield>
 					<datafield tag="035" ind1=" " ind2=" ">
-						<subfield code="a">(FI-MELINDA)1234567</subfield>
+						<subfield code="a">(FI-MELINDA)001234567</subfield>
 					</datafield>
 					<datafield tag="245" ind1=" " ind2=" ">
 						<subfield code="a">Foo Bar</subfield>
@@ -24,16 +24,16 @@
 		</record>
 		<record>
 			<header>
-				<identifier>oai:foo.bar/13141516</identifier>
+				<identifier>oai:foo.bar/013141516</identifier>
 				<datestamp>2010-01-01T00:01:00.000Z</datestamp>
 			</header>
 			<metadata>
 				<record xmlns="http://www.loc.gov/MARC21/slim">
 					<leader>03106cam a2200721 i 4500</leader>
-					<controlfield tag="001">13141516</controlfield>
+					<controlfield tag="001">013141516</controlfield>
 					<controlfield tag="003">FI-MELINDA</controlfield>
 					<datafield tag="035" ind1=" " ind2=" ">
-						<subfield code="a">(FI-MELINDA)13141516</subfield>
+						<subfield code="a">(FI-MELINDA)013141516</subfield>
 					</datafield>
 					<datafield tag="245" ind1=" " ind2=" ">
 						<subfield code="a">Fubar</subfield>
@@ -43,16 +43,16 @@
 		</record>
 		<record>
 			<header>
-				<identifier>oai:foo.bar/89101112</identifier>
+				<identifier>oai:foo.bar/089101112</identifier>
 				<datestamp>2009-07-01T00:10:00.000Z</datestamp>
 			</header>
 			<metadata>
 				<record xmlns="http://www.loc.gov/MARC21/slim">
 					<leader>03106cam a2200721 i 4500</leader>
-					<controlfield tag="001">89101112</controlfield>
+					<controlfield tag="001">089101112</controlfield>
 					<controlfield tag="003">FI-MELINDA</controlfield>
 					<datafield tag="035" ind1=" " ind2=" ">
-						<subfield code="a">(FI-MELINDA)89101112</subfield>
+						<subfield code="a">(FI-MELINDA)089101112</subfield>
 					</datafield>
 					<datafield tag="245" ind1=" " ind2=" ">
 						<subfield code="a">Bar Foo</subfield>

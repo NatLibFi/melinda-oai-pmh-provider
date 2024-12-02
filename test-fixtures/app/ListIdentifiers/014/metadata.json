@@ -1,14 +1,13 @@
 {
-  "description": "Should respond an errors because of an invalid resumption token",
-  "skip": false,
+  "description": "Should respond with an error because of an invalid resumption token (invalid metadataPrefix in token)",
   "onlyDev": false,
   "requests": [
     {
       "method": "GET",
       "status": 200,
       "requestParams": {
-        "verb": "ListSets",
-        "resumptionToken": "foo"
+        "verb": "ListIdentifiers",
+        "resumptionToken": "d%2BO1PYvYM%2F4EX2AFBeALsd2K8KS8oQxZ2zRH2cl82uF1CqqT8HSg4%2BCHWKh0KfPxfSHNY%2BCXJQ%3D%3D"
       }
     }
   ],

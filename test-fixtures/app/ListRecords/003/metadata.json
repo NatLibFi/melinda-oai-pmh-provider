@@ -1,9 +1,11 @@
 {
-  "description": "Should work with from-parameter",
+  "description": "Should work with from-parameter (db results sorted by time)",
+  "skip": false,
+  "onlyDev": false,
   "contextName": "bib",
-     "isPrivileged": false,
-    "alephLibrary": "foo00",
-    "melindaPrefix": "FI-MELINDA",
+  "isPrivileged": false,
+  "alephLibrary": "foo00",
+  "melindaPrefix": "FI-MELINDA",
   "requests": [
     {
       "method": "GET",
@@ -24,13 +26,13 @@
     [
       {
         "TIME": "20090701001000",
-        "ID": "89101112",
+        "ID": "089101112",
         "RECORD": {
           "leader": "03106cam a2200721 i 4500",
           "fields": [
             {
               "tag": "001",
-              "value": "89101112"
+              "value": "089101112"
             },
             {
               "tag": "245",
@@ -46,13 +48,13 @@
       },
       {
         "TIME": "20100101000100",
-        "ID": "13141516",
+        "ID": "013141516",
         "RECORD": {
           "leader": "03106cam a2200721 i 4500",
           "fields": [
             {
               "tag": "001",
-              "value": "13141516"
+              "value": "013141516"
             },
             {
               "tag": "245",

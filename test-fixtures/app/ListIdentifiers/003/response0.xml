@@ -5,14 +5,14 @@
 	<ListIdentifiers>
 		<record>
 			<header>
-				<identifier>oai:foo.bar/13141516</identifier>
-				<datestamp>2010-01-01T00:01:00.000Z</datestamp>
+				<identifier>oai:foo.bar/89101112</identifier>
+				<datestamp>2009-07-01T00:10:00.000Z</datestamp>
 			</header>
 		</record>
 		<record>
 			<header>
-				<identifier>oai:foo.bar/89101112</identifier>
-				<datestamp>2009-07-01T00:10:00.000Z</datestamp>
+				<identifier>oai:foo.bar/13141516</identifier>
+				<datestamp>2010-01-01T00:01:00.000Z</datestamp>
 			</header>
 		</record>
 	</ListIdentifiers>

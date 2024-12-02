@@ -17,67 +17,93 @@ export default ({library, limit}) => ({
   getEarliestTimestamp: () => ({
     query: `SELECT MIN(z13_upd_time_stamp) time FROM ${library}.z13`
   }),
-  getRecords: ({cursor = '000000000', startTime, endTime, indexes = {}}) => {
+  getRecords: ({cursor = '000000000', startTime, endTime, indexes = {}, timeCursor = undefined}) => {
+    if (startTime || endTime) {
+      return {
+        args: genTimeArgs(),
+        query: genTimeQuery()
+      };
+    }
+
     return {
       args: genArgs(),
       query: genQuery()
     };
 
-    function genArgs() {
-      const args = {cursor};
+    function genTimeArgs() {
+
+      const startTimeArg = startTime ? startTime.format(DB_TIME_FORMAT) : undefined;
+      const endTimeArg = endTime ? endTime.format(DB_TIME_FORMAT) : undefined;
+      // If we are using timeCursor, we do not want records that we already have, so let's grow startTime with 1 ms
+      const actualStartTimeArg = timeCursor && timeCursor > startTimeArg ? (Number(timeCursor) + 1).toString() : startTimeArg;
+
+      const args = {};
 
       if (startTime && endTime) {
         return {
-          ...args,
-          startTime: startTime.format(DB_TIME_FORMAT),
-          endTime: endTime.format(DB_TIME_FORMAT)
+          startTime: actualStartTimeArg,
+          endTime: endTimeArg
         };
       }
 
       if (startTime) {
         return {
-          ...args,
-          startTime: startTime.format(DB_TIME_FORMAT)
+          startTime: actualStartTimeArg
         };
       }
 
       if (endTime) {
         return {
-          ...args,
-          endTime: endTime.format(DB_TIME_FORMAT)
+          endTime: endTimeArg
         };
       }
 
       return args;
     }
 
+    function genArgs() {
+      const args = {cursor};
+      return args;
+    }
+
     function genQuery() {
+      const indexStatements = generateIndexStatements();
+
+      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 WHERE s1.z13_rec_key > :cursor AND s1.z13_rec_key <= ${MAX_DOC_NUMBER} ${indexStatements} ORDER BY s1.z13_rec_key FETCH NEXT ${limit} ROWS ONLY) JOIN ${library}.z00 ON id = z00_doc_number`;
+    }
+
+    function genTimeQuery() {
       const conditions = generateTimeConditions();
       const indexStatements = generateIndexStatements();
-      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 WHERE s1.z13_rec_key > :cursor AND s1.z13_rec_key <= ${MAX_DOC_NUMBER} ${conditions} ${indexStatements} ORDER BY s1.z13_rec_key FETCH NEXT ${limit + 1} ROWS ONLY) JOIN ${library}.z00 ON id = z00_doc_number`;
+
+      // DEVELOP: should we have here WITH TIES instead of only?
+      return `SELECT id, time, z00_data record FROM (SELECT z13_rec_key id, z13_upd_time_stamp time FROM ${library}.z13 s1 ${conditions} ${indexStatements} ORDER BY s1.z13_upd_time_stamp FETCH NEXT ${limit} ROWS WITH TIES) JOIN ${library}.z00 ON id = z00_doc_number`;
 
       function generateTimeConditions() {
+        // DEVELOP we get results with last time here!
         const start = `s1.z13_upd_time_stamp >= :startTime`;
         const end = `s1.z13_upd_time_stamp <= :endTime`;
         if (startTime && endTime) {
-          return `AND ${start} AND ${end}`;
+          return `WHERE ${start} AND ${end}`;
         }
         if (startTime) {
-          return `AND ${start}`;
+          return `WHERE ${start}`;
         }
         if (endTime) {
-          return `AND ${end}`;
+          return `WHERE ${end}`;
         }
         return '';
       }
 
-      function generateIndexStatements() {
-        if (indexes.heading) {
-        // return indexes.heading.map((value, index) => `JOIN ${library}.z02 h${index} ON z13_rec_key = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join(' ');
-          return indexes.heading.map((value, index) => `AND EXISTS (SELECT 1 FROM ${library}.z02 h${index} WHERE h${index}.z02_rec_key = CONCAT('${value}', s1.z13_rec_key))`).join(' ');
-        }
-        return '';
-      }
     }
+
+    function generateIndexStatements() {
+      if (indexes.heading) {
+      // return indexes.heading.map((value, index) => `JOIN ${library}.z02 h${index} ON z13_rec_key = h${index}.z02_doc_number AND h${index}.z02_rec_key LIKE '${value}'`).join(' ');
+        return indexes.heading.map((value, index) => `AND EXISTS (SELECT 1 FROM ${library}.z02 h${index} WHERE h${index}.z02_rec_key = CONCAT('${value}', s1.z13_rec_key))`).join(' ');
+      }
+      return '';
+    }
+
   }
 });

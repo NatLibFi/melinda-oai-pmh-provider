@@ -1,5 +1,3 @@
-
-
 import moment from 'moment';
 import {isDeletedRecord, toAlephId} from '@natlibfi/melinda-commons';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
@@ -34,6 +32,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
   return {listRecords, listIdentifiers, getRecord, earliestTimestamp};
 
   function getIndexes() {
+    debugDev(`getIndexes: sets: ${JSON.stringify(sets)}`);
     if (sets.length === 0) {
       return {};
     }
@@ -63,6 +62,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       return results;
 
       async function getHeadingIndexes(values, results = []) {
+        debugDev(`getHeadingsIndexes`);
         const [value] = values;
 
         if (value) {
@@ -88,6 +88,7 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
   async function retrieveEarliestTimestamp() {
     logger.debug(`retrieveEarliestTimestamp`);
+    debugDev(`retrieveEarliestTimestamp`);
     const {query, args} = getQuery(getEarliestTimestamp());
     const {resultSet} = await connection.execute(query, args, {resultSet: true});
     const row = await resultSet.getRow();
@@ -124,10 +125,11 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
   function queryRecords({
     logLabel,
-    connection, from, until, set, metadataPrefix, cursor, lastCount,
+    connection, from, until, set, metadataPrefix, cursor, timeCursor, lastCount,
     includeRecords = true
   }) {
     debugDev(`${logLabel} queryRecords`);
+    logger.debug(`${logLabel} We got a from: ${from}, until: ${until}, set ${set}, metaDataPrefix ${metadataPrefix}, cursor: ${cursor}, timeCursor: ${timeCursor}`);
     const params = getParams();
     // Do not strigingify params there is a circularity in connection!
     //debugDev(`${logLabel} params: ${JSON.stringify(params)}`);
@@ -142,35 +144,37 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         logLabel, row, includeRecords, metadataPrefix
       });
 
+      logger.debug(`${logLabel} We got a indexes: ${JSON.stringify(indexes)}, startTime: ${startTime}, endTime ${endTime}`);
       return {
         logLabel,
-        rowCallback, connection, cursor, lastCount,
-        genQuery: cursor => getRecords({cursor, startTime, endTime, indexes: setIndexes})
+        rowCallback, connection, cursor, timeCursor, lastCount,
+        genQuery: (cursor, timeCursor) => getRecords({cursor, timeCursor, startTime, endTime, indexes: setIndexes})
       };
     }
 
-    async function executeQuery({logLabel, connection, genQuery, rowCallback, cursor, lastCount}) {
+    async function executeQuery({logLabel, connection, genQuery, rowCallback, cursor, timeCursor, lastCount}) {
       debugDev(`${logLabel} executeQuery`);
-      const resultSet = await doQuery(cursor);
+      const resultSet = await doQuery(cursor, timeCursor);
       debugDev(`${logLabel} We got a resultSet`);
-      const {records, newCursor} = await pump();
+      const {records, newCursor, newTimeCursor} = await pump();
 
       await resultSet.close();
 
       if (records.length < maxResults) {
-        debugDev(`${logLabel} No results left after this, not returning a cursor`);
+        debugDev(`${logLabel} No results left after this, not returning cursors`);
         return {records, lastCount};
       }
 
-      debugDev(`${logLabel} There are results left, returning a cursor`);
+      debugDev(`${logLabel} There are results left, returning cursors`);
       return {
         records, lastCount,
-        cursor: newCursor
+        cursor: newCursor,
+        timeCursor: newTimeCursor
       };
 
-      async function doQuery(cursor) {
+      async function doQuery(cursor, timeCursor) {
         debugDev(`${logLabel} doQuery`);
-        const {query, args} = getQuery(genQuery(cursor), logLabel);
+        const {query, args} = getQuery(genQuery(cursor, timeCursor), logLabel);
         const {resultSet} = await connection.execute(query, args, {resultSet: true});
         return resultSet;
       }
@@ -179,13 +183,18 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
         debugDev(`${logLabel} pump: ${rowCount}`);
         const row = await resultSet.getRow();
 
+        // DEVELOP: check that we get ties when running a timed query
+
         if (row) {
           const newRowCount = rowCount + 1;
           logRows(newRowCount, logLabel);
           const result = rowCallback(row);
 
-          if (records.length + 1 === maxResults) {
-            debugDev(`${logLabel} maxResults ${maxResults} reached`);
+          // Do we need this? Our queries have a limit?
+          // Some kind of sanity check for cases where query returns far too much stuff?
+          const overFlowLimit = maxResults + 100;
+          if (records.length + 1 === overFlowLimit) {
+            debugDev(`${logLabel} maxResults ${maxResults / overFlowLimit} reached`);
             return genResults(records.concat(result));
           }
 
@@ -196,20 +205,36 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
           return genResults(records);
         }
 
+        // empty array
         return {records};
 
         function genResults(records) {
           debugDev(`${logLabel} genResults`);
           debug(`${logLabel} We have ${records.length} records`);
           // Because of some Infernal Intervention, sometimes the rows are returned in wrong order (i.e. 000001100 before 000001000). Not repeatable using SQLplus with exact same queries...
-          const sortedRecords = [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
+          // Do we need this sort, when we have sort in query? No we dont (and timed queries should be sorted by time anywyas)
+          /*
+          function sortRecords(records) {
+            if (from || until) {
+              return records;
+            }
+            return records;
+            //return [...records].sort(({id: a}, {id: b}) => Number(a) - Number(b));
+          }
 
-          const lastId = sortedRecords.slice(-1)[0].id;
+          // NOTE: if we want to sort we should sort on time if we have timebased query
+          const sortedRecords = sortRecords(records);
+          */
+          const lastId = toAlephId(records.slice(-1)[0].id);
+          // let's keep the time string as it is - but it's not a string, it's already converted to time ...
+          const lastTimeStr = records.slice(-1)[0].timeCursor;
           debug(`${logLabel} We have ${lastId} as last ID`);
+          debug(`${logLabel} We have ${lastTimeStr} as last time`);
 
           return {
-            records: sortedRecords,
-            newCursor: toAlephId(lastId)
+            records,
+            newCursor: lastId,
+            newTimeCursor: lastTimeStr
           };
         }
       }
@@ -242,11 +267,12 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
       return {
         id: row.ID,
         time: moment.utc(row.TIME, DB_TIME_FORMAT),
+        timeCursor: row.TIME,
         record: formatRecord(record, row.ID, metadataPrefix, logLabel)
       };
     }
 
-    return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), isDeleted};
+    return {id: row.ID, time: moment.utc(row.TIME, DB_TIME_FORMAT), timeCursor: row.TIME, isDeleted};
 
     function handleParseRecord(validate, noFailValidation) {
       debugDev(`${logLabel} recordRowCallback:handleParseRecord`);
@@ -273,8 +299,9 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
     };
 
     function debugQuery(query, args) {
+      debug(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
       //logger.debug(`${logLabel} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
-      logger.debug(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
+      logger.verbose(`${logLabel ? logLabel : ''} Executing query '${query}'${args ? ` with args: ${JSON.stringify(args)}` : ''}`);
     }
   }
 

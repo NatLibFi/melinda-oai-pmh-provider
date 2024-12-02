@@ -5,19 +5,19 @@
 	<ListIdentifiers>
 		<record>
 			<header>
-				<identifier>oai:foo.bar/1234567</identifier>
+				<identifier>oai:foo.bar/001234567</identifier>
 				<datestamp>2000-01-02T05:00:00.000Z</datestamp>
 			</header>
 		</record>
 		<record>
 			<header>
-				<identifier>oai:foo.bar/13141516</identifier>
+				<identifier>oai:foo.bar/013141516</identifier>
 				<datestamp>2010-01-01T00:01:00.000Z</datestamp>
 			</header>
 		</record>
 		<record>
 			<header>
-				<identifier>oai:foo.bar/89101112</identifier>
+				<identifier>oai:foo.bar/089101112</identifier>
 				<datestamp>2009-07-01T00:10:00.000Z</datestamp>
 			</header>
 		</record>

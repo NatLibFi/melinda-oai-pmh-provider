@@ -11,6 +11,7 @@ import databaseFactory from './db';
 import {metadataFormats, requestDateStampFormats} from './constants';
 import {sanitizeQueryParams} from './util';
 import {v4 as uuid} from 'uuid';
+import createDebugLogger from 'debug';
 
 export default async ({
   contextOptions,
@@ -20,6 +21,8 @@ export default async ({
   socketTimeout
 }) => {
   const logger = createLogger();
+  const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/middleware');
+  const debugDev = debug.extend('dev');
   const {
     generateErrorResponse, generateIdentifyResponse,
     generateListMetadataFormatsResponse, generateListSetsResponse,
@@ -201,14 +204,19 @@ export default async ({
 
         function getParams() {
           const parsedParams = 'resumptionToken' in req.query ? parseToken() : parse(req.query);
+          debugDev(`parsedParams: ${JSON.stringify(parsedParams)}`);
           const params = {logLabel, ...parsedParams};
           return needsDb() ? addConnection() : params;
 
           function parseToken() {
+            logger.debug(`${logLabel} Parsing resumptionToken for parameters`);
             const params = parseResumptionToken({
               secretEncryptionKey, verb,
-              token: req.query.resumptionToken
+              token: req.query.resumptionToken,
+              sets
             });
+
+            // DEVELOP: We should probably validate also params from resumptionToken?
 
             return parse(params);
           }
@@ -388,31 +396,38 @@ export default async ({
         }
 
         function listResources(callback) {
-          const {records, cursor, lastCount} = result;
+          const {records, cursor, timeCursor, lastCount} = result;
+          debugDev(`listResources`);
+          debugDev(`records: ${records ? records.length : 'no records'}, cursor: ${cursor}, timeCursor: ${timeCursor}, lastCount: ${lastCount}`);
 
           if (records.length === 0) {
+            debugDev(`No records!`);
             return generateErrorResponse({logLabel, query, requestUrl, error: errors.noRecordsMatch});
           }
 
 
-          if (cursor) {
+          if (cursor || timeCursor) {
+            debugDev(`Records and cursor/timeCursor`);
             const newCount = calculateNewCount();
+            debugDev(`newCount: ${newCount}`);
 
             const {token, tokenExpirationTime} = generateResumptionToken({
               ...params,
               lastCount: newCount,
-              secretEncryptionKey, resumptionTokenTimeout, cursor
+              secretEncryptionKey, resumptionTokenTimeout, cursor, timeCursor
             });
 
             return callback({
               logLabel, requestUrl, query, records, token, tokenExpirationTime,
               format: params.metadataPrefix,
+              // why we have named this cursor?
               cursor: lastCount || 0
             });
           }
 
           return callback({
             logLabel, requestUrl, query, records, format: params.metadataPrefix,
+            // why we have named this cursor?
             cursor: lastCount || 0
           });
 

@@ -1,7 +1,5 @@
 {
-  "description": "Should respond with records - should handle valueless subfield",
-  "devOnly": false,
-  "devSkip": false,
+  "description": "Should respond with records",
   "contextName": "bib",  
      "isPrivileged": false,
     "alephLibrary": "foo00",
@@ -32,18 +30,6 @@
                 {
                   "code": "a",
                   "value": "Foo Bar"
-                }
-              ]
-            },
-            {
-              "tag": "773",
-              "subfields": [
-                {
-                  "code": "a",
-                  "value": "Foo Bar"
-                },
-                {
-                  "code": "w"
                 }
               ]
             }

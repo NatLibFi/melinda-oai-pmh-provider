@@ -169,7 +169,12 @@ export function formatRecord({
         field.subfields
           .filter(({code}) => prefixReplaceCodes.includes(code))
           .forEach(subfield => {
-            subfield.value = subfield.value.replace(pattern, replacement); // eslint-disable-line functional/immutable-data
+            if (subfield.value) {
+              subfield.value = subfield.value.replace(pattern, replacement); // eslint-disable-line functional/immutable-data
+              return;
+            }
+            return;
+
           });
       });
   }

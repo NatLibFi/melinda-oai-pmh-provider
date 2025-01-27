@@ -44,7 +44,7 @@
 		"@natlibfi/melinda-commons": "^13.0.19-alpha.2",
 		"@natlibfi/oracledb-aleph": "^6.6.0",
 		"debug": "^4.3.7",
-		"express": "^4.21.1",
+		"express": "^4.21.2",
 		"http-status": "^1.8.1",
 		"langs": "^2.0.0",
 		"moment": "^2.30.1",

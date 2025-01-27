@@ -256,7 +256,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
               }
 
               field.subfields.forEach(subfield => {
-                if (PATTERN.test(subfield.value)) {
+                if (subfield.value && PATTERN.test(subfield.value)) {
                   logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
                   subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
                   return;

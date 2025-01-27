@@ -19,10 +19,6 @@
 					<datafield tag="245" ind1=" " ind2=" ">
 						<subfield code="a">Foo Bar</subfield>
 					</datafield>
-					<datafield tag="773" ind1=" " ind2=" ">
-						<subfield code="a">Foo Bar</subfield>
-						<subfield code="w"/>
-					</datafield>
 				</record>
 			</metadata>
 		</record>

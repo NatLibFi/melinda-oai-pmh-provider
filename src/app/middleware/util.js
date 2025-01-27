@@ -4,6 +4,7 @@ export function sanitizeQueryParams(queryParams) {
   const query = clone(queryParams);
 
   Object.keys(query).forEach(key => {
+    //if (key === 'resumptionToken' || key === 'identifier') {
     if (key === 'resumptionToken') {
       return;
     }

@@ -95,9 +95,8 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
         return next();
       }
 
-      logger.debug(`Bad IP: ${req.ip}`);
-      const err = new ApiError(httpStatus.FORBIDDEN, 'Invalid IP');
-      return res.status(401, 'Unauthorized');
+      logger.debug(`Bad IP: ${req.headers['cf-connecting-ip']}`);
+      return res.sendStatus(HttpStatus.FORBIDDEN);
     }
   }
 }

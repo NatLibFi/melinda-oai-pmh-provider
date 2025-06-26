@@ -85,15 +85,15 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
     }
 
     function ipWhiteListMiddleware(req, res, next) {
+      logger.verbose('Ip whitelist middleware');
       if (ipWhiteList.length === 0) {
         return next();
       }
-      logger.verbose('Ip whitelist middleware');
       const connectionIp = req.headers['cf-connecting-ip'];
-      logger.debug(connectionIp);
-      const parsedConnectionIp = connectionIp.replace(/::ffff:/u, '');
-      logger.debug(parsedConnectionIp);
-      if (ipRangeCheck(`${parsedConnectionIp}`, ipWhiteList)) {
+      //logger.debug(connectionIp);
+      //const parsedConnectionIp = connectionIp.replace(/::ffff:/u, '');
+      //logger.debug(parsedConnectionIp);
+      if (ipRangeCheck(`${connectionIp}`, ipWhiteList)) {
         logger.debug('IP ok');
         return next();
       }

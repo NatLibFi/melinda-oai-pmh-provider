@@ -9,7 +9,7 @@ import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commo
 import createMiddleware from './middleware';
 
 // oracledb parameter for using oracledbMock for tests!
-export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false}, oracledb = oracledbAleph) {
+export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false, ipWhiteList}, oracledb = oracledbAleph) {
   //const oracledb = useOrigOracledb ? oracledbOrig : oracledbAleph;
   const logger = createLogger();
   //logger.debug(`Using original node-oracledb ${useOrigOracledb}`);

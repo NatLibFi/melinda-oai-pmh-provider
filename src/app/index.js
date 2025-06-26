@@ -4,6 +4,7 @@ import express from 'express';
 import oracledbAleph from '@natlibfi/oracledb-aleph';
 //import oracledbOrig from 'oracledb';
 import HttpStatus from 'http-status';
+import ipRangeCheck from 'ip-range-check';
 import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commons';
 import createMiddleware from './middleware';
 
@@ -52,8 +53,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
       msg: '{{req.logLabel}} {{req.ip}} HTTP {{req.method}} {{req.url}} - {{res.statusCode}} {{res.responseTime}}ms'
     }));
 
-
-    app.get('/', await createMiddleware({...middlewareOptions, pool}));
+    app.get('/', ipWhiteListMiddleware, await createMiddleware({...middlewareOptions, pool}));
 
     app.use(handleError);
 
@@ -82,6 +82,22 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
 
       res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR);
       throw err;
+    }
+
+    function ipWhiteListMiddleware(req, res, next) {
+      logger.verbose('Ip whitelist middleware');
+      const connectionIp = req.headers['cf-connecting-ip'];
+      logger.debug(connectionIp);
+      const parsedConnectionIp = connectionIp.replace(/::ffff:/u, '');
+      logger.debug(parsedConnectionIp);
+      if (ipRangeCheck(`${parsedConnectionIp}`, ipWhiteList)) {
+        logger.debug('IP ok');
+        return next();
+      }
+
+      logger.debug(`Bad IP: ${req.ip}`);
+      const err = new ApiError(httpStatus.FORBIDDEN, 'Invalid IP');
+      return res.status(401, 'Unauthorized');
     }
   }
 }

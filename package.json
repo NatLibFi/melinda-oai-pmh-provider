@@ -46,6 +46,7 @@
 		"debug": "^4.4.1",
 		"express": "^4.21.2",
 		"http-status": "^1.8.1",
+		"ip-range-check": "^0.2.0",
 		"langs": "^2.0.0",
 		"moment": "^2.30.1",
 		"oracledb": "^6.8.0",

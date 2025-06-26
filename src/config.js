@@ -12,6 +12,8 @@ export const oracleConnectString = readEnvironmentVariable('ORACLE_CONNECT_STRIN
 export const httpPort = readEnvironmentVariable('HTTP_PORT', {defaultValue: 8080, format: v => Number(v)});
 export const enableProxy = readEnvironmentVariable('ENABLE_PROXY', {defaultValue: false, format: parseBoolean});
 
+export const ipWhiteList = readEnvironmentVariable('IP_WHITELIST', {defaultValue: [], format: v => JSON.parse(v)});
+
 export const middlewareOptions = {
   alephLibrary,
   instanceUrl: readEnvironmentVariable('INSTANCE_URL'),

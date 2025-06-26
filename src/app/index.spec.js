@@ -42,7 +42,8 @@ function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbRes
         //alephLibrary: 'foo00',
         //melindaPrefix: 'FI-MELINDA'
       }
-    }
+    },
+    ipWhiteList: []
   }, oracleMock);
 
   function formatDbResults() {

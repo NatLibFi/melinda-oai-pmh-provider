@@ -1,11 +1,13 @@
 {
     "description": "Should respond with an error because of an illegal argument",
-    "contextName": "bib",  
+    "only": false,
+    "skip": false,
+    "contextName": "bib",
        "isPrivileged": false,
     "alephLibrary": "foo00",
     "melindaPrefix": "FI-MELINDA",
     "requests": [
-        { "method": "GET", "status": 200, "requestParams": { "verb": "GetRecord", "foo": "bar" } }        
+        { "method": "GET", "status": 200, "requestParams": { "verb": "GetRecord", "foo": "bar" } }
     ],
     "dbResults": [
       [

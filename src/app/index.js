@@ -85,6 +85,9 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
     }
 
     function ipWhiteListMiddleware(req, res, next) {
+      if (ipWhiteList.length === 0) {
+        return next();
+      }
       logger.verbose('Ip whitelist middleware');
       const connectionIp = req.headers['cf-connecting-ip'];
       logger.debug(connectionIp);

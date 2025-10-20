@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v5
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
@@ -36,7 +36,7 @@ jobs:
 
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v5
     - name: nodejsscan scan
       id: njsscan
       uses: ajinabraham/njsscan-action@master
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: mikaelvesavuori/license-compliance-action@v1.0.2
         with:
           exclude_pattern: /^@natlibfi/
@@ -85,7 +85,7 @@ jobs:
 #     if: github.actor!= 'dependabot[bot]'   # ignore the pull request which comes from user dependabot, because it does not access to secrets
 
 #     steps:
-#       - uses: actions/checkout@v3
+#       - uses: actions/checkout@v5
 #       - name: Docker meta
 #         id: meta
 #         uses: docker/metadata-action@v4

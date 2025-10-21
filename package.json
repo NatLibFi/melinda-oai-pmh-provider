@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-oai-pmh-provider.git"
 	},
 	"license": "MIT",
-	"version": "2.1.1",
+	"version": "2.1.2-alpha.1",
 	"main": "./dist/index.js",
 	"engines": {
 		"node": ">=18"
@@ -42,7 +42,7 @@
 		"@natlibfi/marc-record-serializers": "^10.1.6",
 		"@natlibfi/melinda-backend-commons": "^2.3.9",
 		"@natlibfi/melinda-commons": "^13.0.21",
-		"@natlibfi/oracledb-aleph": "^6.6.0",
+		"@natlibfi/oracledb-aleph": "^6.10.0",
 		"debug": "^4.4.3",
 		"express": "^4.21.2",
 		"http-status": "^1.8.1",

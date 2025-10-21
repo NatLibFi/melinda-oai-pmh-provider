@@ -42,7 +42,7 @@
 		"@natlibfi/marc-record-serializers": "^10.1.6",
 		"@natlibfi/melinda-backend-commons": "^2.3.9",
 		"@natlibfi/melinda-commons": "^13.0.21",
-		"@natlibfi/oracledb-aleph": "^6.6.0",
+		"@natlibfi/oracledb-aleph": "^6.10.0",
 		"debug": "^4.4.3",
 		"express": "^4.21.2",
 		"http-status": "^1.8.1",

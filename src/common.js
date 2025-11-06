@@ -2,9 +2,9 @@
 
 import moment from 'moment';
 import {encryptString, decryptString} from '@natlibfi/melinda-backend-commons';
-import {metadataFormats, requestDateStampFormats} from './app/middleware/constants';
+import {metadataFormats, requestDateStampFormats} from './app/middleware/constants.js';
 // import { createLogger } from '@natlibfi/melinda-backend-commons/';
-import ApiError from './api-error';
+import {default as ApiError} from './api-error.js';
 import createDebugLogger from 'debug';
 
 export const errors = {
@@ -49,6 +49,7 @@ export function generateResumptionToken({
   }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false, sets}) {
   //const logger = createLogger();
   const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/parseResumptionToken');
@@ -82,6 +83,7 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
       const decoded = decodeURIComponent(token);
       return decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
     } catch (_) {
+      log.error(_);
       throw new ApiError({verb, code: errors.badResumptionToken});
     }
   }

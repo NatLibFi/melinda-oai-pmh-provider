@@ -2,16 +2,16 @@
 
 import {Parser, Builder} from 'xml2js';
 import {MarcRecord} from '@natlibfi/marc-record';
-import createOracleMock from '@natlibfi/oracledb-mock';
-import generateTests from '@natlibfi/fixugen-http-server';
-import {dbDataStringFromRecord} from './record';
-import startApp from '.';
+import {default as createOracleMock} from '@natlibfi/oracledb-mock';
+import {default as generateTests} from '@natlibfi/fixugen-http-server';
+import {dbDataStringFromRecord} from './record.js';
+import {default as startApp} from './index.js';
 
 const oracleMock = createOracleMock();
 
 generateTests({
   callback, formatResponse,
-  path: [__dirname, '..', '..', 'test-fixtures', 'app']
+  path: [import.meta.dirname, '..', '..', 'test-fixtures', 'app']
 });
 
 function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbResults, sets = []}) {
@@ -54,7 +54,6 @@ function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbRes
     function format(rows) {
       return rows.map(row => {
         if ('RECORD' in row) {
-          // eslint-disable-next-line no-console
           //console.log(`RECORD`);
           return {...row, RECORD: dbDataStringFromRecord(new MarcRecord(row.RECORD, {noFailValidation: true}))};
         }
@@ -66,7 +65,7 @@ function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbRes
 }
 
 async function formatResponse(headers, originalPayload) {
-  if (originalPayload) { // eslint-disable-line functional/no-conditional-statements
+  if (originalPayload) {
     try {
       const obj = await parse(originalPayload);
       const modified = format(obj);

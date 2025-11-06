@@ -2,9 +2,9 @@ import moment from 'moment';
 import {isDeletedRecord, toAlephId} from '@natlibfi/melinda-commons';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
 import {MarcRecord} from '@natlibfi/marc-record';
-import {DB_TIME_FORMAT} from './common';
-import {parseRecord} from '../../record';
-import queryFactory from './query';
+import {DB_TIME_FORMAT} from './common.js';
+import {parseRecord} from '../../record.js';
+import queryFactory from './query.js';
 
 import createDebugLogger from 'debug';
 const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/db:index');
@@ -76,8 +76,8 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
           await resultSet.close();
 
-          cache[value] = `${row.ID}`; // eslint-disable-line functional/immutable-data, require-atomic-updates
-          // cache[value] = `${row.ID}%`; // eslint-disable-line functional/immutable-data, require-atomic-updates
+          cache[value] = `${row.ID}`;
+          // cache[value] = `${row.ID}%`;
           return getHeadingIndexes(values.slice(1), results.concat(cache[value]));
         }
 
@@ -255,7 +255,6 @@ export default async function ({maxResults, sets, alephLibrary, connection, form
 
     // We want to include records in response and have an existing record with validationErrors
     // DEVELOP: we should handle erroring records somehow else than with 500!
-    // eslint-disable-next-line functional/no-conditional-statements
     if (includeRecords && !isDeleted && validationErrors && validationErrors.length > 0) {
       const errorMessage = `Record ${row.ID} is invalid. ${validationErrors}`;
       logger.error(errorMessage);

@@ -1,12 +1,12 @@
 
 
 import express from 'express';
-import oracledbAleph from '@natlibfi/oracledb-aleph';
+import {default as oracledbAleph} from '@natlibfi/oracledb-aleph';
 //import oracledbOrig from 'oracledb';
 import HttpStatus from 'http-status';
 import ipRangeCheck from 'ip-range-check';
 import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commons';
-import createMiddleware from './middleware';
+import {default as createMiddleware} from './middleware/index.js';
 
 // oracledb parameter for using oracledbMock for tests!
 export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false, ipWhiteList}, oracledb = oracledbAleph) {
@@ -34,12 +34,12 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
     return pool;
 
     function setOracleOptions() {
-      oracledb.outFormat = oracledb.OBJECT; // eslint-disable-line functional/immutable-data
-      oracledb.poolTimeout = 20; // eslint-disable-line functional/immutable-data
-      oracledb.events = false; // eslint-disable-line functional/immutable-data
+      oracledb.outFormat = oracledb.OBJECT;
+      oracledb.poolTimeout = 20;
+      oracledb.events = false;
       // Check connection usability always
-      oracledb.poolPingInterval = 0; // eslint-disable-line functional/immutable-data
-      //oracledb.poolPingInterval = 10; // eslint-disable-line functional/immutable-data
+      oracledb.poolPingInterval = 0;
+      //oracledb.poolPingInterval = 10;
     }
   }
 
@@ -60,7 +60,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
     return app.listen(httpPort, () => logger.info('Started Melinda OAI-PMH provider'));
 
     // Express requires next to be present for the error handler to work, even if that argument is not used
-    function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
+    function handleError(err, req, res, next) {
       logger.debug(`HandleError: ${err.message}`);
       logger.debug(`req.aborted: ${req.aborted}`);
 

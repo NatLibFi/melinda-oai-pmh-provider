@@ -1,4 +1,4 @@
-import {DB_TIME_FORMAT, MAX_DOC_NUMBER} from './common';
+import {DB_TIME_FORMAT, MAX_DOC_NUMBER} from './common.js';
 
 export default ({library, limit}) => ({
   getSingleRecord: ({identifier}) => {

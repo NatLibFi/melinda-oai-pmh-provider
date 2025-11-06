@@ -1,4 +1,4 @@
-import {formatAut, stripPrivateFields as stripPrivateFieldsDefault} from './common';
+import {formatAut, stripPrivateFields as stripPrivateFieldsDefault} from './common.js';
 
 export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
   repoName: 'Melinda OAI-PMH provider for authority subject records',

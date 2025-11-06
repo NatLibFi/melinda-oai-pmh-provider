@@ -3,15 +3,15 @@
 import moment from 'moment';
 import {clone} from '@natlibfi/melinda-commons';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
-import ApiError from '../../api-error';
-import responseFactory from './response';
-import {parseResumptionToken, generateResumptionToken, errors} from '../../common';
-import contextFactory from './context';
-import databaseFactory from './db';
-import {metadataFormats, requestDateStampFormats} from './constants';
-import {sanitizeQueryParams} from './util';
+import {default as ApiError} from '../../api-error.js';
+import {default as responseFactory} from './response.js';
+import {parseResumptionToken, generateResumptionToken, errors} from '../../common.js';
+import {default as contextFactory} from './context/index.js';
+import {default as databaseFactory} from './db/index.js';
+import {metadataFormats, requestDateStampFormats} from './constants.js';
+import {sanitizeQueryParams} from './util.js';
 import {v4 as uuid} from 'uuid';
-import createDebugLogger from 'debug';
+import {default as createDebugLogger} from 'debug';
 
 export default async ({
   contextOptions,
@@ -34,7 +34,6 @@ export default async ({
   const {getRecord, earliestTimestamp, listIdentifiers, listRecords} = await getMethods();
 
   return async (req, res, next) => {
-    // eslint-disable-next-line functional/immutable-data
     req.logLabel = uuid();
     const {query: {verb}, logLabel} = req;
     logger.debug(`${logLabel} Handling request from ${req.ip} : ${JSON.stringify(req.query)}`);
@@ -43,15 +42,18 @@ export default async ({
 
     try {
       await handle();
+      debugDev(`DONE?`)
     } catch (err) {
       logger.debug(`middleware/error ${err}, sending apiError`);
       return err instanceof ApiError ? sendResponse({error: err.code}) : next(err);
     }
 
     function handle() {
+      debugDev(`--- Handle.`);
       res.type('application/xml');
 
       const error = validateParams();
+      debugDev(`validateParams result: ${error}`);
 
       return error ? sendResponse({error}) : call();
 
@@ -197,6 +199,7 @@ export default async ({
       }
 
       async function call() {
+        debugDev(`--- Call.`);
         const params = await getParams();
         const result = await wrap();
         logger.debug(`${logLabel} Sending result`);
@@ -261,8 +264,9 @@ export default async ({
         }
 
         function wrap() {
+          debugDev(`--- Wrap.`);
           logger.debug(`${logLabel} wrap`);
-          return new Promise(async (resolve, reject) => { // eslint-disable-line no-async-promise-executor
+          return new Promise(async (resolve, reject) => {
             req.on('close', handleClose);
             const method = getMethod();
 
@@ -284,7 +288,7 @@ export default async ({
 
             function getMethod() {
               return {
-                Identify: () => {}, // eslint-disable-line no-empty-function
+                Identify: () => {},
                 ListSets: listSets,
                 ListMetadataFormats: listMetadataFormats,
                 GetRecord: getRecord,
@@ -304,7 +308,7 @@ export default async ({
             async function handleClose() {
               logger.info(`${logLabel} Request cancelled (handleClose)`);
 
-              if (params.connection) { // eslint-disable-line functional/no-conditional-statements
+              if (params.connection) {
                 try {
                   logger.debug(`${logLabel} Closing connection: handleClose`);
                   await params.connection.break();
@@ -349,14 +353,19 @@ export default async ({
     }
 
     async function sendResponse({error, result, params}) {
+      debugDev(`Send response`);
       const requestUrl = instanceUrl;
       const query = sanitizeQueryParams(clone(req.query)); // njsscan-ignore: express_xss
 
       if (error) {
-        return res.send(await generateErrorResponse({logLabel, query, requestUrl, error}));
+        const payload = await generateErrorResponse({logLabel, query, requestUrl, error});
+        debugDev(`Payload from error: ${payload}`);
+        return res.send(payload);
       }
 
-      return res.send(await generatePayload(verb));
+      const payload = await generatePayload(verb);
+      debugDev(`Payload from verb: ${payload}`);
+      return res.send(payload);
 
       function generatePayload(method) {
         if (method === 'Identify') {

@@ -1,6 +1,6 @@
 
 
-import {formatBib, stripPrivateFields} from './common';
+import {formatBib, stripPrivateFields} from './common.js';
 
 export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
   repoName: 'Melinda OAI-PMH provider for bibliographic records',

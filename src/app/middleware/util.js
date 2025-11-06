@@ -10,7 +10,6 @@ export function sanitizeQueryParams(queryParams) {
     }
 
     validateValue(query[key]);
-    // eslint-disable-next-line
     query[key] = query[key].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('\'', '&apos;').replace('"', '&quot;');
   });
 

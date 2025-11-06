@@ -43,7 +43,7 @@ export function parseRecord({data, validate = false, noFailValidation = false, l
       // This could be done in marc-record-js / marc-record-serializers
       function format() {
         debugDev(`${logLabel} format whitespace in fixed fields`);
-        record.leader = formatWhitespace(record.leader); // eslint-disable-line functional/immutable-data
+        record.leader = formatWhitespace(record.leader);
         // we handle only fields with values = fixed length fields
         record.fields.filter(({value}) => value).forEach(({value}) => formatWhitespace(value));
 

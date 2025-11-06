@@ -1,11 +1,11 @@
 {
     "description": "Should respond with an error because of a bad verb",
-    "contextName": "bib",  
+    "contextName": "bib",
        "isPrivileged": false,
     "alephLibrary": "foo00",
     "melindaPrefix": "FI-MELINDA",
     "requests": [
-        { "method": "GET", "status": 200, "requestParams": { "verb": "foo" } }        
+        { "method": "GET", "status": 200, "requestParams": { "verb": "foo" } }
     ],
     "dbResults": [
       [
@@ -13,5 +13,7 @@
           "TIME": "20000102050000"
         }
       ]
-    ]
+    ],
+    "only": false,
+    "skip": false
   }

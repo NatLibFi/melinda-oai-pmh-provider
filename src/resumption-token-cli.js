@@ -1,19 +1,18 @@
 /* eslint-disable no-console */
-import {parseResumptionToken, generateResumptionToken} from './common';
+import {parseResumptionToken, generateResumptionToken} from './common.js';
 
 run();
 
 function run() {
   const {SECRET_ENCRYPTION_KEY: secretEncryptionKey, RESUMPTION_TOKEN_TIMEOUT: resumptionTokenTimeout} = process.env; // eslint-disable-line no-process-env
   const [op, ...args] = process.argv.slice(2);
-  // eslint-disable-next-line no-console
   console.log(process.argv);
   console.log(op);
   console.log(JSON.stringify(args));
 
   if (op === undefined) {
-    console.error('Missing params!'); // eslint-disable-line no-console
-    return process.exit(1); // eslint-disable-line no-process-exit
+    console.error('Missing params!');
+    return process.exit(1);
   }
 
   if (op === '-e') {
@@ -24,21 +23,21 @@ function run() {
       ...params
     });
 
-    console.log(tokenExpirationTime); // eslint-disable-line no-console
-    console.log(token); // eslint-disable-line no-console
-    return process.exit(); // eslint-disable-line no-process-exit
+    console.log(tokenExpirationTime);
+    console.log(token);
+    return process.exit();
   }
 
   if (op === '-d') {
     const token = decodeURIComponent(args[0]);
     const params = parseResumptionToken({secretEncryptionKey, token, ignoreError: true});
 
-    console.log(params); // eslint-disable-line no-console
-    return process.exit(); // eslint-disable-line no-process-exit
+    console.log(params);
+    return process.exit();
   }
 
-  console.error('Invalid op!'); // eslint-disable-line no-console
-  process.exit(1); // eslint-disable-line no-process-exit
+  console.error('Invalid op!');
+  process.exit(1);
 
   function getParams() {
     return args

@@ -1,6 +1,6 @@
 {
     "description": "Should respond with an error because of an illegal argument",
-    "only": true,
+    "only": false,
     "skip": false,
     "contextName": "bib",
        "isPrivileged": false,

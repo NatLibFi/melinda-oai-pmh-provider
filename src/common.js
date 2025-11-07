@@ -50,40 +50,57 @@ export function generateResumptionToken({
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false, sets}) {
+export async function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false, sets}) {
   //const logger = createLogger();
   const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/parseResumptionToken');
   const debugDev = debug.extend('dev');
   debugDev(`resumptionToken: token ${token}`);
-  const str = decryptToken();
-  debugDev(`resumptionToken: string ${str}`);
-  const [expirationTime, cursor, metadataPrefix, from, until, set, lastCountArg, timeCursor] = str.split(/;/gu);
+  debugDev(`ignoreError: ${ignoreError}`);
 
-  const lastCount = Number(lastCountArg);
-  const expires = moment(expirationTime);
-  debugDev(`Expires: ${expires}`);
-  const params = filter({cursor, timeCursor, metadataPrefix, set, from, until, lastCount});
-  debugDev(`params from resumptionToken: ${JSON.stringify(params)}`);
+  try {
+    const str = await decryptToken();
 
-  /* istanbul ignore if: Exists only for the CLI which won't be tested */
-  if (ignoreError) {
-    return {...params};
+    debugDev(`resumptionToken: string ${str}`);
+    const [expirationTime, cursor, metadataPrefix, from, until, set, lastCountArg, timeCursor] = str.split(/;/gu);
+
+    const lastCount = Number(lastCountArg);
+    const expires = moment(expirationTime);
+    debugDev(`Expires: ${expires}`);
+    const params = filter({cursor, timeCursor, metadataPrefix, set, from, until, lastCount});
+    debugDev(`params from resumptionToken: ${JSON.stringify(params)}`);
+
+    if (ignoreError) {
+      return {...params};
+    }
+
+    await validateParamsFromToken(params);
+
+    if (expires.isValid() && moment().isBefore(expires)) {
+      return {...params};
+    }
+    debugDev(`DONE?`);
   }
+  catch (err) {
+    debugDev(`ERROR: ${JSON.stringify(err)}`);
+    throw new ApiError({verb, code: errors.badResumptionToken});
+ }
 
-  validateParamsFromToken(params);
+ throw new ApiError({verb, code: errors.badResumptionToken});
 
-  if (expires.isValid() && moment().isBefore(expires)) {
-    return {...params};
-  }
-
-  throw new ApiError({verb, code: errors.badResumptionToken});
-
-  function decryptToken() {
+ 
+  async function decryptToken() {
+    debugDev(`Try to decrypt for ${verb}`);
     try {
       const decoded = decodeURIComponent(token);
-      return decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
-    } catch (_) {
-      log.error(_);
+      debugDev(`value: ${decoded}`);
+      debugDev(`key: ${secretEncryptionKey}`);
+      const result = await decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
+      debugDev(result);
+      return result;
+    } catch (err) {
+      debugDev(`ERROR: ${err}`);
+      log.error(err);
+      debugDev(`Decrypt error for ${verb}, throwing ${errors.badResumptionToken}`);
       throw new ApiError({verb, code: errors.badResumptionToken});
     }
   }
@@ -95,14 +112,14 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
       .reduce((acc, [k, v]) => ({...acc, [k]: v}), {});
   }
 
-  function validateParamsFromToken(params) {
-    const hasInvalid = validate(params);
+  async function validateParamsFromToken(params) {
+    const hasInvalid = await validate(params);
     debugDev(`Validation hasInvalid: ${hasInvalid}`);
     if (hasInvalid) {
       throw new ApiError({verb, code: errors.badResumptionToken});
     }
 
-    function validate(params) {
+    async function validate(params) {
       return Object.entries(params)
         .filter(([k]) => ['verb'].includes(k) === false)
         .some(([key, value]) => {
@@ -121,20 +138,22 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
           }
 
           if (key === 'cursor') {
+            debugDev(`Cursor:`);
             // check that cursor is a positive integer
-            return Number(cursor).isNan || Number(cursor) < 0 || !Number.isInteger(Number(cursor));
+            return Number(value).isNan || Number(value) < 0 || !Number.isInteger(Number(value));
           }
 
           if (key === 'timeCursor') {
             // check that timeCursor is a positive integer
-            return Number(timeCursor).isNan || Number(timeCursor) < 0 || !Number.isInteger(Number(timeCursor));
+            return Number(value).isNan || Number(value) < 0 || !Number.isInteger(Number(value));
           }
 
           if (key === 'lastCount') {
             // check that lastCount is a positive integer
-            return lastCount.isNan || lastCount < 0 || !Number.isInteger(lastCount);
+            return value.isNan || value < 0 || !Number.isInteger(value);
           }
 
+          debugDev(`All validations done`);
           return true;
 
           function validateSet() {
@@ -146,6 +165,7 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
           }
 
           function validateMetadataPrefix() {
+            debugDev(`metadataPrefix`);
             return metadataFormats.find(({prefix}) => prefix === value) === undefined;
           }
         });

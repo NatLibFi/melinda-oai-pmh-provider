@@ -2,7 +2,7 @@
   "description": "Should work with resumptionToken parameter (id sorted db result)",
   "comment": "NOTE that tests always format resumptionToken's expirationDate and value in responses so they can't be currently tested!",
   "skip": false,
-  "onlyDev": false,
+  "only": false,
   "requests": [
     {
       "method": "GET",

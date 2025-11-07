@@ -1,7 +1,7 @@
 {
   "description": "Should work with from-parameter (db results sorted by time)",
   "skip": false,
-  "onlyDev": false,
+  "only": false,
   "contextName": "bib",
   "isPrivileged": false,
   "alephLibrary": "foo00",

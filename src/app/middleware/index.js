@@ -44,20 +44,20 @@ export default async ({
       await handle();
       debugDev(`DONE?`)
     } catch (err) {
-      logger.debug(`middleware/error ${err}, sending apiError`);
+      logger.debug(`middleware/error, sending apiError: ${JSON.stringify(err)}`);
       return err instanceof ApiError ? sendResponse({error: err.code}) : next(err);
     }
 
-    function handle() {
+    async function handle() {
       debugDev(`--- Handle.`);
       res.type('application/xml');
 
-      const error = validateParams();
-      debugDev(`validateParams result: ${error}`);
+      const error = await validateParams();
+      debugDev(`validateParams result: ${error} (undefined = no errors)`);
 
       return error ? sendResponse({error}) : call();
 
-      function validateParams() {
+      async function validateParams() {
         const numParams = Object.keys(req.query).length;
 
         if (verb === 'Identify') {
@@ -77,6 +77,7 @@ export default async ({
         }
 
         if (['ListIdentifiers', 'ListRecords'].includes(verb)) {
+          debugDev(`LIST REQUEST`);
           return validateListRequest();
         }
 
@@ -88,9 +89,9 @@ export default async ({
           }
         }
 
-        function validateGetRecord() {
+        async function validateGetRecord() {
           if (numParams === 3) {
-            const error = validateMetadataPrefix(req.query.metadataPrefix);
+            const error = await validateMetadataPrefix(req.query.metadataPrefix);
 
             if (error) {
               return error;
@@ -110,7 +111,7 @@ export default async ({
           return errors.badArgument;
         }
 
-        function validateListMetadataFormats() {
+        async function validateListMetadataFormats() {
           if (numParams === 2) {
             if ('identifier' in req.query) {
               if (isInvalidRecordIdentifier(req.query.identifier)) {
@@ -124,18 +125,21 @@ export default async ({
           }
         }
 
-        function validateListSets() {
+        async function validateListSets() {
           if (numParams === 2 && req.query.resumptionToken === undefined) {
             return errors.badArgument;
           }
         }
 
-        function validateListRequest() {
+        async function validateListRequest() {
+          debugDev(`validateListRequest for ${numParams} parameters`);
           if (numParams >= 2) {
             if (req.query.resumptionToken === undefined) {
+              debugDev(`No resumption token`);
               const match = metadataFormats.find(({prefix}) => prefix === req.query.metadataPrefix);
-
+              debugDev(match);
               if (match) {
+                debugDev(`We have match`);
                 if (isSupportedFormat(req.query.metadataPrefix) === false) {
                   return errors.noRecordsMatch;
                 }
@@ -149,16 +153,18 @@ export default async ({
             return;
           }
 
+
           return errors.badArgument;
 
-          function validateOptParams() {
-            const hasInvalid = validate();
+          async function validateOptParams() {
+            debugDev(`validateOptParams`);
+            const hasInvalid = await validate();
 
             if (hasInvalid) {
               return errors.badArgument;
             }
 
-            function validate() {
+            async function validate() {
               return Object.entries(req.query)
                 .filter(([k]) => ['verb', 'metadataPrefix'].includes(k) === false)
                 .some(([key, value]) => {
@@ -185,7 +191,7 @@ export default async ({
           }
         }
 
-        function validateMetadataPrefix(target) {
+        async function validateMetadataPrefix(target) {
           const match = metadataFormats.find(({prefix}) => prefix === target);
 
           if (match === undefined) {
@@ -205,26 +211,30 @@ export default async ({
         logger.debug(`${logLabel} Sending result`);
         return sendResponse({result, params});
 
-        function getParams() {
-          const parsedParams = 'resumptionToken' in req.query ? parseToken() : parse(req.query);
+        async function getParams() {
+          debugDev(`--- getParams ---`);
+          debugDev(JSON.stringify(req.query));
+          debugDev('resumptionToken' in req.query);
+          const parsedParams = 'resumptionToken' in req.query ? await parseToken() : await parse(req.query);
           debugDev(`parsedParams: ${JSON.stringify(parsedParams)}`);
           const params = {logLabel, ...parsedParams};
           return needsDb() ? addConnection() : params;
 
-          function parseToken() {
+          async function parseToken() {
             logger.debug(`${logLabel} Parsing resumptionToken for parameters`);
-            const params = parseResumptionToken({
+            debugDev(`parseToken`);
+            const params = await parseResumptionToken({
               secretEncryptionKey, verb,
               token: req.query.resumptionToken,
               sets
             });
-
+            debugDev(`We got params from parseToken: ${params}`);
             // DEVELOP: We should probably validate also params from resumptionToken?
 
             return parse(params);
           }
 
-          function parse(params) {
+          async function parse(params) {
             return Object.entries(params)
               .reduce((acc, [key, value]) => {
                 if (['from', 'until'].includes(key)) {
@@ -360,7 +370,7 @@ export default async ({
       if (error) {
         const payload = await generateErrorResponse({logLabel, query, requestUrl, error});
         debugDev(`Payload from error: ${payload}`);
-        return res.send(payload);
+        return res.send(`${payload}`);
       }
 
       const payload = await generatePayload(verb);

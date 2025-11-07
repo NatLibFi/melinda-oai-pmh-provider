@@ -35,6 +35,7 @@
 	"dependencies": {
 		"@natlibfi/marc-record": "^10.0.0",
 		"@natlibfi/marc-record-serializers": "^11.0.0",
+		"@natlibfi/melinda-backend-commons": "^3.0.0",
 		"@natlibfi/melinda-commons": "^14.0.0",
 		"@natlibfi/oracledb-aleph": "^6.10.0",
 		"debug": "^4.4.3",
@@ -52,6 +53,7 @@
 		"@natlibfi/fixugen-http-server": "^2.0.0",
 		"@natlibfi/fixura": "^4.0.0",
 		"@natlibfi/oracledb-mock": "^2.0.0-alpha.1",
+		"chai": "^6.2.0",
 		"cross-env": "^10.1.0",
 		"esbuild": "^0.25.12",
 		"eslint": "^9.39.1"

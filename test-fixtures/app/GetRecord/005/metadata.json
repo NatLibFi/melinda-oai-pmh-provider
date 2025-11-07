@@ -1,7 +1,7 @@
 {
   "description": "Should respond with internal server error because of malformed database results",
   "skip": false,
-  "onlyDev": false,
+  "only": false,
   "contextName": "bib",
   "isPrivileged": false,
   "alephLibrary": "foo00",

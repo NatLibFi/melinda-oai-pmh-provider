@@ -2,7 +2,7 @@
   "description": "Should respond with internal server error (500), there's an invalid record in set (cannot create AlephSequential - line without subfields/value)",
   "comment": "We should handle this error better than with 500!",
   "skip": false,
-  "onlyDev": false,
+  "only": false,
   "contextName": "bib",  
      "isPrivileged": false,
     "alephLibrary": "foo00",

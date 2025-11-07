@@ -64,7 +64,10 @@ function callback({contextName, isPrivileged, alephLibrary, melindaPrefix, dbRes
   }
 }
 
-async function formatResponse(headers, originalPayload) {
+async function formatResponse(response) {
+  const originalPayload = await response.text();
+  //debugDev(`We got payload ${payload}`);
+  const headers = response.headers;
   if (originalPayload) {
     try {
       const obj = await parse(originalPayload);
@@ -75,7 +78,6 @@ async function formatResponse(headers, originalPayload) {
       return {headers, payload: originalPayload};
     }
   }
-
   return {headers, payload: originalPayload};
 
   function parse(str) {

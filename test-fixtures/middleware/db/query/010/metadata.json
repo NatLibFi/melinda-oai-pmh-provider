@@ -1,7 +1,7 @@
 {
   "description": "Should return query and cursor arg for getting records",
   "skip": false,
-  "onlyDev": false,
+  "only": false,
   "alephLibrary": "foo00",
   "limit": 100,
   "testFunction": "getRecords",

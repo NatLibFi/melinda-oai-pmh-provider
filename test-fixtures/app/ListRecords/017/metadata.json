@@ -1,7 +1,7 @@
 {
   "description": "Should respond with an incomplete list including ties (if there aren't too many) with a resumption token (used with from parameter, time sorted db response)",
   "skip": false,
-  "onlyDev": false,
+  "only": false,
   "requests": [
     {
       "method": "GET",

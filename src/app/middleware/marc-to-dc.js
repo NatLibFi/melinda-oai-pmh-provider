@@ -55,7 +55,8 @@ export default record => {
       const timeStr = value.slice(0, 6);
       debug(`We have value from 008: ${value}`);
       debug(`We have timeStr from value: ${timeStr}`);
-      const result = timeStr ? moment(timeStr, 'YYMMDD').toISOString(true) : '';
+//      const result = timeStr ? moment(timeStr, 'YYMMDD').toISOString(true) : '';
+      const result = timeStr ? moment.utc(timeStr, 'YYMMDD').toISOString(true) : '';
       debug(`We have result ${result}`);
       return result;
     }

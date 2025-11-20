@@ -21,7 +21,6 @@
 		"node": ">=22"
 	},
 	"scripts": {
-		"prepare": "npm run build",
 		"start": "node dist/index.js",
 		"cli": "node dist/cli.js",
 		"lint": "eslint src",

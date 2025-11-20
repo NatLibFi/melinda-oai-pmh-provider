@@ -39,6 +39,7 @@
 		"@natlibfi/melinda-commons": "^14.0.1",
 		"@natlibfi/oracledb-aleph": "^6.10.0",
 		"debug": "^4.4.3",
+		"esbuild": "^0.27.0",
 		"express": "^4.21.2",
 		"http-status": "^2.1.0",
 		"ip-range-check": "^0.2.0",
@@ -54,7 +55,6 @@
 		"@natlibfi/fixura": "^4.0.0",
 		"@natlibfi/oracledb-mock": "^2.0.1",
 		"cross-env": "^10.1.0",
-		"esbuild": "^0.27.0",
 		"eslint": "^9.39.1"
 	}
 }

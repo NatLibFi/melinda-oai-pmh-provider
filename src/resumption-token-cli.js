@@ -4,7 +4,7 @@ import {parseResumptionToken, generateResumptionToken} from './common.js';
 run();
 
 function run() {
-  const {SECRET_ENCRYPTION_KEY: secretEncryptionKey, RESUMPTION_TOKEN_TIMEOUT: resumptionTokenTimeout} = process.env; // eslint-disable-line no-process-env
+  const {SECRET_ENCRYPTION_KEY: secretEncryptionKey, RESUMPTION_TOKEN_TIMEOUT: resumptionTokenTimeout} = process.env; 
   const [op, ...args] = process.argv.slice(2);
   console.log(process.argv);
   console.log(op);

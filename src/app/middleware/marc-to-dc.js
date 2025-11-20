@@ -5,6 +5,9 @@ import moment from 'moment';
 import {Builder} from 'xml2js';
 import createDebugLogger from 'debug';
 
+// Note: this marc-to-dc conversion is really-really-simple not actually usable placeholder
+// If we want to actually supply dc from OAI-PMH this should be replaced by something more comprehensive
+
 export default record => {
   const debug = createDebugLogger(`@natlibfi/melinda-oai-pmh-provider/marc-to-dc`);
 
@@ -46,6 +49,7 @@ export default record => {
       return result['1'] || '';
     }
 
+    // dc.date should propably not be creation date of the record
     function getDate() {
       const value = record.get(/^008$/u)?.[0]?.value || '';
       const timeStr = value.slice(0, 6);

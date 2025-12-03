@@ -1,7 +1,7 @@
 {
     "description": "Should respond with a authority auxiliary record",
     "comment": "Note that test data is a name record, which we do not actually supply from autAux",
-    "only": true,
+    "only": false,
     "skip": false,
     "contextName": "autAux",
     "isPrivileged": false,

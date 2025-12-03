@@ -1,7 +1,7 @@
 import {formatAut, stripPrivateFields as stripPrivateFieldsDefault} from './common.js';
 
 export default ({isPrivileged, alephLibrary, melindaPrefix}) => ({
-  repoName: 'Melinda OAI-PMH provider for authority subject records',
+  repoName: 'Melinda OAI-PMH provider for authority auxiliary records',
   isSupportedFormat: f => ['marc21', 'melinda_marc'].includes(f),
   formatRecord: (record, id, metadataPrefix, logLabel) => {
 

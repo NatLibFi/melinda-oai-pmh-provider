@@ -88,13 +88,13 @@ export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreEr
  throw new ApiError({verb, code: errors.badResumptionToken});
 
 
-  async function decryptToken() {
+  function decryptToken() {
     debugDev(`Try to decrypt for ${verb}`);
     try {
       const decoded = decodeURIComponent(token);
       debugDev(`value: ${decoded}`);
       debugDev(`key: ${secretEncryptionKey}`);
-      const result = await decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
+      const result = decryptString({key: secretEncryptionKey, value: decoded, algorithm: 'aes-256-cbc'});
       debugDev(result);
       return result;
     } catch (err) {

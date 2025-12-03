@@ -220,7 +220,7 @@ export default async ({
           const params = {logLabel, ...parsedParams};
           return needsDb() ? addConnection() : params;
 
-          async function parseToken() {
+          function parseToken() {
             logger.debug(`${logLabel} Parsing resumptionToken for parameters`);
             debugDev(`parseToken`);
             const params = parseResumptionToken({

@@ -1,7 +1,7 @@
 {
   "description": "Should work with resumptionToken parameter",
   "skip": false,
-  "only": false,
+  "only": true,
   "requests": [
     {
       "method": "GET",

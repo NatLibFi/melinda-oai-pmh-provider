@@ -48,16 +48,16 @@ export default async ({
       return err instanceof ApiError ? sendResponse({error: err.code}) : next(err);
     }
 
-    async function handle() {
+    function handle() {
       debugDev(`--- Handle.`);
       res.type('application/xml');
 
-      const error = await validateParams();
+      const error = validateParams();
       debugDev(`validateParams result: ${error} (undefined = no errors)`);
 
       return error ? sendResponse({error}) : call();
 
-      async function validateParams() {
+      function validateParams() {
         const numParams = Object.keys(req.query).length;
 
         if (verb === 'Identify') {
@@ -89,9 +89,9 @@ export default async ({
           }
         }
 
-        async function validateGetRecord() {
+        function validateGetRecord() {
           if (numParams === 3) {
-            const error = await validateMetadataPrefix(req.query.metadataPrefix);
+            const error = validateMetadataPrefix(req.query.metadataPrefix);
 
             if (error) {
               return error;
@@ -111,7 +111,7 @@ export default async ({
           return errors.badArgument;
         }
 
-        async function validateListMetadataFormats() {
+        function validateListMetadataFormats() {
           if (numParams === 2) {
             if ('identifier' in req.query) {
               if (isInvalidRecordIdentifier(req.query.identifier)) {
@@ -125,13 +125,13 @@ export default async ({
           }
         }
 
-        async function validateListSets() {
+        function validateListSets() {
           if (numParams === 2 && req.query.resumptionToken === undefined) {
             return errors.badArgument;
           }
         }
 
-        async function validateListRequest() {
+        function validateListRequest() {
           debugDev(`validateListRequest for ${numParams} parameters`);
           if (numParams >= 2) {
             if (req.query.resumptionToken === undefined) {
@@ -156,15 +156,15 @@ export default async ({
 
           return errors.badArgument;
 
-          async function validateOptParams() {
+          function validateOptParams() {
             debugDev(`validateOptParams`);
-            const hasInvalid = await validate();
+            const hasInvalid = validate();
 
             if (hasInvalid) {
               return errors.badArgument;
             }
 
-            async function validate() {
+            function validate() {
               return Object.entries(req.query)
                 .filter(([k]) => ['verb', 'metadataPrefix'].includes(k) === false)
                 .some(([key, value]) => {
@@ -191,7 +191,7 @@ export default async ({
           }
         }
 
-        async function validateMetadataPrefix(target) {
+        function validateMetadataPrefix(target) {
           const match = metadataFormats.find(({prefix}) => prefix === target);
 
           if (match === undefined) {

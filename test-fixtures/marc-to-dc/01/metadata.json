@@ -1,5 +1,5 @@
 {
     "description": "marc-to-dc 1",
-    "only": true,
+    "only": false,
     "skip": false
   }

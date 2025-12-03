@@ -223,7 +223,7 @@ export default async ({
           async function parseToken() {
             logger.debug(`${logLabel} Parsing resumptionToken for parameters`);
             debugDev(`parseToken`);
-            const params = await parseResumptionToken({
+            const params = parseResumptionToken({
               secretEncryptionKey, verb,
               token: req.query.resumptionToken,
               sets

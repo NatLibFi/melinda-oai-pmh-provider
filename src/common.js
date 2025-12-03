@@ -50,7 +50,7 @@ export function generateResumptionToken({
 }
 
 // eslint-disable-next-line max-lines-per-function
-export async function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false, sets}) {
+export function parseResumptionToken({secretEncryptionKey, verb, token, ignoreError = false, sets}) {
   //const logger = createLogger();
   const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/parseResumptionToken');
   const debugDev = debug.extend('dev');
@@ -58,7 +58,7 @@ export async function parseResumptionToken({secretEncryptionKey, verb, token, ig
   debugDev(`ignoreError: ${ignoreError}`);
 
   try {
-    const str = await decryptToken();
+    const str = decryptToken();
 
     debugDev(`resumptionToken: string ${str}`);
     const [expirationTime, cursor, metadataPrefix, from, until, set, lastCountArg, timeCursor] = str.split(/;/gu);
@@ -73,7 +73,7 @@ export async function parseResumptionToken({secretEncryptionKey, verb, token, ig
       return {...params};
     }
 
-    await validateParamsFromToken(params);
+    validateParamsFromToken(params);
 
     if (expires.isValid() && moment().isBefore(expires)) {
       return {...params};
@@ -87,7 +87,7 @@ export async function parseResumptionToken({secretEncryptionKey, verb, token, ig
 
  throw new ApiError({verb, code: errors.badResumptionToken});
 
- 
+
   async function decryptToken() {
     debugDev(`Try to decrypt for ${verb}`);
     try {
@@ -112,14 +112,14 @@ export async function parseResumptionToken({secretEncryptionKey, verb, token, ig
       .reduce((acc, [k, v]) => ({...acc, [k]: v}), {});
   }
 
-  async function validateParamsFromToken(params) {
-    const hasInvalid = await validate(params);
+  function validateParamsFromToken(params) {
+    const hasInvalid = validate(params);
     debugDev(`Validation hasInvalid: ${hasInvalid}`);
     if (hasInvalid) {
       throw new ApiError({verb, code: errors.badResumptionToken});
     }
 
-    async function validate(params) {
+    function validate(params) {
       return Object.entries(params)
         .filter(([k]) => ['verb'].includes(k) === false)
         .some(([key, value]) => {

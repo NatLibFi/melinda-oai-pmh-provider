@@ -32,14 +32,14 @@
 		"dev:test": "cross-env DEBUG=@natlibfi/* NODE_ENV=test node --watch --test --experimental-test-coverage --test-reporter=spec './src/**/*.test.js'"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^10.0.0",
+		"@natlibfi/marc-record": "^10.0.1",
 		"@natlibfi/marc-record-serializers": "^11.0.0",
-		"@natlibfi/melinda-backend-commons": "^3.0.0",
+		"@natlibfi/melinda-backend-commons": "^3.0.1",
 		"@natlibfi/melinda-commons": "^14.0.1",
 		"@natlibfi/oracledb-aleph": "^6.10.0",
 		"debug": "^4.4.3",
 		"esbuild": "^0.27.0",
-		"express": "^4.21.2",
+		"express": "^4.22.1",
 		"http-status": "^2.1.0",
 		"ip-range-check": "^0.2.0",
 		"langs": "^2.0.0",

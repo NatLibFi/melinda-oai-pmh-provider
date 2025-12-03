@@ -14,7 +14,7 @@
 		"url": "git@github.com:natlibfi/melinda-oai-pmh-provider.git"
 	},
 	"license": "MIT",
-	"version": "3.0.0-alpha.3",
+	"version": "3.0.0-alpha.4",
 	"main": "./dist/index.js",
 	"type": "module",
 	"engines": {

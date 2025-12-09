@@ -1,5 +1,7 @@
 {
   "description": "Should respond with all sets",
+  "only": false,
+  "skip": false,
   "requests": [
     {
       "method": "GET",

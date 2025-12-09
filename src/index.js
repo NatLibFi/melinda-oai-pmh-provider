@@ -1,16 +1,16 @@
 
 
-import startApp from './app';
-import * as config from './config';
+import {default as startApp} from './app/index.js';
+import * as config from './config.js';
 
 run();
 
 async function run() {
-  let server; // eslint-disable-line functional/no-let
+  let server;
 
   registerInterruptionHandlers();
 
-  server = await startApp(config); // eslint-disable-line prefer-const
+  server = await startApp(config);
 
   function registerInterruptionHandlers() {
     process.on('SIGTERM', handleSignal);
@@ -29,17 +29,19 @@ async function run() {
         server.close();
 
         if (message) {
-          console.error(message); // eslint-disable-line no-console
-          return process.exit(code); // eslint-disable-line no-process-exit
+          // eslint-disable-next-line no-console
+          console.error(message);
+          return process.exit(code);
         }
       }
 
       if (message) {
-        console.error(message); // eslint-disable-line no-console
-        return process.exit(code); // eslint-disable-line no-process-exit
+        // eslint-disable-next-line no-console
+        console.error(message);
+        return process.exit(code);
       }
 
-      process.exit(code); // eslint-disable-line no-process-exit
+      process.exit(code);
     }
 
     function handleSignal(signal) {

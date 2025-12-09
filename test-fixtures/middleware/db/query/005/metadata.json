@@ -1,7 +1,7 @@
 {
   "description": "Should throw if params do not include an identifier (getSingleRecord)",
   "skip": false,
-  "onlyDev": false,
+  "only": false,
   "testFunction": "getSingleRecord",
   "params": {"foobar": "foobar"},
   "expectedToThrow": true,

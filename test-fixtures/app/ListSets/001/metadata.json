@@ -1,5 +1,7 @@
 {
   "description": "Should respond with an error because of an illegal argument",
+  "only": false,
+  "skip": false,
   "requests": [
     {
       "method": "GET",

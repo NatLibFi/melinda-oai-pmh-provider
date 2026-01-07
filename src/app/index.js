@@ -93,7 +93,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
         return next();
       }
       const connectionIp = req.headers['cf-connecting-ip'];
-      logger.silly(`connectionIp: ${JSON.stringify(req.ip)}`);
+      logger.silly(`connectionIp: ${JSON.stringify(connectionIp)}`);
       //logger.debug(connectionIp);
       //const parsedConnectionIp = connectionIp.replace(/::ffff:/u, '');
       //logger.debug(parsedConnectionIp);

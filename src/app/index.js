@@ -86,13 +86,14 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
 
     function ipWhiteListMiddleware(req, res, next) {
       logger.verbose('Ip whitelist middleware');
-      logger.silly(`Req headers: ${JSON.stringify(req.headers)}`);
+      //logger.silly(`Req headers: ${JSON.stringify(req.headers)}`);
       logger.silly(`Req cf-connecting-ip: ${JSON.stringify(req.headers['cf-connecting-ip'])}`);
       logger.silly(`Req ip: ${JSON.stringify(req.ip)}`);
       if (ipWhiteList.length === 0) {
         return next();
       }
-      const connectionIp = req.headers['cf-connecting-ip'];
+      // If we do not have CF header, use req.ip in check
+      const connectionIp = req.headers['cf-connecting-ip'] || req.ip;
       logger.silly(`connectionIp: ${JSON.stringify(connectionIp)}`);
       //logger.debug(connectionIp);
       //const parsedConnectionIp = connectionIp.replace(/::ffff:/u, '');
@@ -102,7 +103,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
         return next();
       }
 
-      logger.debug(`Bad IP: ${req.headers['cf-connecting-ip']}`);
+      logger.debug(`Bad IP: ${connectionIp} (CF: ${req.headers['cf-connecting-ip']}, req.ip: ${req.ip})`);
       return res.sendStatus(HttpStatus.FORBIDDEN);
     }
   }

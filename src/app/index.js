@@ -86,6 +86,8 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
 
     function ipWhiteListMiddleware(req, res, next) {
       logger.verbose('Ip whitelist middleware');
+      logger.silly(`Req headers: ${JSON.stringify(req.headers)}`);
+      logger.silly(`Req ip: ${JSON.stringify(req.ip)}`);
       if (ipWhiteList.length === 0) {
         return next();
       }

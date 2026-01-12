@@ -90,11 +90,12 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
       logger.silly(`Req cf-connecting-ip: ${JSON.stringify(req.headers['cf-connecting-ip'])}`);
       logger.silly(`Req ip: ${JSON.stringify(req.ip)}`);
       if (ipWhiteList.length === 0) {
+        logger.silly(`Empty whitelist, not checking IP`);
         return next();
       }
-      // If we do not have CF header, use req.ip in check
+      // If we do not want to use a CF header, or do not have a CF header, use req.ip in check
       const connectionIp = useCFHeader && req.headers['cf-connecting-ip'] ? req.headers['cf-connecting-ip'] : req.ip;
-      logger.silly(`connectionIp: ${JSON.stringify(connectionIp)}`);
+      logger.silly(`connectionIp: ${JSON.stringify(connectionIp)} (CF: ${req.headers['cf-connecting-ip']}, req.ip: ${req.ip}, useCFHeader: ${useCFHeader})`);
       //logger.debug(connectionIp);
       //const parsedConnectionIp = connectionIp.replace(/::ffff:/u, '');
       //logger.debug(parsedConnectionIp);

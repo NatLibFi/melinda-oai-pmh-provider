@@ -9,7 +9,7 @@ import {createLogger, createExpressLogger} from '@natlibfi/melinda-backend-commo
 import {default as createMiddleware} from './middleware/index.js';
 
 // oracledb parameter for using oracledbMock for tests!
-export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false, ipWhiteList}, oracledb = oracledbAleph) {
+export default async function ({middlewareOptions, httpPort, oracleUsername, oraclePassword, oracleConnectString, enableProxy = false, ipWhiteList, useCFHeader}, oracledb = oracledbAleph) {
   //const oracledb = useOrigOracledb ? oracledbOrig : oracledbAleph;
   const logger = createLogger();
   //logger.debug(`Using original node-oracledb ${useOrigOracledb}`);
@@ -93,7 +93,7 @@ export default async function ({middlewareOptions, httpPort, oracleUsername, ora
         return next();
       }
       // If we do not have CF header, use req.ip in check
-      const connectionIp = req.headers['cf-connecting-ip'] || req.ip;
+      const connectionIp = useCFHeader && req.headers['cf-connecting-ip'] ? req.headers['cf-connecting-ip'] : req.ip;
       logger.silly(`connectionIp: ${JSON.stringify(connectionIp)}`);
       //logger.debug(connectionIp);
       //const parsedConnectionIp = connectionIp.replace(/::ffff:/u, '');

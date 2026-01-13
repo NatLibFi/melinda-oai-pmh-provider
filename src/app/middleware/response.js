@@ -5,9 +5,9 @@ import {MarcRecord} from '@natlibfi/marc-record';
 import {MARCXML} from '@natlibfi/marc-record-serializers';
 import {createLogger} from '@natlibfi/melinda-backend-commons';
 import {Parser, Builder} from 'xml2js';
-import marcToDC from './marc-to-dc';
-import {errors} from './../../common';
-import createDebugLogger from 'debug';
+import {default as marcToDC} from './marc-to-dc.js';
+import {errors} from './../../common.js';
+import {default as createDebugLogger} from 'debug';
 
 const debug = createDebugLogger('@natlibfi/melinda-oai-pmh-provider/response');
 const debugDev = debug.extend('dev');
@@ -97,9 +97,11 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
   function generateResponse({logLabel = '', requestUrl, query, payload}) {
     debugDev(`${logLabel} generateResponse`);
     const obj = generate();
+
     return toXML();
 
     function generate() {
+      debugDev(`generating`);
       return {
         'OAI-PMH': {
           $: {
@@ -121,7 +123,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
 
         function getAttr() {
           // Disabling ESLint rule because sort is actually just modifying the object entries of the variable and not the original
-          return Object.entries(query) // eslint-disable-line functional/immutable-data
+          return Object.entries(query)
             .sort(sort)
             .reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
 
@@ -243,12 +245,12 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
           // Clean record only if we got validationErrors from our marcRecord
           if (validationErrors.length > 0) {
             debugDev(`${logLabel} We got validationErrors, cleaning up record`);
-            const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu; // eslint-disable-line no-control-regex
+            const PATTERN = /[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/gu;
             newRecord.fields.forEach(field => {
               if (field.value) {
                 if (PATTERN.test(field.value)) {
                   logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
-                  field.value = field.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+                  field.value = field.value.replace(PATTERN, '');
                   return;
                 }
 
@@ -258,7 +260,7 @@ export default ({oaiIdentifierPrefix, supportEmail}) => {
               field.subfields.forEach(subfield => {
                 if (subfield.value && PATTERN.test(subfield.value)) {
                   logger.warn(`${logLabel} Record ${id} contains invalid characters. Cleaning up...`);
-                  subfield.value = subfield.value.replace(PATTERN, ''); // eslint-disable-line functional/immutable-data
+                  subfield.value = subfield.value.replace(PATTERN, '');
                   return;
                 }
 

@@ -1,7 +1,7 @@
 {
     "description": "Should respond with a record",
     "skip": false,
-    "onlyDev": false,
+    "only": false,
     "contextName": "bib",
        "isPrivileged": false,
     "alephLibrary": "foo00",

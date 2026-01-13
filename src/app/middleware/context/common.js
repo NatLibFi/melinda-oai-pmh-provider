@@ -170,7 +170,7 @@ export function formatRecord({
           .filter(({code}) => prefixReplaceCodes.includes(code))
           .forEach(subfield => {
             if (subfield.value) {
-              subfield.value = subfield.value.replace(pattern, replacement); // eslint-disable-line functional/immutable-data
+              subfield.value = subfield.value.replace(pattern, replacement);
               return;
             }
             return;

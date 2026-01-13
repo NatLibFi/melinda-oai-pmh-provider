@@ -1,6 +1,7 @@
 {
   "description": "Should respond with an error because of an invalid resumption token",
-  "onlyDev": true,
+  "only": false,
+  "skip": false,
   "requests": [
     {
       "method": "GET",

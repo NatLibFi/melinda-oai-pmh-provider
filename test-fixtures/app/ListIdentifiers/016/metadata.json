@@ -1,6 +1,6 @@
 {
   "description": "Should respond with an error because of an invalid resumption token (invalid cursor in token)",
-  "onlyDev": false,
+  "only": false,
   "requests": [
     {
       "method": "GET",

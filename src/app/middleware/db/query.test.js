@@ -1,14 +1,15 @@
 
 
-import {expect} from 'chai';
+import assert from 'node:assert';
+import {describe} from 'node:test';
 import generateTests from '@natlibfi/fixugen';
 import {READERS} from '@natlibfi/fixura';
 //import {MarcRecord} from '@natlibfi/marc-record';
 //import query from './query.js';
-import queryFactory from './query';
-import createDebugLogger from 'debug';
+import {default as queryFactory} from './query.js';
+import {default as createDebugLogger} from 'debug';
 import moment from 'moment';
-import {requestDateStampFormats} from '../constants';
+import {requestDateStampFormats} from '../constants.js';
 
 
 const debug = createDebugLogger('@natlibfi/melinda-rest-oai-pmh-provider:db:query:test');
@@ -16,7 +17,7 @@ const debugData = debug.extend('data');
 
 describe('query', () => {
   generateTests({
-    path: [__dirname, '..', '..', '..', '..', 'test-fixtures', 'middleware', 'db', 'query'],
+    path: [import.meta.dirname, '..', '..', '..', '..', 'test-fixtures', 'middleware', 'db', 'query'],
     useMetadataFile: true,
     recurse: false,
     fixura: {
@@ -41,13 +42,15 @@ describe('query', () => {
         const result = functionToTest(newParams);
         debugData(result);
         //expect(JSON.stringify(result)).to.equal(JSON.stringify(expectedResult));
-        expect(result).to.eql(expectedResult);
+        //expect(result).to.eql(expectedResult);
+        assert.deepEqual(result,expectedResult);
         //expect(result.args).to.equal(expectedResult.args);
       } catch (err) {
         if (expectedToThrow) {
           debugData(`ERROR! ${err.message}`);
           debug(`Expected to throw, OK`);
-          expect(err.message).to.equal(expectedErrorMessage);
+          //expect(err.message).to.equal(expectedErrorMessage);
+          assert.equal(err.message, expectedErrorMessage);
           return;
         }
         debug(`Not expected to throw`);

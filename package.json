@@ -14,38 +14,33 @@
 		"url": "git@github.com:natlibfi/melinda-oai-pmh-provider.git"
 	},
 	"license": "MIT",
-	"version": "2.1.2",
+	"version": "3.0.0-alpha.7",
 	"main": "./dist/index.js",
+	"type": "module",
 	"engines": {
-		"node": ">=18"
+		"node": ">=22"
 	},
 	"scripts": {
 		"start": "node dist/index.js",
 		"cli": "node dist/cli.js",
 		"lint": "eslint src",
 		"lint:dev": "eslint --fix src",
-		"test:base": "cross-env NODE_ENV=test nyc mocha --require @babel/register --parallel",
-		"test:base2": "cross-env NODE_ENV=test nyc mocha --require @babel/register",
-		"test": "npm run lint && npm run test:base -- 'src/**/*.spec.js'",
-		"test2": "npm run lint && npm run test:base2 -- 'src/**/*.spec.js'",
-		"test:dev": "npm run lint:dev && npm run test:base -- 'src/**/*.spec.js' && npm run coverage",
-		"test:dev2": "npm run lint:dev && npm run test:base2 -- 'src/**/*.spec.js' && npm run coverage",
-		"coverage": "nyc check-coverage --per-file",
-		"build": "babel src --source-maps --copy-files --delete-dir-on-start --out-dir=dist --minified",
-		"build:dev": "babel src --source-maps --copy-files --delete-dir-on-start --out-dir=dist",
-		"watch:test": "cross-env DEBUG=1 NODE_ENV=test nodemon -w src --exec 'npm run test:dev'",
-		"watch:dev": "cross-env DEBUG=1 nodemon -w src --exec 'babel-node src/index.js'"
+		"build": "esbuild \"src/**/*.js\" --sourcemap --platform=node --outdir=dist",
+		"test": "npm run lint && npm run test:base",
+		"test:base": "node --test --test-force-exit --experimental-test-coverage --test-reporter=spec './src/**/*.test.js'",
+		"test:base:only": "node --test --test-only --test-force-exit --experimental-test-coverage --test-reporter=spec './src/**/*.test.js'",
+		"dev:test": "cross-env DEBUG=@natlibfi/* NODE_ENV=test node --watch --test --experimental-test-coverage --test-reporter=spec './src/**/*.test.js'"
 	},
 	"dependencies": {
-		"@babel/runtime": "^7.28.4",
-		"@natlibfi/marc-record": "^9.1.6",
-		"@natlibfi/marc-record-serializers": "^10.1.6",
-		"@natlibfi/melinda-backend-commons": "^2.3.9",
-		"@natlibfi/melinda-commons": "^13.0.21",
+		"@natlibfi/marc-record": "^10.0.1",
+		"@natlibfi/marc-record-serializers": "^11.0.1",
+		"@natlibfi/melinda-backend-commons": "^3.0.2",
+		"@natlibfi/melinda-commons": "^14.0.2",
 		"@natlibfi/oracledb-aleph": "^6.10.0",
 		"debug": "^4.4.3",
-		"express": "^4.21.2",
-		"http-status": "^1.8.1",
+		"esbuild": "^0.27.2",
+		"express": "^4.22.1",
+		"http-status": "^2.1.0",
 		"ip-range-check": "^0.2.0",
 		"langs": "^2.0.0",
 		"moment": "^2.30.1",
@@ -54,63 +49,11 @@
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.28.3",
-		"@babel/core": "^7.28.4",
-		"@babel/eslint-parser": "^7.28.4",
-		"@babel/node": "^7.28.0",
-		"@babel/preset-env": "^7.28.3",
-		"@babel/register": "^7.28.3",
-		"@natlibfi/eslint-config-melinda-backend": "^3.0.6",
-		"@natlibfi/fixugen": "^2.0.15",
-		"@natlibfi/fixugen-http-server": "^1.1.22",
-		"@natlibfi/fixura": "^3.0.14",
-		"@natlibfi/oracledb-mock": "^1.0.3",
-		"babel-plugin-istanbul": "^7.0.1",
-		"babel-plugin-rewire": "^1.2.0",
-		"chai": "^4.5.0",
-		"cross-env": "^7.0.3",
-		"eslint": "^8.57.1",
-		"mocha": "^11.7.4",
-		"nodemon": "^3.1.10",
-		"nyc": "^17.1.0"
-	},
-	"eslintConfig": {
-		"extends": "@natlibfi/melinda-backend"
-	},
-	"babel": {
-		"presets": [
-			[
-				"@babel/preset-env",
-				{
-					"targets": "maintained node versions"
-				}
-			]
-		],
-		"env": {
-			"test": {
-				"plugins": [
-					"istanbul",
-					"rewire"
-				]
-			}
-		}
-	},
-	"nyc": {
-		"exclude": [
-			"**/*.spec.js"
-		],
-		"reporter": [
-			"lcov",
-			"html"
-		],
-		"require": [
-			"@babel/register"
-		],
-		"sourceMap": false,
-		"instrument": false,
-		"lines": 80,
-		"statements": 80,
-		"functions": 80,
-		"branches": 80
+		"@natlibfi/fixugen": "^3.0.0",
+		"@natlibfi/fixugen-http-server": "^2.0.2",
+		"@natlibfi/fixura": "^4.0.0",
+		"@natlibfi/oracledb-mock": "^2.0.2",
+		"cross-env": "^10.1.0",
+		"eslint": "^9.39.2"
 	}
 }

@@ -1,6 +1,6 @@
-# Melinda node tests
+# Melinda node tests and webhook deployment to openshift
 
-name: Melinda-node-tests
+name: Melinda-node-tests-and-webhook
 
 on: push
 
@@ -11,12 +11,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [22.x, 24.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
       with:
@@ -32,11 +32,11 @@ jobs:
   njsscan:
     name: Njsscan-check
     runs-on: ubuntu-latest
-    container: docker://node:18
+    container: node:22
 
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: nodejsscan scan
       id: njsscan
       uses: ajinabraham/njsscan-action@master
@@ -46,10 +46,11 @@ jobs:
   license-scan:
     name: License compliance check
     runs-on: ubuntu-latest
+    container: node:22
 
     steps:
-      - uses: actions/checkout@v5
-      - uses: mikaelvesavuori/license-compliance-action@v1.0.2
+      - uses: actions/checkout@v6
+      - uses: mikaelvesavuori/license-compliance-action@v1.0.3
         with:
           exclude_pattern: /^@natlibfi/
 
@@ -57,6 +58,7 @@ jobs:
     name: OpenShift webhook for image builder
     needs: [build-node-versions, njsscan]
     runs-on: ubuntu-latest
+    container: node:22
 
     steps:
       - name: Test webhook from test

@@ -1,6 +1,6 @@
 
 
-import {DB_TIME_FORMAT} from './common';
+import {DB_TIME_FORMAT} from './common.js';
 
 export default ({library, limit}) => ({
   getSingleRecord: ({identifier}) => ({

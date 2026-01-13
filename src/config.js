@@ -13,6 +13,7 @@ export const httpPort = readEnvironmentVariable('HTTP_PORT', {defaultValue: 8080
 export const enableProxy = readEnvironmentVariable('ENABLE_PROXY', {defaultValue: false, format: parseBoolean});
 
 export const ipWhiteList = readEnvironmentVariable('IP_WHITELIST', {defaultValue: [], format: v => JSON.parse(v)});
+export const useCFHeader = readEnvironmentVariable('USE_CF_HEADER', {defaultValue: false, format: parseBoolean});
 
 export const middlewareOptions = {
   alephLibrary,

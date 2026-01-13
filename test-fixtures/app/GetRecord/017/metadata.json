@@ -2,7 +2,7 @@
   "description": "Should respond with internal server error (500) because of invalid record in database results (validationErrors from marc-record)",
   "comment": "It's currently impossible to create this test, we're validating just fields (AlephSequential has always FMT-field) and subfields (we cannot parse dbData string without subfields to AlephSequential - see 018)",
   "skip": true,
-  "onlyDev": false,
+  "only": false,
   "contextName": "bib",
   "isPrivileged": false,
   "alephLibrary": "foo00",

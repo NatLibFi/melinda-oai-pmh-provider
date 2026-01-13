@@ -3,8 +3,14 @@
 import Langs from 'langs';
 import moment from 'moment';
 import {Builder} from 'xml2js';
+import createDebugLogger from 'debug';
+
+// Note: this marc-to-dc conversion is really-really-simple not actually usable placeholder
+// If we want to actually supply dc from OAI-PMH this should be replaced by something more comprehensive
 
 export default record => {
+  const debug = createDebugLogger(`@natlibfi/melinda-oai-pmh-provider/marc-to-dc`);
+
   const elements = getElements();
   const obj = {
     'oai_dc:dc': {
@@ -23,6 +29,7 @@ export default record => {
     const title = {'dc:title': getTitle()};
     const language = {'dc:language': getLanguage()};
     const date = {'dc:date': getDate()};
+    debug(`We have date element ${JSON.stringify(date)}`);
 
     return [title, language, date].filter(identity).reduce((acc, obj) => ({...acc, ...obj}), {});
 
@@ -42,10 +49,17 @@ export default record => {
       return result['1'] || '';
     }
 
+    // dc.date should propably not be creation date of the record
     function getDate() {
       const value = record.get(/^008$/u)?.[0]?.value || '';
       const timeStr = value.slice(0, 6);
-      return timeStr ? moment(timeStr, 'YYMMDD').toISOString(true) : '';
+      debug(`We have value from 008: ${value}`);
+      debug(`We have timeStr from value: ${timeStr}`);
+      // We can use static time zone .utc here (to make testing easier), as we are handling just dates,
+      // and also do not know which timezone the original even is
+      const result = timeStr ? moment.utc(timeStr, 'YYMMDD').toISOString(true) : '';
+      debug(`We have result ${result}`);
+      return result;
     }
 
     function identity(obj) {

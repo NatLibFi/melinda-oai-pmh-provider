@@ -2,7 +2,7 @@
   "description": "Should return query for getting records with both end and start parameter and timeCursor",
   "comment": "Use timeCursor when it exists and is greater than (original) startTime, grow timeCursor with 1 ms to avoid getting duplicate results",
   "skip": false,
-  "onlyDev": false,
+  "only": false,
   "alephLibrary": "foo00",
   "limit": 100,
   "testFunction": "getRecords",

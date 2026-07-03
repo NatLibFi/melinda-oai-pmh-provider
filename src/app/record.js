@@ -9,8 +9,8 @@ const debugDevData = debugDev.extend('data');
 
 
 export function parseRecord({data, validate = false, noFailValidation = false, logLabel}) {
-  debugDev(`${logLabel} parseRecord: create AlephSequential from dbResult data`);
-  debug(data.toString());
+  //debugDev(`${logLabel} parseRecord: create AlephSequential from dbResult data`);
+  //debugDev(data.toString());
   const buffer = Buffer.from(data);
   return iterate();
 
@@ -22,13 +22,14 @@ export function parseRecord({data, validate = false, noFailValidation = false, l
 
     const length = Number(buffer.toString('utf8', offset, offset + 4));
     offset += 4;
-    // nTooLong counts deprecated UTF-8 chars (range 65536...) such as '𝑁' as two chars
-    //const [ lengthInBytes, nTooLong ] = lengthInCharsToOtherLengths();
 
+    // NVOLK (2026-07-02): buffer.toString() gives unexpected results with deprecated UTF-8 chars (range > 65535...) such as '𝑁'...
+    // Compare with "console.log('𝑁'.length);". It's probably not really using bytes for length or whatever despite what the docs say. Thus I've replaced
+    // // const line = buffer.toString('utf8', offset, offset + length);
+    // with a sub-buffer (which *really* uses bytes) here:
     const subBuffer = buffer.subarray(offset, offset+length);
-    debug(`SUBBUF (${length}): '${subBuffer.toString()}'`);
+    // debug(`SUBBUF (${length}): '${subBuffer.toString()}'`);
     const line = subBuffer.toString('utf8');
-    //const line = buffer.toString('utf8', offset, offset + length);
 
     return iterate(offset + length, lines.concat(format(line)));
 
@@ -89,7 +90,6 @@ export function dbDataStringFromRecord(record) {
     const end = data.slice(8);
     // We need a buffer so that the total number of bytes can calculated
     const dataBuffer = Buffer.from(`${start}L${end}`);
-    //const lengthInBytes = getOffsetSizeInBytes(dataBuffer, 0, dataBuffer.length);
     const lengthPrefix = String(dataBuffer.length).padStart(4, '0'); // 24 => "0024"
 
     return Buffer.concat([Buffer.from(lengthPrefix), dataBuffer]);
@@ -97,37 +97,3 @@ export function dbDataStringFromRecord(record) {
 
   return Buffer.concat(buffers);
 }
-
-
-function getOffsetSizeInBytes(buffer, offset, length) {
-  let i = 0;
-  let bytepos = offset;
-  while ( i < length ) {
-    // https://en.wikipedia.org/wiki/UTF-8
-    // 2-byte UTF-8 char (128-2047)
-    if (buffer[bytepos] >= 192 && buffer[bytepos] <= 223 && buffer[bytepos+1] >= 128 && buffer[bytepos+1] < 192 ) {
-      bytepos += 2;
-    }
-    // 3-byte UTF-8 char (2048-65535
-    else if (buffer[bytepos] >= 224 && buffer[bytepos] <= 239 && buffer[bytepos+1] >= 128 && buffer[bytepos+1] < 192 && buffer[bytepos+2] >= 128 && buffer[bytepos+2] < 192 ) {
-      bytepos += 3;
-    }
-    // 4-byte *non-standard* UTF-8 char (65535-...) This is not calculated corrently by string.length.
-    else if (buffer[bytepos] >= 240 && buffer[bytepos] <= 247 && buffer[bytepos+1] >= 128 && buffer[bytepos+1] < 192 && buffer[bytepos+2] >= 128 && buffer[bytepos+2] < 192  && buffer[bytepos+3] >= 128 && buffer[bytepos+3] < 192 ) {
-      bytepos += 4;
-    }
-    else { // Everything else is read as a single byte
-    	// 1-byte UTF-8 char (0-127)
-      // 128-159 CP-1252 or some other MS code page?
-      // 160-191 are probably some iso-latin-1 etc  values
-      // 248-255 are some mysterious crap
-      bytepos++;
-    }
-    i++;
-  }
-  if (offset === 0) {
-    debug(`OFFSET SIZE: ${bytepos - offset}: '${buffer.toString()}'`);
-  }
-  return bytepos - offset;
-}
-

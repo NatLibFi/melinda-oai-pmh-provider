@@ -32,28 +32,28 @@
 		"dev:test": "cross-env DEBUG=@natlibfi/* NODE_ENV=test node --watch --test --experimental-test-coverage --test-reporter=spec './src/**/*.test.js'"
 	},
 	"dependencies": {
-		"@natlibfi/marc-record": "^10.0.1",
-		"@natlibfi/marc-record-serializers": "^11.0.1",
-		"@natlibfi/melinda-backend-commons": "^3.0.2",
+		"@natlibfi/marc-record": "^10.0.2",
+		"@natlibfi/marc-record-serializers": "^11.0.3",
+		"@natlibfi/melinda-backend-commons": "^3.0.6",
 		"@natlibfi/melinda-commons": "^14.0.2",
 		"@natlibfi/oracledb-aleph": "^6.10.0",
 		"debug": "^4.4.3",
-		"esbuild": "^0.27.2",
-		"express": "^4.22.1",
+		"esbuild": "^0.28.1",
+		"express": "^4.2.2",
 		"http-status": "^2.1.0",
 		"ip-range-check": "^0.2.0",
 		"langs": "^2.0.0",
 		"moment": "^2.30.1",
 		"oracledb": "^6.10.0",
-		"uuid": "^11.1.0",
+		"uuid": "^14.0.1",
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
-		"@natlibfi/fixugen": "^3.0.0",
-		"@natlibfi/fixugen-http-server": "^2.0.2",
-		"@natlibfi/fixura": "^4.0.0",
+		"@natlibfi/fixugen": "^3.0.1",
+		"@natlibfi/fixugen-http-server": "^2.0.3",
+		"@natlibfi/fixura": "^4.0.1",
 		"@natlibfi/oracledb-mock": "^2.0.2",
 		"cross-env": "^10.1.0",
-		"eslint": "^9.39.2"
+		"eslint": "^10.6.0"
 	}
 }

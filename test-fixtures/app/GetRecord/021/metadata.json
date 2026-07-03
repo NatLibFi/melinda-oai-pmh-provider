@@ -1,0 +1,47 @@
+{
+    "description": "021: Should respond with a record, note that f245 contains over-long non-standatd UTF-8 char",
+    "skip": false,
+    "only": false,
+    "contextName": "bib",
+       "isPrivileged": false,
+    "alephLibrary": "foo00",
+    "melindaPrefix": "FI-MELINDA",
+    "requests": [
+        { "method": "GET", "status": 200,
+            "requestParams": {
+                "verb": "GetRecord",
+                "metadataPrefix": "marc21",
+                "identifier": "oai:foo.bar/12345"
+            }
+        }
+    ],
+    "dbResults": [
+        [
+            {
+                "TIME": "20000102050000"
+            }
+        ],
+        [
+            {
+                "TIME": "20000102050000",
+                "ID": "000012345",
+                "RECORD": {
+                    "leader": "03106cam a2200721 i 4500",
+                    "fields": [
+                        {
+                            "tag": "001",
+                            "value": "1234567"
+                        },
+                        {
+                            "tag": "245",
+                            "subfields": [{
+                                "code": "a",
+                                "value": "Enttenä 𝑁 Tenttenä"
+                                }]
+                            }
+                        ]
+                    }
+                }
+            ]
+        ]
+    }

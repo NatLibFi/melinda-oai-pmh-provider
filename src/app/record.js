@@ -9,7 +9,8 @@ const debugDevData = debugDev.extend('data');
 
 
 export function parseRecord({data, validate = false, noFailValidation = false, logLabel}) {
-  debugDev(`${logLabel} parseRecord: create AlephSequential from dbResult data`);
+  //debugDev(`${logLabel} parseRecord: create AlephSequential from dbResult data`);
+  //debugDev(data.toString());
   const buffer = Buffer.from(data);
   return iterate();
 
@@ -20,9 +21,17 @@ export function parseRecord({data, validate = false, noFailValidation = false, l
     }
 
     const length = Number(buffer.toString('utf8', offset, offset + 4));
-    const line = buffer.toString('utf8', offset + 4, offset + 4 + length);
+    offset += 4;
 
-    return iterate(offset + 4 + length, lines.concat(format(line)));
+    // NVOLK (2026-07-02): buffer.toString() gives unexpected results with deprecated UTF-8 chars (range > 65535...) such as '𝑁'...
+    // Compare with "console.log('𝑁'.length);". It's probably not really using bytes for length or whatever despite what the docs say. Thus I've replaced
+    // // const line = buffer.toString('utf8', offset, offset + length);
+    // with a sub-buffer (which *really* uses bytes) here:
+    const subBuffer = buffer.subarray(offset, offset+length);
+    // debug(`SUBBUF (${length}): '${subBuffer.toString()}'`);
+    const line = subBuffer.toString('utf8');
+
+    return iterate(offset + length, lines.concat(format(line)));
 
     // Format Aleph-database string to Aleph Sequential
     function format(l) {
@@ -81,7 +90,7 @@ export function dbDataStringFromRecord(record) {
     const end = data.slice(8);
     // We need a buffer so that the total number of bytes can calculated
     const dataBuffer = Buffer.from(`${start}L${end}`);
-    const lengthPrefix = String(dataBuffer.length).padStart(4, '0');
+    const lengthPrefix = String(dataBuffer.length).padStart(4, '0'); // 24 => "0024"
 
     return Buffer.concat([Buffer.from(lengthPrefix), dataBuffer]);
   });
